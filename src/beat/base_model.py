@@ -28,6 +28,8 @@ class BaseModel:
         if params is not None:
             self.parameters.update(params)
 
+        self._setup_state_space()
+
         self._timestep = dolfin.Constant(self.parameters["default_timestep"])
         (G, self._prec) = self.variational_forms(self._timestep)
         self._lhs, self._rhs = dolfin.system(G)
@@ -41,6 +43,10 @@ class BaseModel:
 
         # Create linear solver (based on parameter choices)
         self.linear_solver, self._update_solver = self._create_linear_solver()
+
+    @abc.abstractmethod
+    def _setup_state_space(self) -> None:
+        ...
 
     def _create_linear_solver(self):
         "Helper function for creating linear solver based on parameters."

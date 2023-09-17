@@ -2,6 +2,7 @@ import logging
 
 import dolfin
 import ufl_legacy as ufl
+from ufl_legacy.core.expr import Expr
 
 from .base_model import BaseModel
 
@@ -21,12 +22,12 @@ class MonodomainModel(BaseModel):
     def __init__(
         self, time, mesh: dolfin.Mesh, M: ufl.Coefficient | float, I_s, params=None
     ) -> None:
-        super().__init__(mesh=mesh, params=params)
-
         self._M = M
         self._I_s = I_s
         self.time = time
+        super().__init__(mesh=mesh, params=params)
 
+    def _setup_state_space(self) -> None:
         # Set-up function spaces
         k = self.parameters["degree"]
         family = self.parameters["family"]
@@ -37,12 +38,11 @@ class MonodomainModel(BaseModel):
             degree=k,
             quad_scheme="default",
         )
-        V = dolfin.FunctionSpace(self._mesh, element)
 
-        self.V = V
+        self.V = dolfin.FunctionSpace(self._mesh, element)
 
         # Set-up solution fields:
-        self.v_ = dolfin.Function(V, name="v_")
+        self.v_ = dolfin.Function(self.V, name="v_")
         self._state = dolfin.Function(self.V, name="v")
 
     @property
@@ -54,40 +54,11 @@ class MonodomainModel(BaseModel):
 
     @staticmethod
     def default_parameters():
-        def to_dict(d):
-            if isinstance(d, dolfin.Parameters):
-                return to_dict(d.to_dict())
+        params = super(MonodomainModel, MonodomainModel).default_parameters()
+        params["use_custom_preconditioner"] = True
+        return params
 
-            elif isinstance(d, dict):
-                res = {}
-                for k, v in d.items():
-                    res[k] = to_dict(v)
-                return res
-            elif isinstance(d, dolfin.cpp.parameter.Parameter):
-                return d.value()
-            else:
-                return d
-
-        lu_solver_params = to_dict(dolfin.LUSolver.default_parameters())
-        krylov_solver_params = to_dict(dolfin.KrylovSolver.default_parameters())
-
-        return {
-            "theta": 0.5,
-            "degree": 1,
-            "family": "Lagrange",
-            "default_timestep": 1.0,
-            "linear_solver_type": "iterative",
-            "lu_type": "default",
-            "algorithm": "cg",
-            "preconditioner": "petsc_amg",
-            "use_custom_preconditioner": True,
-            "krylov_solver": krylov_solver_params,
-            "lu_solver": lu_solver_params,
-        }
-
-    def variational_forms(
-        self, k_n: ufl.core.expr.Expr | float
-    ) -> tuple[ufl.Form, ufl.Form]:
+    def variational_forms(self, k_n: Expr | float) -> tuple[ufl.Form, ufl.Form]:
         """Create the variational forms corresponding to the given
         discretization of the given system of equations.
 

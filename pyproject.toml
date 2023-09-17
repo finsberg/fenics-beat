@@ -53,7 +53,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 addopts = [
-   "--cov=pseudo_ecg",
+   "--cov=beat",
    "--cov-report=html",
    "--cov-report=term-missing",
    "-v"

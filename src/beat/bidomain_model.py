@@ -1,5 +1,6 @@
 import logging
 import ufl_legacy as ufl
+from ufl_legacy.core.expr import Expr
 import dolfin
 
 from .base_model import BaseModel
@@ -10,8 +11,6 @@ logger = logging.getLogger(__name__)
 
 class BidomainModel(BaseModel):
     def __init__(self, mesh, time, M_i, M_e, I_s=None, I_a=None, v_=None, params=None):
-        super().__init__(mesh=mesh, params=params)
-
         self._nullspace_basis = None
         # Store input
 
@@ -21,6 +20,9 @@ class BidomainModel(BaseModel):
         self._I_s = I_s
         self._I_a = I_a
 
+        super().__init__(mesh=mesh, params=params)
+
+    def _setup_state_space(self) -> None:
         # Set-up function spaces
         k = self.parameters["degree"]
         Ve = dolfin.FiniteElement("CG", self._mesh.ufl_cell(), k)
@@ -32,9 +34,11 @@ class BidomainModel(BaseModel):
         if use_R:
             Re = dolfin.FiniteElement("R", self._mesh.ufl_cell(), 0)
             dolfin.FunctionSpace(self._mesh, "R", 0)
-            self.VUR = dolfin.FunctionSpace(mesh, dolfin.MixedElement((Ve, Ue, Re)))
+            self.VUR = dolfin.FunctionSpace(
+                self._mesh, dolfin.MixedElement((Ve, Ue, Re))
+            )
         else:
-            self.VUR = dolfin.FunctionSpace(mesh, dolfin.MixedElement((Ve, Ue)))
+            self.VUR = dolfin.FunctionSpace(self._mesh, dolfin.MixedElement((Ve, Ue)))
 
         self.V = V
 
@@ -65,7 +69,7 @@ class BidomainModel(BaseModel):
             # transpose nullspace is the same as the nullspace (easy
             # to prove from matrix structure).
             if not self.parameters["use_avg_u_constraint"]:
-                A = dolfin.as_dolfin_type(self._lhs_matrix)
+                A = dolfin.as_backend_type(self._lhs_matrix)
                 A.set_nullspace(self.nullspace)
         return solver, update_routine
 
@@ -93,9 +97,7 @@ class BidomainModel(BaseModel):
         params["use_avg_u_constraint"] = False
         return params
 
-    def variational_forms(
-        self, k_n: ufl.core.expr.Expr | float
-    ) -> tuple[ufl.Form, ufl.Form]:
+    def variational_forms(self, k_n: Expr | float) -> tuple[ufl.Form, ufl.Form]:
         """Create the variational forms corresponding to the given
         discretization of the given system of equations.
 
