@@ -84,6 +84,7 @@ class DolfinODESolver:
     init_states: npt.NDArray
     parameters: npt.NDArray
     fun: Callable
+    v_index: int = 0
 
     def __post_init__(self):
         self.assigners = [
@@ -97,11 +98,28 @@ class DolfinODESolver:
             parameters=self.parameters,
         )
 
-    def to_dolfin(self):
+    def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
         for i, a in enumerate(self.assigners):
             a.f.vector().set_local(self._values[i, :])
             a.assigner_from_single.assign(self.s.sub(i), a.f)
+
+    def v_to_dolfin(self) -> None:
+        a = self.assigners[self.v_index]
+        a.f.vector().set_local(self._values[self.v_index, :])
+        a.assigner_from_single.assign(self.s.sub(self.v_index), a.f)
+
+    def v_from_dolfin(self) -> None:
+        a = self.assigners[self.v_index]
+        self.values[self.v_index, :] = a.f.vector().get_local()
+        a.assigner_from_single.assign(self.s.sub(self.v_index), a.f)
+
+    def __getitem__(self, index) -> dolfin.Function:
+        return self.assigners[index].f
+
+    @property
+    def v(self) -> dolfin.Function:
+        return self.assigners[self.v_index].f
 
     @property
     def values(self):

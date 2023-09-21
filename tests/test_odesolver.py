@@ -102,3 +102,45 @@ def test_beeler_reuter_unit_square():
     dolfin_ode.to_dolfin()
 
     assert not np.allclose(dolfin_ode.s.vector().get_local(), old_state)
+
+
+def test_assignment_ode():
+    model = beat.cellmodels.beeler_reuter
+    init_states = model.init_state_values()
+    parameters = model.init_parameter_values()
+    parameters[model.parameter_indices("IstimAmplitude")] = 1.0
+    v_index = model.state_indices("V")
+    num_states = len(init_states)
+
+    mesh = dolfin.UnitSquareMesh(5, 5)
+    V = dolfin.VectorFunctionSpace(mesh, "Lagrange", 1, dim=num_states)
+    s = dolfin.Function(V)
+    ode = DolfinODESolver(
+        s,
+        fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
+        init_states=init_states,
+        parameters=parameters,
+        v_index=v_index,
+    )
+    assert np.allclose(ode.v.vector().get_local(), 0)
+    assert np.allclose(ode.values[:, 0], init_states)
+
+    ode.v_to_dolfin()
+    assert np.allclose(ode.v.vector().get_local(), init_states[v_index])
+    # Check that another state is still zero
+    assert np.allclose(ode[v_index - 1].vector().get_local(), 0.0)
+    ode.to_dolfin()
+    assert np.allclose(ode[v_index - 1].vector().get_local(), init_states[v_index - 1])
+
+    # Now update values for v
+    ode.values[v_index, :] = 42.0
+    assert np.allclose(ode.v.vector().get_local(), init_states[v_index])
+    ode.v_to_dolfin()
+    assert np.allclose(ode.v.vector().get_local(), 42.0)
+    assert np.allclose(ode.s.vector().get_local()[v_index::num_states], 42.0)
+
+    # Now update dolfin function for v
+    ode.v.assign(dolfin.Constant(13.0))
+    ode.v_from_dolfin()
+    assert np.allclose(ode.values[v_index, :], 13.0)
+    assert np.allclose(ode.s.vector().get_local()[v_index::num_states], 13.0)
