@@ -4,7 +4,7 @@ from . import (
     bidomain_model,
     base_model,
     cellmodels,
-    cellsolver,
+    odesolver,
 )
 
 from .monodomain_model import MonodomainModel
@@ -16,7 +16,7 @@ __all__ = [
     "monodomain_model",
     "cellmodels",
     "bidomain_model",
-    "cellsolver",
+    "odesolver",
     "base_model",
     "MonodomainModel",
     "BidomainModel",

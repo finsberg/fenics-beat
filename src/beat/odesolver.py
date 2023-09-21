@@ -72,9 +72,7 @@ def solve(
     t = t0
     while t + dt < t_bound:
         fun(states=states, t=t, parameters=parameters, dt=dt, **extra)
-        V[i, :] = states[
-            V_index:,
-        ]
+        V[i, :] = states[V_index, :]
         i += 1
         t += dt
 
