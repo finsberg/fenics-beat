@@ -1,24 +1,25 @@
 from . import (
-    cellmodel,
     monodomain_model,
+    monodomain_solver,
     bidomain_model,
     base_model,
     cellmodels,
     cellsolver,
 )
-from .cellmodel import CellModel
+
 from .monodomain_model import MonodomainModel
 from .bidomain_model import BidomainModel
+from .monodomain_solver import MonodomainSplittingSolver
 
 
 __all__ = [
     "monodomain_model",
-    "cellmodel",
     "cellmodels",
     "bidomain_model",
     "cellsolver",
     "base_model",
-    "CellModel",
     "MonodomainModel",
     "BidomainModel",
+    "monodomain_solver",
+    "MonodomainSplittingSolver",
 ]

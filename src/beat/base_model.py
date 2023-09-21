@@ -5,6 +5,7 @@ from enum import Enum, auto
 
 import dolfin
 import ufl_legacy as ufl
+from ufl_legacy.core.expr import Expr
 
 
 logger = logging.getLogger(__name__)
@@ -21,8 +22,14 @@ class Results(NamedTuple):
 
 
 class BaseModel:
-    def __init__(self, mesh: dolfin.Mesh, params: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        time: dolfin.Constant,
+        mesh: dolfin.Mesh,
+        params: dict[str, Any] | None = None,
+    ) -> None:
         self._mesh = mesh
+        self.time = time
 
         self.parameters = type(self).default_parameters()
         if params is not None:
@@ -85,7 +92,7 @@ class BaseModel:
 
     @property
     @abc.abstractmethod
-    def state(self) -> None:
+    def state(self) -> dolfin.Function:
         ...
 
     @abc.abstractmethod
@@ -125,9 +132,7 @@ class BaseModel:
         }
 
     @abc.abstractmethod
-    def variational_forms(
-        self, k_n: ufl.core.expr.Expr | float
-    ) -> tuple[ufl.Form, ufl.Form]:
+    def variational_forms(self, k_n: Expr | float) -> tuple[ufl.Form, ufl.Form]:
         """Create the variational forms corresponding to the given
         discretization of the given system of equations.
 
@@ -154,7 +159,7 @@ class BaseModel:
           self.v in correct state at t1.
         """
 
-        timer = dolfin.Timer("PDE Step")
+        # timer = dolfin.Timer("PDE Step")
 
         # Extract interval and thus time-step
         (t0, t1) = interval
@@ -172,7 +177,7 @@ class BaseModel:
 
         # Solve problem
         self.linear_solver.solve(self.state.vector(), self._rhs_vector)
-        timer.stop()
+        # timer.stop()
 
     def _update_lu_solver(self, timestep_unchanged, dt):
         """Helper function for updating an LUSolver depending on

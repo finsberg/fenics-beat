@@ -20,12 +20,17 @@ class MonodomainModel(BaseModel):
     """
 
     def __init__(
-        self, time, mesh: dolfin.Mesh, M: ufl.Coefficient | float, I_s, params=None
+        self,
+        time: dolfin.Constant,
+        mesh: dolfin.Mesh,
+        M: ufl.Coefficient | float,
+        I_s,
+        params=None,
     ) -> None:
         self._M = M
         self._I_s = I_s
         self.time = time
-        super().__init__(mesh=mesh, params=params)
+        super().__init__(mesh=mesh, time=time, params=params)
 
     def _setup_state_space(self) -> None:
         # Set-up function spaces

@@ -14,13 +14,12 @@ class BidomainModel(BaseModel):
         self._nullspace_basis = None
         # Store input
 
-        self.time = time
         self._M_i = M_i
         self._M_e = M_e
         self._I_s = I_s
         self._I_a = I_a
 
-        super().__init__(mesh=mesh, params=params)
+        super().__init__(mesh=mesh, time=time, params=params)
 
     def _setup_state_space(self) -> None:
         # Set-up function spaces

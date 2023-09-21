@@ -1,21 +1,34 @@
 import numpy as np
 
 import beat
+from beat.cellsolver import ODESytemSolver
 
 
-def test_fitzhughnagumo():
-    model = beat.cellmodels.FitzHughNagumo()
+def test_beeler_reuter_odesystemsolver():
+    model = beat.cellmodels.beeler_reuter
+    num_points = 10
+    init_states = model.init_state_values()
+    parameters = model.init_parameter_values()
+    # parameters[model.parameter_indices("IstimAmplitude")] = 1.0
+    num_states = len(init_states)
+    states = np.zeros((num_states, num_points))
+    states.T[:] = init_states
+    dt = 0.1
+    t_bound = 1.0
+    t0 = 0.0
 
-    i_app = lambda t: 0.05 * 125 if 50 <= t <= 60 else 0
-    x = np.linspace(0, 1000, 100)
-    res = beat.cellsolver.solve_cellmodel(
-        model, [0, 1000], i_app=i_app, t_eval=x, max_step=1
+    ode = ODESytemSolver(
+        fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
+        states=states,
+        dt=dt,
+        t_bound=t_bound,
+        t0=t0,
+        parameters=parameters,
     )
+    assert np.isclose(ode.t, t0)
+    assert np.allclose(ode.values, states)
 
-    assert np.isclose(res.y.min(), -85)
-    assert np.isclose(res.y.max(), 68.60182926019024)
-    assert np.isclose(res.t[0], 0.0)
-    assert np.isclose(res.t[-1], 1000.0)
-    # import matplotlib.pyplot as plt
-    # plt.plot(res.t, res.y[0, :])
-    # plt.savefig("cell.png")
+    ode.step()
+
+    assert np.isclose(ode.t, t0 + dt)
+    assert not np.allclose(ode.values, states)

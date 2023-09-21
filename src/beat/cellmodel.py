@@ -45,6 +45,7 @@ class CellModel:
         "Return the ionic current."
         ...
 
+    @property
     @abc.abstractmethod
     def num_states(self):
         """Return number of state variables (in addition to the
