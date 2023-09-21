@@ -26,16 +26,15 @@ def test_simple_ode_odesystemsolver():
         ode = ODESytemSolver(
             fun=simple_ode_forward_euler,
             states=states,
-            dt=dt,
-            t_bound=t_bound,
-            t0=t0,
             parameters=None,
         )
         j = 0
+        t = 0.0
         for _ in range(int((t_bound - t0) / dt)):
-            ode.step()
-            if np.isclose(ode.t, x[j]):
-                print(ode.t, j)
+            ode.step(t, dt)
+            t += dt
+            if np.isclose(t, x[j]):
+                print(t, j)
                 y[j, :] = ode.states[:, 0]
                 j += 1
         errors.append(np.linalg.norm(sol - y))
@@ -53,24 +52,18 @@ def test_beeler_reuter_odesystemsolver():
     states = np.zeros((num_states, num_points))
     states.T[:] = init_states
     dt = 0.1
-    t_bound = 1.0
     t0 = 0.0
     old_states = np.copy(states)
 
     ode = ODESytemSolver(
         fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
         states=states,
-        dt=dt,
-        t_bound=t_bound,
-        t0=t0,
         parameters=parameters,
     )
-    assert np.isclose(ode.t, t0)
     assert np.allclose(ode.states, old_states)
 
-    ode.step()
+    ode.step(t0, dt)
 
-    assert np.isclose(ode.t, t0 + dt)
     assert not np.allclose(ode.states, old_states)
 
 
@@ -85,16 +78,12 @@ def test_beeler_reuter_unit_square():
     V = dolfin.VectorFunctionSpace(mesh, "Lagrange", 1, dim=num_states)
     s = dolfin.Function(V)
     dt = 0.1
-    t_bound = 1.0
     t0 = 0.0
 
     dolfin_ode = DolfinODESolver(
         s,
         fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
         init_states=init_states,
-        dt=dt,
-        t_bound=t_bound,
-        t0=t0,
         parameters=parameters,
     )
     assert np.allclose(dolfin_ode.s.vector().get_local(), 0.0)
@@ -105,10 +94,11 @@ def test_beeler_reuter_unit_square():
     assert not np.allclose(old_state, 0.0)
 
     N = 10
+    t = t0
     for _ in range(N):
-        dolfin_ode.step()
+        dolfin_ode.step(t, dt)
+        t += dt
 
     dolfin_ode.to_dolfin()
 
-    assert np.isclose(dolfin_ode.t, N * dt)
     assert not np.allclose(dolfin_ode.s.vector().get_local(), old_state)

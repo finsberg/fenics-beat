@@ -41,13 +41,7 @@ def solve(
 class ODESytemSolver:
     fun: Callable
     states: npt.NDArray
-    dt: float
-    t_bound: float
     parameters: npt.NDArray
-    t0: float = 0
-
-    def __post_init__(self):
-        self.t = self.t0
 
     @property
     def num_points(self) -> int:
@@ -57,11 +51,8 @@ class ODESytemSolver:
     def num_states(self) -> int:
         return self.states.shape[0]
 
-    def step(self) -> None:
-        if self.t + self.dt >= self.t_bound + EPS:
-            return
-        self.fun(states=self.states, t=self.t, parameters=self.parameters, dt=self.dt)
-        self.t += self.dt
+    def step(self, t0: float, dt: float) -> None:
+        self.fun(states=self.states, t=t0, parameters=self.parameters, dt=dt)
 
 
 class Assigner(NamedTuple):
@@ -93,9 +84,6 @@ class DolfinODESolver:
     init_states: npt.NDArray
     parameters: npt.NDArray
     fun: Callable
-    dt: float
-    t_bound: float
-    t0: float = 0.0
 
     def __post_init__(self):
         self.assigners = [
@@ -106,9 +94,6 @@ class DolfinODESolver:
         self._ode = ODESytemSolver(
             fun=self.fun,
             states=self._values,
-            dt=self.dt,
-            t_bound=self.t_bound,
-            t0=self.t0,
             parameters=self.parameters,
         )
 
@@ -127,13 +112,9 @@ class DolfinODESolver:
         return self.s.num_sub_spaces()
 
     @property
-    def t(self) -> float:
-        return self._ode.t
-
-    @property
     def num_points(self) -> int:
         # FIXME: Should be number of dofs in order to work with MPI
         return self.s.function_space().sub(0).collapse().dim()
 
-    def step(self):
-        self._ode.step()
+    def step(self, t0: float, dt: float):
+        self._ode.step(t0=t0, dt=dt)
