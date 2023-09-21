@@ -5,6 +5,8 @@ from typing import NamedTuple, Callable
 import numpy as np
 import numpy.typing as npt
 
+EPS = 1e-12
+
 
 class ODEResults(NamedTuple):
     y: npt.NDArray[np.float64]
@@ -87,7 +89,6 @@ class ODESytemSolver:
     t0: float = 0
 
     def __post_init__(self):
-        self.values = np.copy(self.states)
         self.t = self.t0
 
     @property
@@ -99,9 +100,7 @@ class ODESytemSolver:
         return self.states.shape[0]
 
     def step(self) -> None:
-        if self.t + self.dt >= self.t_bound:
+        if self.t + self.dt >= self.t_bound + EPS:
             return
-        self.fun(states=self.values, t=self.t, parameters=self.parameters, dt=self.dt)
+        self.fun(states=self.states, t=self.t, parameters=self.parameters, dt=self.dt)
         self.t += self.dt
-
-    # def solve(self)
