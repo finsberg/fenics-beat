@@ -2,8 +2,7 @@ import numpy as np
 import dolfin
 
 import beat
-from beat.odesolver import ODESytemSolver
-from beat.dolfin_odesolver import DolfinODESolver
+from beat.odesolver import ODESytemSolver, DolfinODESolver
 
 
 def test_simple_ode_odesystemsolver():
