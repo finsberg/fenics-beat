@@ -16,21 +16,19 @@ def test_monodomain_splitting_analytic():
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
 
     # Source term
-    ac_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*(cos(t) + 8*pow(pi, 2)*sin(t))"
-    ac_str += " - " + s_exact_str
+    ac_str = "8*pow(pi, 2)*cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     s_exact = dolfin.Expression(s_exact_str, t=0, degree=1)
 
-    theta = 1  # Forward Euler
+    theta = 1.0  # Forward Euler
 
     family = "Lagrange"
     degree = 1
-    # Create data
     N = 50
     mesh = dolfin.UnitSquareMesh(N, N)
     time = dolfin.Constant(0.0)
     I_s = dolfin.Expression(ac_str, t=time, degree=5)
     M = 1.0
-    T = 1.0
+    T = 4.0
     dt = 0.01
     t0 = 0.0
 
@@ -73,17 +71,13 @@ def test_monodomain_splitting_spatial_convergence():
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
 
     # Source term
-    ac_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*(cos(t) +  8*pow(pi, 2)*sin(t))"
-    # ac_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*8*pow(pi, 2)*sin(t)"
-    # ac_str += " - " + s_exact_str
+    ac_str = "8*pow(pi, 2)*cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     theta = 1.0  # Forward Euler
 
     s_exact = dolfin.Expression(s_exact_str, t=0, degree=1)
 
     family = "Lagrange"
     degree = 1
-    # Create data
-    # N = 10
 
     M = 1.0
     T = 1.0
@@ -105,12 +99,12 @@ def test_monodomain_splitting_spatial_convergence():
         I_s = dolfin.Expression(ac_str, t=time, degree=5)
 
         pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
+        s_exact = dolfin.Expression(s_exact_str, t=0, degree=1)
         s = dolfin.interpolate(s_exact, pde.V)
         s_arr = s.vector().get_local()
         init_states = np.zeros((2, s_arr.size))
         init_states[1, :] = s_arr
 
-        # breakpoint()
         ode = beat.odesolver.DolfinODESolver(
             pde.state,
             fun=simple_ode_forward_euler,
