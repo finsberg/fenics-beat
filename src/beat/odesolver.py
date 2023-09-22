@@ -55,43 +55,22 @@ class ODESytemSolver:
         self.fun(states=self.states, t=t0, parameters=self.parameters, dt=dt)
 
 
-class Assigner(NamedTuple):
-    f: dolfin.Function
-    assigner_to_single: dolfin.FunctionAssigner
-    assigner_from_single: dolfin.FunctionAssigner
-
-
-def setup_assigner(vs, index):
-    # Set-up separate potential function for post processing
-    VS0 = vs.function_space().sub(index)
-    V = VS0.collapse()
-    v = dolfin.Function(V)
-    # Set-up object to optimize assignment from a function to subfunction
-    assigner_to_single = dolfin.FunctionAssigner(V, VS0)
-    assigner_to_single.assign(v, vs.sub(index))
-    assigner_from_single = dolfin.FunctionAssigner(VS0, V)
-    assigner_from_single.assign(vs.sub(index), v)
-    return Assigner(
-        f=v,
-        assigner_to_single=assigner_to_single,
-        assigner_from_single=assigner_from_single,
-    )
-
-
 @dataclass
 class DolfinODESolver:
-    s: dolfin.Function
+    v: dolfin.Function
     init_states: npt.NDArray
     parameters: npt.NDArray
     fun: Callable
+    num_states: int
     v_index: int = 0
 
     def __post_init__(self):
-        self.assigners = [
-            setup_assigner(self.s, index) for index in range(self.num_states)
-        ]
-        self._values = np.zeros((self.num_states, self.num_points))
-        self._values.T[:] = self.init_states
+        if np.shape(self.init_states) == self.shape:
+            self._values = np.copy(self.init_states)
+        else:
+            self._values = np.zeros(self.shape)
+            self._values.T[:] = self.init_states
+
         self._ode = ODESytemSolver(
             fun=self.fun,
             states=self._values,
@@ -100,39 +79,27 @@ class DolfinODESolver:
 
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
-        for i, a in enumerate(self.assigners):
-            a.f.vector().set_local(self._values[i, :])
-            a.assigner_from_single.assign(self.s.sub(i), a.f)
+        self.v.vector().set_local(self._values[self.v_index, :])
 
-    def v_to_dolfin(self) -> None:
-        a = self.assigners[self.v_index]
-        a.f.vector().set_local(self._values[self.v_index, :])
-        a.assigner_from_single.assign(self.s.sub(self.v_index), a.f)
-
-    def v_from_dolfin(self) -> None:
-        a = self.assigners[self.v_index]
-        self.values[self.v_index, :] = a.f.vector().get_local()
-        a.assigner_from_single.assign(self.s.sub(self.v_index), a.f)
-
-    def __getitem__(self, index) -> dolfin.Function:
-        return self.assigners[index].f
-
-    @property
-    def v(self) -> dolfin.Function:
-        return self.assigners[self.v_index].f
+    def from_dolfin(self) -> None:
+        self.values[self.v_index, :] = self.v.vector().get_local()
 
     @property
     def values(self):
         return self._values
 
     @property
-    def num_states(self) -> int:
-        return self.s.num_sub_spaces()
+    def num_parameters(self) -> int:
+        return len(self.parameters)
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        return (self.num_states, self.num_points)
 
     @property
     def num_points(self) -> int:
         # FIXME: Should be number of dofs in order to work with MPI
-        return self.s.function_space().sub(0).collapse().dim()
+        return self.v.vector().size()
 
     def step(self, t0: float, dt: float):
         self._ode.step(t0=t0, dt=dt)
