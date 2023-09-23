@@ -98,7 +98,6 @@ class DolfinODESolver:
 
     @property
     def num_points(self) -> int:
-        # FIXME: Should be number of dofs in order to work with MPI
         return self.v.vector().size()
 
     def step(self, t0: float, dt: float):

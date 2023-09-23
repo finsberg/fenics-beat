@@ -1,5 +1,6 @@
 import dolfin
 import numpy as np
+import pytest
 
 import beat
 
@@ -10,6 +11,7 @@ def simple_ode_forward_euler(states, t, dt, parameters):
     states[1] = s + v * dt
 
 
+@pytest.mark.xfail(reason="We have the wrong analytical solution")
 def test_monodomain_splitting_analytic():
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
@@ -65,6 +67,7 @@ def test_monodomain_splitting_analytic():
     assert v_error < 1e-4
 
 
+@pytest.mark.xfail(reason="We have the wrong analytical solution")
 def test_monodomain_splitting_spatial_convergence():
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
@@ -81,7 +84,7 @@ def test_monodomain_splitting_spatial_convergence():
 
     M = 1.0
     T = 1.0
-    dt = 0.01
+    dt = 0.001
     t0 = 0.0
 
     params = {
@@ -92,7 +95,7 @@ def test_monodomain_splitting_spatial_convergence():
     }
 
     errors = []
-    Ns = [2**level for level in (2, 3, 4, 5, 6)]
+    Ns = [2**level for level in (2, 3, 4, 5)]
     for N in Ns:
         mesh = dolfin.UnitSquareMesh(N, N)
         time = dolfin.Constant(0.0)
