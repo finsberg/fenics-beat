@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 from dataclasses import dataclass
 from .monodomain_model import MonodomainModel
 from .odesolver import DolfinODESolver
@@ -11,6 +12,11 @@ EPS = 1e-12
 class MonodomainSplittingSolver:
     pde: MonodomainModel
     ode: DolfinODESolver
+    theta: float = 0.5
+
+    def __post_init__(self) -> None:
+        self.ode.to_dolfin()
+        self.pde.assign_previous()
 
     def solve(self, interval, dt):
         (T0, T) = interval
@@ -28,7 +34,7 @@ class MonodomainSplittingSolver:
 
     def step(self, interval):
         # Extract some parameters for readability
-        theta = self.pde.parameters["theta"]
+        theta = self.theta
 
         # Extract time domain
         (t0, t1) = interval
@@ -48,8 +54,11 @@ class MonodomainSplittingSolver:
 
         # Copy voltage from PDE to ODE
         self.ode.from_dolfin()
+
         # If first order splitting, we are done.
-        if theta == 1.0:
+        if np.isclose(theta, 1.0):
+            # But first update previous value in PDE
+            self.pde.assign_previous()
             return
 
         # Otherwise, we do another ode_step:
@@ -59,3 +68,4 @@ class MonodomainSplittingSolver:
         self.ode.step(t, (1.0 - theta) * dt)
         # And copy the solution back to FEniCS
         self.ode.to_dolfin()
+        self.pde.assign_previous()

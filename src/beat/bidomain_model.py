@@ -1,25 +1,35 @@
+from __future__ import annotations
 import logging
 import ufl_legacy as ufl
 from ufl_legacy.core.expr import Expr
 import dolfin
 
-from .base_model import BaseModel
+from .base_model import BaseModel, Stimulus
 
 
 logger = logging.getLogger(__name__)
 
 
 class BidomainModel(BaseModel):
-    def __init__(self, mesh, time, M_i, M_e, I_s=None, I_a=None, v_=None, params=None):
+    def __init__(
+        self,
+        mesh,
+        time,
+        M_i,
+        M_e,
+        I_s: Stimulus | ufl.Coefficient | None = None,
+        I_a=None,
+        v_=None,
+        params=None,
+    ):
         self._nullspace_basis = None
         # Store input
 
         self._M_i = M_i
         self._M_e = M_e
-        self._I_s = I_s
         self._I_a = I_a
 
-        super().__init__(mesh=mesh, time=time, params=params)
+        super().__init__(mesh=mesh, time=time, params=params, I_s=I_s)
 
     def _setup_state_space(self) -> None:
         # Set-up function spaces
@@ -126,7 +136,7 @@ class BidomainModel(BaseModel):
         # Set-up measure and rhs from stimulus
         # (dz, rhs) = rhs_with_markerwise_field(self._I_s, self._mesh, w)
         dz = dolfin.dx
-        rhs = self._I_s * w * dz()
+        rhs = self._I_s.expr * w * self._I_s.dx
 
         # Set-up variational problem
         Dt_v_k_n = v - self.v_

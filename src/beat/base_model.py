@@ -22,12 +22,18 @@ class Results(NamedTuple):
     status: Status
 
 
+class Stimulus(NamedTuple):
+    dx: dolfin.Measure
+    expr: dolfin.Expression
+
+
 class BaseModel:
     def __init__(
         self,
         time: dolfin.Constant,
         mesh: dolfin.Mesh,
         params: dict[str, Any] | None = None,
+        I_s: Stimulus | ufl.Coefficient | None = None,
     ) -> None:
         self._mesh = mesh
         self.time = time
@@ -36,11 +42,17 @@ class BaseModel:
         if params is not None:
             self.parameters.update(params)
 
+        if I_s is None:
+            I_s = dolfin.Constant(0.0)
+        if not isinstance(I_s, Stimulus):
+            I_s = Stimulus(expr=I_s, dx=dolfin.dx)
+        self._I_s = I_s
+
         self._setup_state_space()
 
         self._timestep = dolfin.Constant(self.parameters["default_timestep"])
-        (G, self._prec) = self.variational_forms(self._timestep)
-        self._lhs, self._rhs = dolfin.system(G)
+        (self._G, self._prec) = self.variational_forms(self._timestep)
+        self._lhs, self._rhs = dolfin.system(self._G)
 
         logger.debug("Preassembling monodomain matrix (and initializing vector)")
         self._lhs_matrix = dolfin.assemble(self._lhs)

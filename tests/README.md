@@ -36,7 +36,7 @@ $$
 and finally
 
 $$
-\nabla \cdot \nabla v = -8\pi^2 \cos(2\pi x)\cos(2\pi y)\sin(t)-
+\nabla \cdot \nabla v = -8\pi^2 \cos(2\pi x)\cos(2\pi y)\sin(t)
 $$
 
 Therefore we see that

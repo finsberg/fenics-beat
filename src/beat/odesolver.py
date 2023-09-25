@@ -82,7 +82,7 @@ class DolfinODESolver:
         self.v.vector().set_local(self._values[self.v_index, :])
 
     def from_dolfin(self) -> None:
-        self.values[self.v_index, :] = self.v.vector().get_local()
+        self._values[self.v_index, :] = self.v.vector().get_local()
 
     @property
     def values(self):
