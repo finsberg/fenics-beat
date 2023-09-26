@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any, NamedTuple
 import abc
 import logging
@@ -5,6 +6,7 @@ from enum import Enum, auto
 
 import dolfin
 import ufl_legacy as ufl
+from ufl_legacy.core.expr import Expr
 
 
 logger = logging.getLogger(__name__)
@@ -20,19 +22,37 @@ class Results(NamedTuple):
     status: Status
 
 
+class Stimulus(NamedTuple):
+    dx: dolfin.Measure
+    expr: dolfin.Expression
+
+
 class BaseModel:
-    def __init__(self, mesh: dolfin.Mesh, params: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        time: dolfin.Constant,
+        mesh: dolfin.Mesh,
+        params: dict[str, Any] | None = None,
+        I_s: Stimulus | ufl.Coefficient | None = None,
+    ) -> None:
         self._mesh = mesh
+        self.time = time
 
         self.parameters = type(self).default_parameters()
         if params is not None:
             self.parameters.update(params)
 
+        if I_s is None:
+            I_s = dolfin.Constant(0.0)
+        if not isinstance(I_s, Stimulus):
+            I_s = Stimulus(expr=I_s, dx=dolfin.dx)
+        self._I_s = I_s
+
         self._setup_state_space()
 
         self._timestep = dolfin.Constant(self.parameters["default_timestep"])
-        (G, self._prec) = self.variational_forms(self._timestep)
-        self._lhs, self._rhs = dolfin.system(G)
+        (self._G, self._prec) = self.variational_forms(self._timestep)
+        self._lhs, self._rhs = dolfin.system(self._G)
 
         logger.debug("Preassembling monodomain matrix (and initializing vector)")
         self._lhs_matrix = dolfin.assemble(self._lhs)
@@ -85,7 +105,7 @@ class BaseModel:
 
     @property
     @abc.abstractmethod
-    def state(self) -> None:
+    def state(self) -> dolfin.Function:
         ...
 
     @abc.abstractmethod
@@ -125,9 +145,7 @@ class BaseModel:
         }
 
     @abc.abstractmethod
-    def variational_forms(
-        self, k_n: ufl.core.expr.Expr | float
-    ) -> tuple[ufl.Form, ufl.Form]:
+    def variational_forms(self, k_n: Expr | float) -> tuple[ufl.Form, ufl.Form]:
         """Create the variational forms corresponding to the given
         discretization of the given system of equations.
 
@@ -154,7 +172,7 @@ class BaseModel:
           self.v in correct state at t1.
         """
 
-        timer = dolfin.Timer("PDE Step")
+        # timer = dolfin.Timer("PDE Step")
 
         # Extract interval and thus time-step
         (t0, t1) = interval
@@ -172,7 +190,7 @@ class BaseModel:
 
         # Solve problem
         self.linear_solver.solve(self.state.vector(), self._rhs_vector)
-        timer.stop()
+        # timer.stop()
 
     def _update_lu_solver(self, timestep_unchanged, dt):
         """Helper function for updating an LUSolver depending on

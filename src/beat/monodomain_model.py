@@ -1,10 +1,11 @@
+from __future__ import annotations
 import logging
 
 import dolfin
 import ufl_legacy as ufl
 from ufl_legacy.core.expr import Expr
 
-from .base_model import BaseModel
+from .base_model import BaseModel, Stimulus
 
 logger = logging.getLogger(__name__)
 
@@ -14,18 +15,22 @@ class MonodomainModel(BaseModel):
 
     .. math::
 
-        \chi C_m \frac{\partial V}{\partial t} -
+        \frac{\partial V}{\partial t} -
         \nabla \cdot \left( M \nabla V \right) - I_{\mathrm{stim}} = 0
 
     """
 
     def __init__(
-        self, time, mesh: dolfin.Mesh, M: ufl.Coefficient | float, I_s, params=None
+        self,
+        time: dolfin.Constant,
+        mesh: dolfin.Mesh,
+        M: ufl.Coefficient | float,
+        I_s: Stimulus | ufl.Coefficient | None = None,
+        params=None,
     ) -> None:
         self._M = M
-        self._I_s = I_s
-        self.time = time
-        super().__init__(mesh=mesh, params=params)
+
+        super().__init__(mesh=mesh, time=time, params=params, I_s=I_s)
 
     def _setup_state_space(self) -> None:
         # Set-up function spaces
@@ -81,14 +86,19 @@ class MonodomainModel(BaseModel):
         v_mid = theta * v + (1.0 - theta) * self.v_
 
         theta_parabolic = ufl.inner(self._M * ufl.grad(v_mid), ufl.grad(w))
+        # breakpoint()
+        G_stim = self._I_s.expr * w * self._I_s.dx
 
-        G = (Dt_v_k_n * w + k_n * theta_parabolic - k_n * self._I_s * w) * dolfin.dx(
+        G = (Dt_v_k_n * w + k_n * theta_parabolic) * dolfin.dx(
             domain=self._mesh
-        )
+        ) - k_n * G_stim
 
         # Define preconditioner based on educated(?) guess by Marie
-        prec = (
-            v * w + k_n / 2.0 * ufl.inner(self._M * ufl.grad(v), ufl.grad(w))
-        ) * dolfin.dx(domain=self._mesh)
+        if self.parameters["use_custom_preconditioner"]:
+            prec = (
+                v * w + k_n / 2.0 * ufl.inner(self._M * ufl.grad(v), ufl.grad(w))
+            ) * dolfin.dx(domain=self._mesh)
+        else:
+            prec = None
 
         return (G, prec)
