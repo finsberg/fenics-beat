@@ -1,0 +1,7 @@
+states("Membrane",
+       v = 0.0,
+       s = 0.0)
+
+# Time derivatives
+dv_dt = s
+ds_dt = v
