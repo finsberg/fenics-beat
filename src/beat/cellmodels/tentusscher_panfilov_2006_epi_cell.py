@@ -1513,17 +1513,17 @@ def forward_explicit_euler(states, t, dt, parameters):
     return states
 
 
-import numba
+# import numba
 
 
-@numba.njit(parallel=True)
+# @numba.njit(parallel=True)
+# def forward_generalized_rush_larsen(states, t, dt, parameters):
+#     for i in numba.prange(states.shape[1]):
+#         _forward_generalized_rush_larsen(states[:, i], t, dt, parameters)
+
+
+# @numba.njit
 def forward_generalized_rush_larsen(states, t, dt, parameters):
-    for i in numba.prange(states.shape[1]):
-        _forward_generalized_rush_larsen(states[:, i], t, dt, parameters)
-
-
-@numba.njit
-def _forward_generalized_rush_larsen(states, t, dt, parameters):
     """
     Compute a forward step using the generalised Rush-Larsen (GRL1) scheme to\
         the tentusscher_panfilov_2006_epi_cell ODE
