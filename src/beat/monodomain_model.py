@@ -55,7 +55,7 @@ class MonodomainModel(BaseModel):
         return self._state
 
     def assign_previous(self):
-        self.v_.vector().set_local(self.state.vector())
+        self.v_.assign(self.state)
 
     @staticmethod
     def default_parameters():
@@ -94,8 +94,11 @@ class MonodomainModel(BaseModel):
         ) - k_n * G_stim
 
         # Define preconditioner based on educated(?) guess by Marie
-        prec = (
-            v * w + k_n / 2.0 * ufl.inner(self._M * ufl.grad(v), ufl.grad(w))
-        ) * dolfin.dx(domain=self._mesh)
+        if self.parameters["use_custom_preconditioner"]:
+            prec = (
+                v * w + k_n / 2.0 * ufl.inner(self._M * ufl.grad(v), ufl.grad(w))
+            ) * dolfin.dx(domain=self._mesh)
+        else:
+            prec = None
 
         return (G, prec)
