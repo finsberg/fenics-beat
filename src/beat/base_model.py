@@ -23,7 +23,7 @@ class Results(NamedTuple):
 
 
 class Stimulus(NamedTuple):
-    dx: dolfin.Measure
+    dz: dolfin.Measure
     expr: dolfin.Expression
 
 
@@ -45,7 +45,7 @@ class BaseModel:
         if I_s is None:
             I_s = dolfin.Constant(0.0)
         if not isinstance(I_s, Stimulus):
-            I_s = Stimulus(expr=I_s, dx=dolfin.dx)
+            I_s = Stimulus(expr=I_s, dz=dolfin.dx)
         self._I_s = I_s
 
         self._setup_state_space()
