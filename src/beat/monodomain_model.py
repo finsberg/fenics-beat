@@ -87,7 +87,7 @@ class MonodomainModel(BaseModel):
 
         theta_parabolic = ufl.inner(self._M * ufl.grad(v_mid), ufl.grad(w))
         # breakpoint()
-        G_stim = self._I_s.expr * w * self._I_s.dx
+        G_stim = self._I_s.expr * w * self._I_s.dz
 
         G = (Dt_v_k_n * w + k_n * theta_parabolic) * dolfin.dx(
             domain=self._mesh

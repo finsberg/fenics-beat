@@ -136,7 +136,7 @@ class BidomainModel(BaseModel):
         # Set-up measure and rhs from stimulus
         # (dz, rhs) = rhs_with_markerwise_field(self._I_s, self._mesh, w)
         dz = dolfin.dx
-        rhs = self._I_s.expr * w * self._I_s.dx
+        rhs = self._I_s.expr * w * self._I_s.dz
 
         # Set-up variational problem
         Dt_v_k_n = v - self.v_

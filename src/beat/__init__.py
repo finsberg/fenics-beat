@@ -5,6 +5,7 @@ from . import (
     base_model,
     cellmodels,
     odesolver,
+    ecg,
 )
 
 from .monodomain_model import MonodomainModel
@@ -22,4 +23,5 @@ __all__ = [
     "BidomainModel",
     "monodomain_solver",
     "MonodomainSplittingSolver",
+    "ecg",
 ]
