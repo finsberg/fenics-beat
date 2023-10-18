@@ -1,5 +1,8 @@
+from collections import defaultdict
 from pathlib import Path
 import cardiac_geometries
+import numpy as np
+import matplotlib.pyplot as plt
 
 import dolfin
 import ufl_legacy as ufl
@@ -98,6 +101,118 @@ def define_conductivity_tensor(chi, C_m, f0, s0, n0):
     return M
 
 
+def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
+    V = dolfin.FunctionSpace(heart_mesh, "Lagrange", 1)
+    v = dolfin.Function(V)
+
+    i = 0
+    with dolfin.XDMFFile(Path(xdmffile).as_posix()) as f:
+        while True:
+            try:
+                f.read_checkpoint(v, key, i)
+            except Exception:
+                break
+            else:
+                yield v.copy(deepcopy=True), i
+                i += 1
+
+            if stop_index is not None and stop_index < i:
+                break
+
+
+def rotation_matrix(x, direction=0):
+    R = np.eye(3)
+    if direction == 0:
+        R[0, 0] = np.cos(x)
+        R[0, 1] = -np.sin(x)
+        R[1, 0] = np.sin(x)
+        R[1, 1] = np.cos(x)
+    elif direction == 1:
+        R[0, 0] = np.cos(x)
+        R[0, 2] = np.sin(x)
+        R[2, 0] = -np.sin(x)
+        R[2, 2] = np.cos(x)
+    elif direction == 2:
+        R[1, 1] = np.cos(x)
+        R[1, 2] = -np.sin(x)
+        R[2, 1] = np.sin(x)
+        R[2, 2] = np.cos(x)
+    else:
+        raise ValueError(f"Invalid direction {direction}")
+
+    return R
+
+
+def compute_ecg_recovery():
+    datadir = Path("data_epicardial_stimulation")
+    xdmffile = datadir / "state.xdmf"
+    data = get_data(datadir=datadir)
+
+    # https://litfl.com/ecg-lead-positioning/
+    vs = load_from_file(data.mesh, xdmffile, key="V")
+
+    leads = dict(
+        RA=(-15.0, 0.0, -10.0),
+        LA=(4.0, -12.0, -7.0),
+        RL=(0.0, 20.0, 3.0),
+        LL=(17.0, 11.0, 7.0),
+        V1=(-3.0, 4.0, -9.0),
+        V2=(0.0, 2.0, -8.0),
+        V3=(3.0, 1.0, -8.0),
+        V4=(6.0, 1.0, -6.0),
+        V5=(10.0, 2.0, 0.0),
+        V6=(10.0, -6.0, 2.0),
+    )
+
+    fname = datadir / "extracellular_potential.npy"
+    if not fname.is_file():
+        phie = defaultdict(list)
+        time = []
+        for v, t in vs:
+            time.append(t)
+            for name, point in leads.items():
+                phie[name].append(
+                    beat.ecg.ecg_recovery(v=v, mesh=data.mesh, sigma_b=1.0, point=point)
+                )
+        np.save(fname, {"phie": phie, "time": time})
+
+    phie_time = np.load(fname, allow_pickle=True).item()
+    phie = phie_time["phie"]
+    time = phie_time["time"]
+
+    fig, ax = plt.subplots(2, 5, sharex=True, figsize=(6, 8))
+    for i, (name, values) in enumerate(phie.items()):
+        axi = ax.flatten()[i]
+        axi.plot(time, values)
+        axi.set_title(name)
+    fig.savefig(datadir / "extracellular_potential.png")
+
+    ecg = beat.ecg.Leads12(**{k: np.array(v) for k, v in phie.items()})
+    fig, ax = plt.subplots(3, 4, sharex=True, figsize=(12, 8))
+    for i, name in enumerate(
+        [
+            "I",
+            "II",
+            "III",
+            "aVR",
+            "aVL",
+            "aVF",
+            "V1_",
+            "V2_",
+            "V3_",
+            "V4_",
+            "V5_",
+            "V6_",
+        ]
+    ):
+        y = getattr(ecg, name)
+        axi = ax.flatten()[i]
+        axi.plot(time, y)
+        axi.set_title(name)
+    fig.savefig(datadir / "ecg_12_leads.png")
+    # breakpoint()
+
+
 def main():
     datadir = Path("data_epicardial_stimulation")
     data = get_data(datadir=datadir)
@@ -134,7 +249,7 @@ def main():
         v_index=model.state_indices("V"),
     )
 
-    T = 10
+    T = 200
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
@@ -158,4 +273,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    compute_ecg_recovery()
