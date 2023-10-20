@@ -35,8 +35,8 @@ def _check_attr(attr: np.ndarray | None):
 class Leads12(NamedTuple):
     RA: np.ndarray
     LA: np.ndarray
-    RL: np.ndarray
     LL: np.ndarray
+    RL: np.ndarray | None = None  # Do we really need this?
     V1: np.ndarray | None = None
     V2: np.ndarray | None = None
     V3: np.ndarray | None = None
@@ -71,14 +71,26 @@ class Leads12(NamedTuple):
 
     @property
     def aVR(self) -> np.ndarray:
+        """Lead augmented vector right (aVR) has the positive
+        electrode on the right arm. The negative pole is a
+        combination of the left arm electrode and the left leg electrode
+        """
         return (3 / 2) * (self.RA - self.Vw)
 
     @property
     def aVL(self) -> np.ndarray:
+        """Lead augmented vector left (aVL) has the positive electrode
+        on the left arm. The negative pole is a combination of the right
+        arm electrode and the left leg electrode
+        """
         return (3 / 2) * (self.LA - self.Vw)
 
     @property
     def aVF(self) -> np.ndarray:
+        """Lead augmented vector foot (aVF) has the positive electrode on the
+        left leg. The negative pole is a combination of the right arm
+        electrode and the left arm electrode
+        """
         return (3 / 2) * (self.LL - self.Vw)
 
     @property
