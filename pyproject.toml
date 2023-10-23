@@ -41,6 +41,7 @@ demos = [
 ]
 docs = [
    "jupyter-book",
+   "jupytext",
    "fenics-beat[demos]"
 ]
 all = [
