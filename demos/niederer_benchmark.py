@@ -1,3 +1,14 @@
+# # Niederer benchmark
+#
+# In this example we will use the same setup as in the Niederer benchmark
+# > Niederer SA, Kerfoot E, Benson AP, Bernabeu MO, Bernus O, Bradley C,
+#  Cherry EM, Clayton R, Fenton FH, Garny A, Heidenreich E, Land S, Maleckar M,
+#  Pathmanathan P, Plank G, Rodríguez JF, Roy I, Sachse FB, Seemann G, Skavhaug O,
+#  Smith NP. Verification of cardiac tissue electrophysiology simulators using an
+#  N-version benchmark. Philos Trans A Math Phys Eng Sci. 2011 Nov 13;369(1954):4331-51.
+#  doi: 10.1098/rsta.2011.0139. PMID: 21969679; PMCID: PMC3263775.
+#
+
 import dolfin
 import numpy as np
 import numpy.typing as npt
@@ -78,7 +89,7 @@ def define_stimulus(mesh, chi, C_m, time):
     )
 
     dx = dolfin.Measure("dx", domain=mesh, subdomain_data=S1_markers)(S1_marker)
-    return beat.base_model.Stimulus(dx=dx, expr=I_s)
+    return beat.base_model.Stimulus(dz=dx, expr=I_s)
 
 
 def define_conductivity_tensor(chi, C_m):
@@ -143,7 +154,8 @@ def main():
     i = 0
     while t < T + 1e-12:
         if i % 20 == 0:
-            print(f"Solve for {t=:.2f}, {solver.pde.state.vector().get_local() =}")
+            v = solver.pde.state.vector().get_local()
+            print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
             xdmf.write_checkpoint(
                 solver.pde.state,
                 "V",

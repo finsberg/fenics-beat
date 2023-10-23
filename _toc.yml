@@ -1,0 +1,21 @@
+format: jb-book
+root: README
+
+parts:
+  - caption: Getting started
+    chapters:
+    - file: docs/quickstart.md
+    - file: docs/new_cellmodel.md
+  - caption: Examples
+    chapters:
+    - file: demos/simple_ode.py
+    - file: demos/solve_many_odes.py
+    - file: demos/niederer_benchmark.py
+    - file: demos/endocardial_stimulation.py
+  - caption: Verification
+    chapters:
+    - file: tests/README
+  - caption: API documentation
+    chapters:
+    - file: CONTRIBUTING
+    - file: "docs/api.rst"

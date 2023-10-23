@@ -36,14 +36,19 @@ pypi = [
     "twine",
     "build"
 ]
+demos = [
+   "cardiac-geometries",
+]
 docs = [
    "jupyter-book",
+   "fenics-beat[demos]"
 ]
 all = [
    "fenics-beat[test]",
    "fenics-beat[docs]",
    "fenics-beat[pypi]",
-   "fenics-beat[dev]"
+   "fenics-beat[dev]",
+   "fenics-beat[demos]"
 ]
 
 

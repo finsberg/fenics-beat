@@ -1,11 +1,23 @@
 # Beat
 
-A simplified version of `cbcbeat`
+A simplified version of `cbcbeat` for running cardiac electrophysiology simulations.
 
+- Source code: https://github.com/finsberg/beat
+- Documentation: https://finsberv.github.io/beat
 
-
-
-# Codegeneration for cellmodel
+## Install
+You can install the library with pip
 ```
-gotran2py beeler_reuter_1977.ode --solvers.explicit_euler.generate=1 --solvers.generalized_rush_larsen.generate=1 --code.body.use_enum=1 --namespace=np
+python3 -m pip install fenics-beat
 ```
+
+
+## Getting started
+
+TBW
+
+## License
+MIT
+
+## Need help or having issues
+Please submit an [issue](https://github.com/finsberg/beat/issues)
