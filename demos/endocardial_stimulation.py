@@ -1,3 +1,6 @@
+# # Endocardial stimulation
+# In this demo we stimulate a Bi-ventricular geometry at the endocardium and compute a pseudo-ecg
+
 from collections import defaultdict
 from pathlib import Path
 import cardiac_geometries
@@ -6,6 +9,11 @@ import matplotlib.pyplot as plt
 
 import dolfin
 import ufl_legacy as ufl
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = lambda x: x
 
 import beat
 
@@ -101,46 +109,29 @@ def define_conductivity_tensor(chi, C_m, f0, s0, n0):
     return M
 
 
+def load_timesteps_from_xdmf(xdmffile):
+    import xml.etree.ElementTree as ET
+
+    times = {}
+    i = 0
+    tree = ET.parse(xdmffile)
+    for elem in tree.iter():
+        if elem.tag == "Time":
+            times[i] = float(elem.get("Value"))
+            i += 1
+
+    return times
+
+
 def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
     V = dolfin.FunctionSpace(heart_mesh, "Lagrange", 1)
     v = dolfin.Function(V)
 
-    i = 0
+    timesteps = load_timesteps_from_xdmf(xdmffile)
     with dolfin.XDMFFile(Path(xdmffile).as_posix()) as f:
-        while True:
-            try:
-                f.read_checkpoint(v, key, i)
-            except Exception:
-                break
-            else:
-                yield v.copy(deepcopy=True), i
-                i += 1
-
-            if stop_index is not None and stop_index < i:
-                break
-
-
-def rotation_matrix(x, direction=0):
-    R = np.eye(3)
-    if direction == 0:
-        R[0, 0] = np.cos(x)
-        R[0, 1] = -np.sin(x)
-        R[1, 0] = np.sin(x)
-        R[1, 1] = np.cos(x)
-    elif direction == 1:
-        R[0, 0] = np.cos(x)
-        R[0, 2] = np.sin(x)
-        R[2, 0] = -np.sin(x)
-        R[2, 2] = np.cos(x)
-    elif direction == 2:
-        R[1, 1] = np.cos(x)
-        R[1, 2] = -np.sin(x)
-        R[2, 1] = np.sin(x)
-        R[2, 2] = np.cos(x)
-    else:
-        raise ValueError(f"Invalid direction {direction}")
-
-    return R
+        for i, t in tqdm(timesteps.items()):
+            f.read_checkpoint(v, key, i)
+            yield v.copy(deepcopy=True), t
 
 
 def compute_ecg_recovery():
@@ -249,7 +240,7 @@ def main():
         v_index=model.state_indices("V"),
     )
 
-    T = 200
+    T = 50
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
@@ -258,7 +249,8 @@ def main():
     i = 0
     while t < T + 1e-12:
         if i % 20 == 0:
-            print(f"Solve for {t=:.2f}, {solver.pde.state.vector().get_local() =}")
+            v = solver.pde.state.vector().get_local()
+            print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
             with dolfin.XDMFFile(dolfin.MPI.comm_world, fname) as xdmf:
                 xdmf.write_checkpoint(
                     solver.pde.state,
@@ -273,5 +265,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
+    main()
     compute_ecg_recovery()
