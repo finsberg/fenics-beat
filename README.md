@@ -1,9 +1,9 @@
-# Beat
+# fenics-beat
 
 A simplified version of `cbcbeat` for running cardiac electrophysiology simulations.
 
-- Source code: https://github.com/finsberg/beat
-- Documentation: https://finsberv.github.io/beat
+- Source code: https://github.com/finsberg/fenics-beat
+- Documentation: https://finsberv.github.io/fenics-beat
 
 ## Install
 You can install the library with pip
@@ -20,4 +20,4 @@ TBW
 MIT
 
 ## Need help or having issues
-Please submit an [issue](https://github.com/finsberg/beat/issues)
+Please submit an [issue](https://github.com/finsberg/fenics-beat/issues)
