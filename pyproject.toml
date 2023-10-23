@@ -16,10 +16,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://computationalphysiology.github.io/fenics-beat"
-Documentation = "https://computationalphysiology.github.io/fenics-beat"
-Source = "https://github.com/ComputationalPhysiology/fenics-beat"
-Tracker = "https://github.com/ComputationalPhysiology/fenics-beat/issues"
+Homepage = "https://finsberg.github.io/fenics-beat"
+Documentation = "https://finsberg.github.io/fenics-beat"
+Source = "https://github.com/finsberg/fenics-beat"
+Tracker = "https://github.com/finsberg/fenics-beat/issues"
 
 [project.optional-dependencies]
 test = [
