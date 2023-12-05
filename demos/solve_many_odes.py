@@ -10,6 +10,7 @@ from time import perf_counter
 
 
 model = beat.cellmodels.beeler_reuter
+# model = beat.cellmodels.tentusscher_panfilov_2006.epi
 
 init_states = model.init_state_values()
 parameters = model.init_parameter_values()
@@ -44,7 +45,7 @@ V = np.zeros((nT, num_points))
 t0 = perf_counter()
 # values = np.zeros_like(ic)
 beat.odesolver.solve(
-    fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
+    fun=model.forward_generalized_rush_larsen,
     t_bound=t_bound,
     states=states,
     V=V,

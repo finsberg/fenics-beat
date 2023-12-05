@@ -102,3 +102,72 @@ class DolfinODESolver:
 
     def step(self, t0: float, dt: float):
         self._ode.step(t0=t0, dt=dt)
+
+
+@dataclass
+class DolfinMultiODESolver:
+    v: dolfin.Function
+    markers: dolfin.Function
+    init_states: dict[int, npt.NDArray]
+    parameters: dict[int, npt.NDArray]
+    fun: dict[int, Callable]
+    num_states: dict[int, int]
+    v_index: dict[int, int]
+
+    def __post_init__(self):
+        if self.v.vector().size() != self.markers.vector().size():
+            raise RuntimeError(
+                "Marker and voltage need to be in the same function space"
+            )
+
+        self._marker_values = tuple(self.init_states.keys())
+        self._num_points = {}
+        self._odes = {}
+        self._values = {}
+        self._inds = {}
+        for marker in self._marker_values:
+            where = self.markers.vector().get_local() == marker
+            self._num_points[marker] = where.sum()
+            self._inds[marker] = where
+
+            if np.shape(self.init_states[marker]) == self.shape(marker):
+                self._values[marker] = np.copy(self.init_states[marker])
+            else:
+                self._values[marker] = np.zeros(self.shape(marker))
+                self._values[marker].T[:] = self.init_states[marker]
+
+            self._odes[marker] = ODESytemSolver(
+                fun=self.fun[marker],
+                states=self._values[marker],
+                parameters=self.parameters[marker],
+            )
+
+    def to_dolfin(self) -> None:
+        """Assign values from numpy array to dolfin function"""
+
+        arr = self.v.vector().get_local().copy()
+        for marker in self._marker_values:
+            arr[self._inds[marker]] = self._values[marker][self.v_index[marker], :]
+
+        self.v.vector().set_local(arr)
+
+    def from_dolfin(self) -> None:
+        arr = self.v.vector().get_local()
+        for marker in self._marker_values:
+            self._values[marker][self.v_index[marker], :] = arr[self._inds[marker]]
+
+    def values(self, marker: int):
+        return self._values
+
+    def num_parameters(self, marker: int) -> int:
+        return len(self.parameters[marker])
+
+    def shape(self, marker: int) -> tuple[int, int]:
+        return (self.num_states[marker], self._num_points[marker])
+
+    def num_points(self, marker: int) -> int:
+        return self._num_points[marker]
+
+    def step(self, t0: float, dt: float):
+        for ode in self._odes.values():
+            ode.step(t0=t0, dt=dt)

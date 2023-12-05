@@ -2,7 +2,7 @@ import numpy as np
 import dolfin
 
 import beat
-from beat.odesolver import ODESytemSolver, DolfinODESolver
+from beat.odesolver import ODESytemSolver, DolfinODESolver, DolfinMultiODESolver
 
 
 def test_simple_ode_odesystemsolver():
@@ -138,3 +138,77 @@ def test_assignment_ode():
     ode.v.assign(dolfin.Constant(13.0))
     ode.from_dolfin()
     assert np.allclose(ode.values[v_index, :], 13.0)
+
+
+def test_ode_with_markers_3D_to_and_from_dolfin():
+    model = beat.cellmodels.tentusscher_panfilov_2006
+    mesh = dolfin.UnitCubeMesh(3, 3, 3)
+    V = dolfin.FunctionSpace(mesh, "Lagrange", 1)
+
+    markers = dolfin.Function(V)
+    arr = markers.vector().get_local().copy()
+
+    v2d = dolfin.vertex_to_dof_map(V)
+
+    mfun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
+    mfun.set_all(0)
+    dolfin.CompiledSubDomain("near(x[0], 0)").mark(mfun, 1)
+    dolfin.CompiledSubDomain("near(x[0], 1)").mark(mfun, 2)
+
+    for marker in [0, 1, 2]:
+        for facet in mfun.where_equal(marker):
+            f = dolfin.Facet(mesh, facet)
+            arr[v2d[f.entities(0)]] = marker
+    markers.vector().set_local(arr)
+
+    v = dolfin.Function(V)
+    init_states = {
+        0: model.M.init_state_values(),
+        1: model.endo.init_state_values(),
+        2: model.epi.init_state_values(),
+    }
+    parameters = {
+        0: model.M.init_parameter_values(),
+        1: model.endo.init_parameter_values(),
+        2: model.epi.init_parameter_values(),
+    }
+    fun = {
+        0: model.M.forward_generalized_rush_larsen,
+        1: model.endo.forward_generalized_rush_larsen,
+        2: model.epi.forward_generalized_rush_larsen,
+    }
+    v_index = {
+        0: model.M.state_indices("V"),
+        1: model.endo.state_indices("V"),
+        2: model.epi.state_indices("V"),
+    }
+
+    ode = DolfinMultiODESolver(
+        v,
+        markers=markers,
+        num_states={i: len(s) for i, s in init_states.items()},
+        fun=fun,
+        init_states=init_states,
+        parameters=parameters,
+        v_index=v_index,
+    )
+
+    marker_values = {0: 40, 1: 41, 2: 42}
+
+    for m, v in marker_values.items():
+        ode._values[m][ode.v_index[m], :] = v
+    ode.to_dolfin()
+
+    for m, v in marker_values.items():
+        assert (ode.v.vector()[markers.vector().get_local() == m] == v).all()
+
+    # Now go the other way
+    marker_values = {0: 4, 1: 5, 2: 6}
+    arr = ode.v.vector().get_local().copy()
+    for m, v in marker_values.items():
+        arr[markers.vector().get_local() == m] = v
+    ode.v.vector().set_local(arr)
+    ode.from_dolfin()
+
+    for m, v in marker_values.items():
+        assert (ode._values[m][v_index[m], :] == v).all()

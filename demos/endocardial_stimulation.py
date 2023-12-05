@@ -1,6 +1,15 @@
 # # Endocardial stimulation
 # In this demo we stimulate a Bi-ventricular geometry at the endocardium and compute a pseudo-ecg
+#
+# ```{figure} docs/_static/torso_electrodes.png
+# ---
+# name: torso_electrodes
+# ---
 
+# Displacement ($u$), active tension ($T_a$), voltage ($V$) and calcium ($Ca$)
+# visualized for a specific time point in Paraview.
+# ```
+#
 from collections import defaultdict
 from pathlib import Path
 import cardiac_geometries
@@ -17,7 +26,7 @@ except ImportError:
 
 import beat
 
-import beat.cellmodels.tentusscher_panfilov_2006_epi_cell as model
+import beat.cellmodels.tentusscher_panfilov_2006 as model
 
 
 def get_data(datadir="data_epicardial_stimulation"):
