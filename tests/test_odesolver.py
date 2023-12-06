@@ -2,7 +2,7 @@ import numpy as np
 import dolfin
 
 import beat
-from beat.odesolver import ODESytemSolver, DolfinODESolver, DolfinMultiODESolver
+from beat.odesolver import ODESystemSolver, DolfinODESolver, DolfinMultiODESolver
 
 
 def test_simple_ode_odesystemsolver():
@@ -23,7 +23,7 @@ def test_simple_ode_odesystemsolver():
     for dt in [0.1, 0.01, 0.001, 0.0001]:
         states = np.zeros((2, num_points))
         states.T[:] = [1, 0]
-        ode = ODESytemSolver(
+        ode = ODESystemSolver(
             fun=simple_ode_forward_euler,
             states=states,
             parameters=None,
@@ -55,7 +55,7 @@ def test_beeler_reuter_odesystemsolver():
     t0 = 0.0
     old_states = np.copy(states)
 
-    ode = ODESytemSolver(
+    ode = ODESystemSolver(
         fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
         states=states,
         parameters=parameters,
@@ -163,22 +163,22 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
 
     v = dolfin.Function(V)
     init_states = {
-        0: model.M.init_state_values(),
+        0: model.mid.init_state_values(),
         1: model.endo.init_state_values(),
         2: model.epi.init_state_values(),
     }
     parameters = {
-        0: model.M.init_parameter_values(),
+        0: model.mid.init_parameter_values(),
         1: model.endo.init_parameter_values(),
         2: model.epi.init_parameter_values(),
     }
     fun = {
-        0: model.M.forward_generalized_rush_larsen,
+        0: model.mid.forward_generalized_rush_larsen,
         1: model.endo.forward_generalized_rush_larsen,
         2: model.epi.forward_generalized_rush_larsen,
     }
     v_index = {
-        0: model.M.state_indices("V"),
+        0: model.mid.state_indices("V"),
         1: model.endo.state_indices("V"),
         2: model.epi.state_indices("V"),
     }
@@ -196,7 +196,7 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
     marker_values = {0: 40, 1: 41, 2: 42}
 
     for m, v in marker_values.items():
-        ode._values[m][ode.v_index[m], :] = v
+        ode.values(m)[ode.v_index[m], :] = v
     ode.to_dolfin()
 
     for m, v in marker_values.items():
@@ -211,4 +211,4 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
     ode.from_dolfin()
 
     for m, v in marker_values.items():
-        assert (ode._values[m][v_index[m], :] == v).all()
+        assert (ode.values(m)[v_index[m], :] == v).all()

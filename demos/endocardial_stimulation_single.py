@@ -26,8 +26,7 @@ except ImportError:
 
 import beat
 
-# import beat.cellmodels.tentusscher_panfilov_2006 as model
-import beat.cellmodels.torord_dyn_chloride as model
+import beat.cellmodels.tentusscher_panfilov_2006.epi as model
 
 
 def get_data(datadir="data_epicardial_stimulation"):
@@ -146,7 +145,7 @@ def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
 
 def compute_ecg_recovery():
     datadir = Path("data_epicardial_stimulation")
-    xdmffile = datadir / "state.xdmf"
+    xdmffile = datadir / "state_single.xdmf"
     data = get_data(datadir=datadir)
 
     # https://litfl.com/ecg-lead-positioning/
@@ -165,7 +164,7 @@ def compute_ecg_recovery():
         V6=(10.0, -6.0, 2.0),
     )
 
-    fname = datadir / "extracellular_potential.npy"
+    fname = datadir / "extracellular_potential_single.npy"
     if not fname.is_file():
         phie = defaultdict(list)
         time = []
@@ -181,12 +180,12 @@ def compute_ecg_recovery():
     phie = phie_time["phie"]
     time = phie_time["time"]
 
-    fig, ax = plt.subplots(2, 5, sharex=True, figsize=(12, 8))
+    fig, ax = plt.subplots(2, 5, sharex=True, figsize=(6, 8))
     for i, (name, values) in enumerate(phie.items()):
         axi = ax.flatten()[i]
         axi.plot(time, values)
         axi.set_title(name)
-    fig.savefig(datadir / "extracellular_potential.png")
+    fig.savefig(datadir / "extracellular_potential_single.png")
 
     ecg = beat.ecg.Leads12(**{k: np.array(v) for k, v in phie.items()})
     fig, ax = plt.subplots(3, 4, sharex=True, figsize=(12, 8))
@@ -210,7 +209,7 @@ def compute_ecg_recovery():
         axi = ax.flatten()[i]
         axi.plot(time, y)
         axi.set_title(name)
-    fig.savefig(datadir / "ecg_12_leads.png")
+    fig.savefig(datadir / "ecg_12_leads_signle.png")
     # breakpoint()
 
 
@@ -218,46 +217,9 @@ def main():
     datadir = Path("data_epicardial_stimulation")
     data = get_data(datadir=datadir)
 
-    V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
-
-    markers = dolfin.Function(V)
-    arr = markers.vector().get_local().copy()
-    v2d = dolfin.vertex_to_dof_map(V)
-
-    # Mark ENDO with 1 and EPI with 2
-    for key in ["ENDO_LV", "ENDO_RV"]:
-        for facet in data.ffun.where_equal(data.markers[key][0]):
-            f = dolfin.Facet(data.mesh, facet)
-            arr[v2d[f.entities(0)]] = 1
-
-    for facet in data.ffun.where_equal(data.markers["EPI"][0]):
-        f = dolfin.Facet(data.mesh, facet)
-        arr[v2d[f.entities(0)]] = 2
-    markers.vector().set_local(arr)
-
-    with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
-        xdmf.write(markers)
-
-    init_states = {
-        0: model.mid.init_state_values(),
-        1: model.endo.init_state_values(),
-        2: model.epi.init_state_values(),
-    }
-    parameters = {
-        0: model.mid.init_parameter_values(),
-        1: model.endo.init_parameter_values(),
-        2: model.epi.init_parameter_values(),
-    }
-    fun = {
-        0: model.mid.forward_generalized_rush_larsen,
-        1: model.endo.forward_generalized_rush_larsen,
-        2: model.epi.forward_generalized_rush_larsen,
-    }
-    v_index = {
-        0: model.mid.state_indices("V"),
-        1: model.endo.state_indices("V"),
-        2: model.epi.state_indices("V"),
-    }
+    fun = model.forward_generalized_rush_larsen
+    init_states = model.init_state_values()
+    parameters = model.init_parameter_values()
 
     # Surface to volume ratio
     chi = 140.0  # mm^{-1}
@@ -278,15 +240,13 @@ def main():
 
     params = {"preconditioner": "sor", "use_custom_preconditioner": False}
     pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, params=params)
-
-    ode = beat.odesolver.DolfinMultiODESolver(
+    ode = beat.odesolver.DolfinODESolver(
         pde.state,
-        markers=markers,
-        num_states={i: len(s) for i, s in init_states.items()},
         fun=fun,
         init_states=init_states,
         parameters=parameters,
-        v_index=v_index,
+        num_states=len(init_states),
+        v_index=model.state_indices("V"),
     )
 
     T = 500
@@ -294,7 +254,7 @@ def main():
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
-    fname = (datadir / "state.xdmf").as_posix()
+    fname = (datadir / "state_single.xdmf").as_posix()
     i = 0
     while t < T + 1e-12:
         if i % 20 == 0:
@@ -314,5 +274,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
+    main()
     compute_ecg_recovery()

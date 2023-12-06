@@ -1,17 +1,28 @@
 import logging
 import numpy as np
+from typing import Protocol
 from dataclasses import dataclass
 from .monodomain_model import MonodomainModel
-from .odesolver import DolfinODESolver
 
 logger = logging.getLogger(__name__)
 EPS = 1e-12
 
 
+class ODESolver(Protocol):
+    def to_dolfin(self) -> None:
+        ...
+
+    def from_dolfin(self) -> None:
+        ...
+
+    def step(self, t0: float, t1: float) -> None:
+        ...
+
+
 @dataclass
 class MonodomainSplittingSolver:
     pde: MonodomainModel
-    ode: DolfinODESolver
+    ode: ODESolver
     theta: float = 0.5
 
     def __post_init__(self) -> None:

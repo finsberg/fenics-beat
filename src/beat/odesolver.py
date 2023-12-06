@@ -38,7 +38,7 @@ def solve(
 
 
 @dataclass
-class ODESytemSolver:
+class ODESystemSolver:
     fun: Callable
     states: npt.NDArray
     parameters: npt.NDArray
@@ -71,7 +71,7 @@ class DolfinODESolver:
             self._values = np.zeros(self.shape)
             self._values.T[:] = self.init_states
 
-        self._ode = ODESytemSolver(
+        self._ode = ODESystemSolver(
             fun=self.fun,
             states=self._values,
             parameters=self.parameters,
@@ -136,7 +136,7 @@ class DolfinMultiODESolver:
                 self._values[marker] = np.zeros(self.shape(marker))
                 self._values[marker].T[:] = self.init_states[marker]
 
-            self._odes[marker] = ODESytemSolver(
+            self._odes[marker] = ODESystemSolver(
                 fun=self.fun[marker],
                 states=self._values[marker],
                 parameters=self.parameters[marker],
