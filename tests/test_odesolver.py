@@ -43,7 +43,7 @@ def test_simple_ode_odesystemsolver():
 
 
 def test_beeler_reuter_odesystemsolver():
-    model = beat.cellmodels.beeler_reuter
+    model = beat.cellmodels.beeler_reuter_1977
     num_points = 10
     init_states = model.init_state_values()
     parameters = model.init_parameter_values()
@@ -56,7 +56,7 @@ def test_beeler_reuter_odesystemsolver():
     old_states = np.copy(states)
 
     ode = ODESystemSolver(
-        fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
+        fun=beat.cellmodels.beeler_reuter_1977.forward_generalized_rush_larsen,
         states=states,
         parameters=parameters,
     )
@@ -68,7 +68,7 @@ def test_beeler_reuter_odesystemsolver():
 
 
 def test_beeler_reuter_unit_square():
-    model = beat.cellmodels.beeler_reuter
+    model = beat.cellmodels.beeler_reuter_1977
     init_states = model.init_state_values()
     parameters = model.init_parameter_values()
     parameters[model.parameter_indices("IstimAmplitude")] = 1.0
@@ -82,7 +82,7 @@ def test_beeler_reuter_unit_square():
     dolfin_ode = DolfinODESolver(
         s,
         num_states=len(init_states),
-        fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
+        fun=beat.cellmodels.beeler_reuter_1977.forward_generalized_rush_larsen,
         init_states=init_states,
         parameters=parameters,
     )
@@ -105,7 +105,7 @@ def test_beeler_reuter_unit_square():
 
 
 def test_assignment_ode():
-    model = beat.cellmodels.beeler_reuter
+    model = beat.cellmodels.beeler_reuter_1977
     init_states = model.init_state_values()
     parameters = model.init_parameter_values()
     parameters[model.parameter_indices("IstimAmplitude")] = 1.0
@@ -117,7 +117,7 @@ def test_assignment_ode():
     ode = DolfinODESolver(
         v,
         num_states=len(init_states),
-        fun=beat.cellmodels.beeler_reuter.forward_generalized_rush_larsen,
+        fun=beat.cellmodels.beeler_reuter_1977.forward_generalized_rush_larsen,
         init_states=init_states,
         parameters=parameters,
         v_index=v_index,

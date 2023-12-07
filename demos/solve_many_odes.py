@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from time import perf_counter
 
 
-model = beat.cellmodels.beeler_reuter
+model = beat.cellmodels.beeler_reuter_1977
 # model = beat.cellmodels.tentusscher_panfilov_2006.epi
 
 init_states = model.init_state_values()
