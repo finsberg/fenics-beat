@@ -144,10 +144,8 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
     model = beat.cellmodels.tentusscher_panfilov_2006
     mesh = dolfin.UnitCubeMesh(3, 3, 3)
     V = dolfin.FunctionSpace(mesh, "Lagrange", 1)
-
     markers = dolfin.Function(V)
     arr = markers.vector().get_local().copy()
-
     v2d = dolfin.vertex_to_dof_map(V)
 
     mfun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)

@@ -29,7 +29,7 @@ import beat
 import beat.cellmodels.tentusscher_panfilov_2006.epi as model
 
 
-def get_data(datadir="data_epicardial_stimulation"):
+def get_data(datadir="data_endocardial_stimulation"):
     datadir = Path(datadir)
     msh_file = datadir / "biv_ellipsoid.msh"
     if not msh_file.is_file():
@@ -144,7 +144,7 @@ def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
 
 
 def compute_ecg_recovery():
-    datadir = Path("data_epicardial_stimulation")
+    datadir = Path("data_endocardial_stimulation")
     xdmffile = datadir / "state_single.xdmf"
     data = get_data(datadir=datadir)
 
@@ -209,12 +209,12 @@ def compute_ecg_recovery():
         axi = ax.flatten()[i]
         axi.plot(time, y)
         axi.set_title(name)
-    fig.savefig(datadir / "ecg_12_leads_signle.png")
+    fig.savefig(datadir / "ecg_12_leads_single.png")
     # breakpoint()
 
 
 def main():
-    datadir = Path("data_epicardial_stimulation")
+    datadir = Path("data_endocardial_stimulation")
     data = get_data(datadir=datadir)
 
     fun = model.forward_generalized_rush_larsen

@@ -156,8 +156,8 @@ class DolfinMultiODESolver:
         for marker in self._marker_values:
             self._values[marker][self.v_index[marker], :] = arr[self._inds[marker]]
 
-    def values(self, marker: int):
-        return self._values
+    def values(self, marker: int) -> npt.NDArray:
+        return self._values[marker]
 
     def num_parameters(self, marker: int) -> int:
         return len(self.parameters[marker])
