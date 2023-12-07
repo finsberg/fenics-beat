@@ -30,11 +30,11 @@ def init_parameter_values(**values):
     Initialize parameter values
     """
     # Param values
-    # a=0.13, b=0.013, c_1=0.26, c_2=0.1, c_3=1.0, stim_amplitude=0,
+    # a=0.13, b=0.013, c_1=0.26, c_2=0.1, c_3=1.0, stim_amplitude=50,
     # stim_duration=1, stim_period=1000, stim_start=1, v_peak=40.0,
     # v_rest=-85.0
     init_values = np.array(
-        [0.13, 0.013, 0.26, 0.1, 1.0, 0, 1, 1000, 1, 40.0, -85.0], dtype=np.float_
+        [0.13, 0.013, 0.26, 0.1, 1.0, 50, 1, 1000, 1, 40.0, -85.0], dtype=np.float_
     )
 
     # Parameter indices and limit checker

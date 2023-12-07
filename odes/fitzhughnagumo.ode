@@ -14,7 +14,7 @@ parameters(a=0.13,
            v_peak=40.,
            stim_start = 1,
            stim_duration = 1,
-           stim_amplitude = 0, # 50
+           stim_amplitude = 50,
            stim_period = 1000)
 
 # Intermediates
