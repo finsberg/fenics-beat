@@ -248,8 +248,9 @@ def main():
         num_states=len(init_states),
         v_index=model.state_indices("V"),
     )
-
-    T = 500
+    T = 1
+    # Change to 500 to simulate the full cardiac cycle
+    # T = 500
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)

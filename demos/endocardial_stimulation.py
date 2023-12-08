@@ -1,7 +1,7 @@
-# # Endocardial stimulation
+# # Endocardial stimulation (multiple cell models)
 # In this demo we stimulate a Bi-ventricular geometry at the endocardium and compute a pseudo-ecg
 #
-# ```{figure} docs/_static/torso_electrodes.png
+# ```{figure} ../docs/_static/torso_electrodes.png
 # ---
 # name: torso_electrodes
 # ---
@@ -297,7 +297,9 @@ def main():
         v_index=v_index,
     )
 
-    T = 500
+    T = 1
+    # Change to 500 to simulate the full cardiac cycle
+    # T = 500
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)

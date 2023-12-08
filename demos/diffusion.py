@@ -1,3 +1,10 @@
+# # Diffusion in a square domain with a stimulus in the lower left corner
+#
+# This demo solves the monodomain equation on a square domain with a
+# stimulus in the lower left corner. The stimulus is defined as a
+# constant value in a subdomain.
+#
+
 import beat
 import dolfin
 import matplotlib.pyplot as plt
@@ -6,7 +13,6 @@ import matplotlib.pyplot as plt
 def main():
     mesh = dolfin.UnitSquareMesh(20, 20)
 
-    # S = Constant(0.0)  # source term
     S = dolfin.Constant(1.0)
     S1_subdomain = dolfin.CompiledSubDomain(
         "x[0] <= L + DOLFIN_EPS && x[1] <= L + DOLFIN_EPS",

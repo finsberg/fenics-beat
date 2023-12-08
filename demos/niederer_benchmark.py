@@ -16,7 +16,7 @@ import numpy.typing as npt
 
 import beat
 
-import beat.cellmodels.tentusscher_panfilov_2006_epi_cell as model
+import beat.cellmodels.tentusscher_panfilov_2006.epi as model
 
 
 def setup_initial_conditions() -> npt.NDArray:
@@ -145,7 +145,8 @@ def main():
         v_index=model.state_indices("V"),
     )
 
-    T = 100
+    T = 1
+    # T = 100  # Change to 100 to reproduce Niederer benchmark
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
