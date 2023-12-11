@@ -40,7 +40,7 @@ t0 = 0.0
 
 V_index = model.state_indices("V")
 
-nT = int((t_bound - t0) / dt)
+nT = int((t_bound - t0) / dt) - 1
 V = np.zeros((nT, num_points))
 t0 = perf_counter()
 # values = np.zeros_like(ic)
