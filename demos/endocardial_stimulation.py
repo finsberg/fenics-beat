@@ -26,8 +26,9 @@ except ImportError:
 
 import beat
 
-# import beat.cellmodels.tentusscher_panfilov_2006 as model
-import beat.cellmodels.torord_dyn_chloride as model
+import beat.cellmodels.tentusscher_panfilov_2006 as model
+
+# import beat.cellmodels.torord_dyn_chloride as model
 
 model_name = model.__name__.split(".")[-1]
 
@@ -223,18 +224,17 @@ def main():
     V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 
     markers = dolfin.Function(V)
-    arr = markers.vector().get_local().copy()
-    v2d = dolfin.vertex_to_dof_map(V)
+    arr = beat.utils.expand_layer(
+        markers=markers,
+        mfun=data.ffun,
+        endo_markers=[data.markers["ENDO_LV"][0], data.markers["ENDO_RV"][0]],
+        epi_markers=[data.markers["EPI"][0]],
+        endo_marker=1,
+        epi_marker=2,
+        endo_size=0.3,
+        epi_size=0.3,
+    )
 
-    # Mark ENDO with 1 and EPI with 2
-    for key in ["ENDO_LV", "ENDO_RV"]:
-        for facet in data.ffun.where_equal(data.markers[key][0]):
-            f = dolfin.Facet(data.mesh, facet)
-            arr[v2d[f.entities(0)]] = 1
-
-    for facet in data.ffun.where_equal(data.markers["EPI"][0]):
-        f = dolfin.Facet(data.mesh, facet)
-        arr[v2d[f.entities(0)]] = 2
     markers.vector().set_local(arr)
 
     with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:

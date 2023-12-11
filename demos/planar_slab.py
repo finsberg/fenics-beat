@@ -218,13 +218,17 @@ def main(datadir=Path("planar_slab")):
 
     V = dolfin.FunctionSpace(mesh, "Lagrange", 1)
     markers = dolfin.Function(V)
-    arr = markers.vector().get_local().copy()
-    v2d = dolfin.vertex_to_dof_map(V)
+    arr = beat.utils.expand_layer(
+        markers=markers,
+        mfun=mfun,
+        endo_markers=[1],
+        epi_markers=[2],
+        endo_marker=1,
+        epi_marker=2,
+        endo_size=0.3,
+        epi_size=0.3,
+    )
 
-    for marker in [0, 1, 2]:
-        for facet in mfun.where_equal(marker):
-            f = dolfin.Facet(mesh, facet)
-            arr[v2d[f.entities(0)]] = marker
     markers.vector().set_local(arr)
 
     with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
@@ -299,9 +303,9 @@ def main(datadir=Path("planar_slab")):
         v_index=v_index,
     )
 
-    T = 1
+    # T = 1
     # Change to 500 to simulate the full cardiac cycle
-    # T = 500
+    T = 500
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
@@ -326,5 +330,5 @@ def main(datadir=Path("planar_slab")):
 
 
 if __name__ == "__main__":
-    # main()
-    compute_ecg_recovery()
+    main()
+    # compute_ecg_recovery()

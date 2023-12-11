@@ -1,7 +1,7 @@
 # # Endocardial stimulation
 # In this demo we stimulate a Bi-ventricular geometry at the endocardium and compute a pseudo-ecg
 #
-# ```{figure} docs/_static/torso_electrodes.png
+# ```{figure} ../docs/_static/torso_electrodes.png
 # ---
 # name: torso_electrodes
 # ---

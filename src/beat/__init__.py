@@ -6,6 +6,7 @@ from . import (
     cellmodels,
     odesolver,
     ecg,
+    utils,
 )
 
 from .monodomain_model import MonodomainModel
@@ -24,4 +25,5 @@ __all__ = [
     "monodomain_solver",
     "MonodomainSplittingSolver",
     "ecg",
+    "utils",
 ]
