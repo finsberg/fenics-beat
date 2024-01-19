@@ -8,8 +8,10 @@ from beat.odesolver import ODESystemSolver, DolfinODESolver, DolfinMultiODESolve
 def test_simple_ode_odesystemsolver():
     def simple_ode_forward_euler(states, t, dt, parameters):
         v, s = states
-        states[0] = v - s * dt
-        states[1] = s + v * dt
+        values = np.zeros_like(states)
+        values[0] = v - s * dt
+        values[1] = s + v * dt
+        return values
 
     num_points = 1
 

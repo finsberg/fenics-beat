@@ -7,8 +7,10 @@ import beat
 
 def simple_ode_forward_euler(states, t, dt, parameters):
     v, s = states
-    states[0] = v - s * dt
-    states[1] = s + v * dt
+    values = np.zeros_like(states)
+    values[0] = v - s * dt
+    values[1] = s + v * dt
+    return values
 
 
 def test_monodomain_splitting_analytic():

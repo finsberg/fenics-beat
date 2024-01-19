@@ -52,7 +52,9 @@ class ODESystemSolver:
         return self.states.shape[0]
 
     def step(self, t0: float, dt: float) -> None:
-        self.fun(states=self.states, t=t0, parameters=self.parameters, dt=dt)
+        self.states[:] = self.fun(
+            states=self.states, t=t0, parameters=self.parameters, dt=dt
+        )
 
 
 @dataclass

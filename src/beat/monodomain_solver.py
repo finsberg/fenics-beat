@@ -49,13 +49,14 @@ class MonodomainSplittingSolver:
 
         # Extract time domain
         (t0, t1) = interval
+        logger.info(f"Stepping from {t0} to {t1} using theta = {theta}")
         dt = t1 - t0
         t = t0 + theta * dt
 
-        logger.info("Tentative ODE step")
+        logger.info(f"Tentative ODE step with t0={t0:.5f} dt={theta * dt:.5f}")
 
         # Solve ODE
-        self.ode.step(t0, theta * dt)
+        self.ode.step(t0=t0, dt=theta * dt)
         # Move voltage to FEniCS
         self.ode.to_dolfin()
 
@@ -73,7 +74,9 @@ class MonodomainSplittingSolver:
             return
 
         # Otherwise, we do another ode_step:
-        logger.info("Corrective ODE step")
+        logger.info(
+            f"Corrective ODE step with t0={t:5f} and dt={(1.0 - theta) * dt:.5f}"
+        )
 
         # To the correction step
         self.ode.step(t, (1.0 - theta) * dt)
