@@ -146,7 +146,7 @@ def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
 
 def compute_ecg_recovery():
     datadir = Path("data_endocardial_stimulation2")
-    xdmffile = datadir / f"state.xdmf"
+    xdmffile = datadir / "state.xdmf"
     data = get_data(datadir=datadir)
 
     # https://litfl.com/ecg-lead-positioning/
@@ -165,7 +165,7 @@ def compute_ecg_recovery():
         V6=(10.0, -6.0, 2.0),
     )
 
-    fname = datadir / f"extracellular_potential.npy"
+    fname = datadir / "extracellular_potential.npy"
     if not fname.is_file():
         phie = defaultdict(list)
         time = []
@@ -186,7 +186,7 @@ def compute_ecg_recovery():
         axi = ax.flatten()[i]
         axi.plot(time, values)
         axi.set_title(name)
-    fig.savefig(datadir / f"extracellular_potential.png")
+    fig.savefig(datadir / "extracellular_potential.png")
 
     ecg = beat.ecg.Leads12(**{k: np.array(v) for k, v in phie.items()})
     fig, ax = plt.subplots(3, 4, sharex=True, figsize=(12, 8))
@@ -210,7 +210,7 @@ def compute_ecg_recovery():
         axi = ax.flatten()[i]
         axi.plot(time, y)
         axi.set_title(name)
-    fig.savefig(datadir / f"ecg_12_leads.png")
+    fig.savefig(datadir / "ecg_12_leads.png")
     # breakpoint()
 
 
@@ -302,7 +302,7 @@ def main():
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
-    fname = (datadir / f"state.xdmf").as_posix()
+    fname = (datadir / "state.xdmf").as_posix()
     i = 0
     while t < T + 1e-12:
         if i % 20 == 0:
