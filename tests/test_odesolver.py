@@ -140,6 +140,7 @@ def test_assignment_ode():
     ode.v.assign(dolfin.Constant(13.0))
     ode.from_dolfin()
     assert np.allclose(ode.values[v_index, :], 13.0)
+    assert np.allclose(ode.full_values[v_index, :], 13.0)
 
 
 def test_ode_with_markers_3D_to_and_from_dolfin():
@@ -210,5 +211,10 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
     ode.v.vector().set_local(arr)
     ode.from_dolfin()
 
+    v_arr = np.zeros_like(arr)
     for m, v in marker_values.items():
         assert (ode.values(m)[v_index[m], :] == v).all()
+        v_arr[markers.vector().get_local() == m] = v
+
+    assert ode.full_values.shape == (len(init_states[0]), len(arr))
+    assert np.allclose(ode.full_values[v_index[0], :], v_arr)
