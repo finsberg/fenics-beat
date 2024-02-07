@@ -1,4 +1,4 @@
-# # Endocardial stimulation
+# # Endocardial stimulation (multiple cell models)
 # In this demo we stimulate a Bi-ventricular geometry at the endocardium and compute a pseudo-ecg
 #
 # ```{figure} ../docs/_static/torso_electrodes.png
@@ -25,11 +25,12 @@ except ImportError:
     tqdm = lambda x: x
 
 import beat
+import gotranx
 
-import beat.cellmodels.tentusscher_panfilov_2006.epi as model
+# import beat.cellmodels.torord_dyn_chloride as model
 
 
-def get_data(datadir="data_endocardial_stimulation"):
+def get_data(datadir="data_endocardial_stimulation2"):
     datadir = Path(datadir)
     msh_file = datadir / "biv_ellipsoid.msh"
     if not msh_file.is_file():
@@ -144,8 +145,8 @@ def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
 
 
 def compute_ecg_recovery():
-    datadir = Path("data_endocardial_stimulation")
-    xdmffile = datadir / "state_single.xdmf"
+    datadir = Path("data_endocardial_stimulation2")
+    xdmffile = datadir / "state.xdmf"
     data = get_data(datadir=datadir)
 
     # https://litfl.com/ecg-lead-positioning/
@@ -164,7 +165,7 @@ def compute_ecg_recovery():
         V6=(10.0, -6.0, 2.0),
     )
 
-    fname = datadir / "extracellular_potential_single.npy"
+    fname = datadir / "extracellular_potential.npy"
     if not fname.is_file():
         phie = defaultdict(list)
         time = []
@@ -180,12 +181,12 @@ def compute_ecg_recovery():
     phie = phie_time["phie"]
     time = phie_time["time"]
 
-    fig, ax = plt.subplots(2, 5, sharex=True, figsize=(6, 8))
+    fig, ax = plt.subplots(2, 5, sharex=True, figsize=(12, 8))
     for i, (name, values) in enumerate(phie.items()):
         axi = ax.flatten()[i]
         axi.plot(time, values)
         axi.set_title(name)
-    fig.savefig(datadir / "extracellular_potential_single.png")
+    fig.savefig(datadir / "extracellular_potential.png")
 
     ecg = beat.ecg.Leads12(**{k: np.array(v) for k, v in phie.items()})
     fig, ax = plt.subplots(3, 4, sharex=True, figsize=(12, 8))
@@ -209,17 +210,60 @@ def compute_ecg_recovery():
         axi = ax.flatten()[i]
         axi.plot(time, y)
         axi.set_title(name)
-    fig.savefig(datadir / "ecg_12_leads_single.png")
+    fig.savefig(datadir / "ecg_12_leads.png")
     # breakpoint()
 
 
 def main():
-    datadir = Path("data_endocardial_stimulation")
+    datadir = Path("data_endocardial_stimulation2")
+    ode = gotranx.load_ode("ORdmm_Land.ode")
+    code = gotranx.cli.gotran2py.get_code(
+        ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
+    )
+    model = {}
+    exec(code, model)
     data = get_data(datadir=datadir)
 
-    fun = model.forward_generalized_rush_larsen
-    init_states = model.init_state_values()
-    parameters = model.init_parameter_values()
+    V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
+
+    markers = dolfin.Function(V)
+    arr = beat.utils.expand_layer(
+        markers=markers,
+        mfun=data.ffun,
+        endo_markers=[data.markers["ENDO_LV"][0], data.markers["ENDO_RV"][0]],
+        epi_markers=[data.markers["EPI"][0]],
+        endo_marker=1,
+        epi_marker=2,
+        endo_size=0.3,
+        epi_size=0.3,
+    )
+
+    markers.vector().set_local(arr)
+
+    with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
+        xdmf.write(markers)
+
+    init_states = {
+        0: model["init_state_values"](),
+        1: model["init_state_values"](),
+        2: model["init_state_values"](),
+    }
+    # endo = 0, epi = 1, M = 2
+    parameters = {
+        0: model["init_parameter_values"](amp=0.0, celltype=2),
+        1: model["init_parameter_values"](amp=0.0, celltype=0),
+        2: model["init_parameter_values"](amp=0.0, celltype=1),
+    }
+    fun = {
+        0: model["forward_generalized_rush_larsen"],
+        1: model["forward_generalized_rush_larsen"],
+        2: model["forward_generalized_rush_larsen"],
+    }
+    v_index = {
+        0: model["state_index"]("v"),
+        1: model["state_index"]("v"),
+        2: model["state_index"]("v"),
+    }
 
     # Surface to volume ratio
     chi = 140.0  # mm^{-1}
@@ -240,22 +284,25 @@ def main():
 
     params = {"preconditioner": "sor", "use_custom_preconditioner": False}
     pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, params=params)
-    ode = beat.odesolver.DolfinODESolver(
+
+    ode = beat.odesolver.DolfinMultiODESolver(
         pde.state,
+        markers=markers,
+        num_states={i: len(s) for i, s in init_states.items()},
         fun=fun,
         init_states=init_states,
         parameters=parameters,
-        num_states=len(init_states),
-        v_index=model.state_indices("V"),
+        v_index=v_index,
     )
-    T = 1
+
+    # T = 1
     # Change to 500 to simulate the full cardiac cycle
-    # T = 500
+    T = 500
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
-    fname = (datadir / "state_single.xdmf").as_posix()
+    fname = (datadir / "state.xdmf").as_posix()
     i = 0
     while t < T + 1e-12:
         if i % 20 == 0:

@@ -52,7 +52,9 @@ class ODESystemSolver:
         return self.states.shape[0]
 
     def step(self, t0: float, dt: float) -> None:
-        self.fun(states=self.states, t=t0, parameters=self.parameters, dt=dt)
+        self.states[:] = self.fun(
+            states=self.states, t=t0, parameters=self.parameters, dt=dt
+        )
 
 
 @dataclass
@@ -103,6 +105,10 @@ class DolfinODESolver:
     def step(self, t0: float, dt: float):
         self._ode.step(t0=t0, dt=dt)
 
+    @property
+    def full_values(self):
+        return self._values
+
 
 @dataclass
 class DolfinMultiODESolver:
@@ -125,6 +131,9 @@ class DolfinMultiODESolver:
         self._odes = {}
         self._values = {}
         self._inds = {}
+
+        self._initialize_full_values()
+
         for marker in self._marker_values:
             where = self.markers.vector().get_local() == marker
             self._num_points[marker] = where.sum()
@@ -142,13 +151,22 @@ class DolfinMultiODESolver:
                 parameters=self.parameters[marker],
             )
 
+    def _initialize_full_values(self):
+        self._all_states_equal_size = (
+            np.array(tuple(self.num_states.values()))
+            == tuple(self.num_states.values())[0]
+        ).all()
+        if self._all_states_equal_size:
+            self._full_values = np.zeros(
+                (next(iter(self.num_states.values())), self.markers.vector().size())
+            )
+
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
 
         arr = self.v.vector().get_local().copy()
         for marker in self._marker_values:
             arr[self._inds[marker]] = self._values[marker][self.v_index[marker], :]
-
         self.v.vector().set_local(arr)
 
     def from_dolfin(self) -> None:
@@ -171,3 +189,18 @@ class DolfinMultiODESolver:
     def step(self, t0: float, dt: float):
         for ode in self._odes.values():
             ode.step(t0=t0, dt=dt)
+
+    @property
+    def full_values(self):
+        if not self._all_states_equal_size:
+            msg = (
+                "Cannot get full values size states are not of equal size. "
+                f"Have {self.num_states=}, use .values(marker) instead"
+            )
+            raise RuntimeError(msg)
+
+        for marker in self._marker_values:
+            where = self.markers.vector().get_local() == marker
+            self._full_values[:, where] = self._values[marker]
+
+        return self._full_values
