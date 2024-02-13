@@ -59,7 +59,8 @@ class ODESystemSolver:
 
 @dataclass
 class DolfinODESolver:
-    v: dolfin.Function
+    v_ode: dolfin.Function
+    v_pde: dolfin.Function
     init_states: npt.NDArray
     parameters: npt.NDArray
     fun: Callable
@@ -81,10 +82,16 @@ class DolfinODESolver:
 
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
-        self.v.vector().set_local(self._values[self.v_index, :])
+        self.v_ode.vector().set_local(self._values[self.v_index, :])
 
     def from_dolfin(self) -> None:
-        self._values[self.v_index, :] = self.v.vector().get_local()
+        """Assign values from dolfin function to numpy array"""
+        self._values[self.v_index, :] = self.v_ode.vector().get_local()
+
+    # ode_to_pde projects v_ode (belonging to quadrature space or any other type of not CG1 space) into v_pde (CG1)
+    # TODO : For now this assumes v_ode and v_pde to be both CG1. Needs to implement projection
+    def ode_to_pde(self) -> None:
+        self.v_pde.vector().set_local(self.v_ode.vector().get_local())
 
     @property
     def values(self):
@@ -100,7 +107,7 @@ class DolfinODESolver:
 
     @property
     def num_points(self) -> int:
-        return self.v.vector().size()
+        return self.v_ode.vector().size()
 
     def step(self, t0: float, dt: float):
         self._ode.step(t0=t0, dt=dt)
@@ -112,7 +119,8 @@ class DolfinODESolver:
 
 @dataclass
 class DolfinMultiODESolver:
-    v: dolfin.Function
+    v_ode: dolfin.Function
+    v_pde: dolfin.Function
     markers: dolfin.Function
     init_states: dict[int, npt.NDArray]
     parameters: dict[int, npt.NDArray]
@@ -121,7 +129,7 @@ class DolfinMultiODESolver:
     v_index: dict[int, int]
 
     def __post_init__(self):
-        if self.v.vector().size() != self.markers.vector().size():
+        if self.v_ode.vector().size() != self.markers.vector().size():
             raise RuntimeError(
                 "Marker and voltage need to be in the same function space"
             )
@@ -163,16 +171,21 @@ class DolfinMultiODESolver:
 
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
-
-        arr = self.v.vector().get_local().copy()
+        arr = self.v_ode.vector().get_local().copy()
         for marker in self._marker_values:
             arr[self._inds[marker]] = self._values[marker][self.v_index[marker], :]
-        self.v.vector().set_local(arr)
+        self.v_ode.vector().set_local(arr)
 
     def from_dolfin(self) -> None:
-        arr = self.v.vector().get_local()
+        """Assign values from dolifn function to numpy array"""
+        arr = self.v_ode.vector().get_local()
         for marker in self._marker_values:
             self._values[marker][self.v_index[marker], :] = arr[self._inds[marker]]
+
+    # ode_to_pde projects v_ode (belonging to quadrature space or any other type of not CG1 space) into v_pde (CG1)
+    # TODO : For now this assumes v_ode and v_pde to be both CG1. Needs to implement projection
+    def ode_to_pde(self) -> None:
+        self.v_pde.vector().set_local(self.v_ode.vector().get_local())
 
     def values(self, marker: int) -> npt.NDArray:
         return self._values[marker]
