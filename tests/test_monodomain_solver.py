@@ -48,7 +48,8 @@ def test_monodomain_splitting_analytic():
     init_states[1, :] = s_arr
 
     ode = beat.odesolver.DolfinODESolver(
-        pde.state,
+        v_ode=dolfin.Function(pde.V),
+        v_pde=pde.state,
         fun=simple_ode_forward_euler,
         init_states=init_states,
         parameters=None,
@@ -104,7 +105,8 @@ def test_monodomain_splitting_spatial_convergence():
         init_states[1, :] = s_arr
 
         ode = beat.odesolver.DolfinODESolver(
-            pde.state,
+            v_ode=dolfin.Function(pde.V),
+            v_pde=pde.state,
             fun=simple_ode_forward_euler,
             init_states=init_states,
             num_states=2,
@@ -163,7 +165,8 @@ def test_monodomain_splitting_temporal_convergence():
         init_states[1, :] = s_arr
 
         ode = beat.odesolver.DolfinODESolver(
-            pde.state,
+            v_ode=dolfin.Function(pde.V),
+            v_pde=pde.state,
             fun=simple_ode_forward_euler,
             init_states=init_states,
             num_states=2,
@@ -217,7 +220,8 @@ def test_monodomain_splitting_analytic_multiODE():
     init_states[1, :] = s_arr
 
     ode = beat.odesolver.DolfinODESolver(
-        pde.state,
+        v_ode=dolfin.Function(pde.V),
+        v_pde=pde.state,
         fun=simple_ode_forward_euler,
         init_states=init_states,
         parameters=None,

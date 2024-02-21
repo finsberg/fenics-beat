@@ -18,6 +18,9 @@ class ODESolver(Protocol):
     def ode_to_pde(self) -> None:
         ...
 
+    def pde_to_ode(self) -> None:
+        ...
+
     def step(self, t0: float, t1: float) -> None:
         ...
 
