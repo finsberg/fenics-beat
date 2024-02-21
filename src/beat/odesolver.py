@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import dolfin
 
+from .utils import local_project
 
 EPS = 1e-12
 
@@ -88,15 +89,13 @@ class DolfinODESolver:
         """Assign values from dolfin function to numpy array"""
         self._values[self.v_index, :] = self.v_ode.vector().get_local()
 
-    # ode_to_pde projects v_ode (belonging to quadrature space or any other type of not CG1 space) into v_pde (CG1)
-    # TODO : For now this assumes v_ode and v_pde to be both CG1. Needs to implement projection
+    # ode_to_pde projects v_ode (DG0, quadrature space, ...) into v_pde (CG1)
     def ode_to_pde(self) -> None:
-        self.v_pde.vector().set_local(self.v_ode.vector().get_local())
+        local_project(self.v_ode, self.v_pde.function_space(), self.v_pde)
 
-    # pde_to_ode projects v_pde (CG1) into v_ode (belonging to quadrature space or any other type of not CG1 space)
-    # TODO : For now this assumes v_ode and v_pde to be both CG1. Needs to implement projection
+    # pde_to_ode projects v_pde (CG1) into v_ode (DG0, quadrature space, ...)
     def pde_to_ode(self) -> None:
-        self.v_ode.vector().set_local(self.v_pde.vector().get_local())
+        local_project(self.v_pde, self.v_ode.function_space(), self.v_ode)
 
     @property
     def values(self):
@@ -187,15 +186,13 @@ class DolfinMultiODESolver:
         for marker in self._marker_values:
             self._values[marker][self.v_index[marker], :] = arr[self._inds[marker]]
 
-    # ode_to_pde projects v_ode (quadrature space or another appropriate space) into v_pde (CG1) to be given to PDE solver
-    # TODO : For now this assumes v_ode and v_pde to be both CG1. Needs projector implementation
+    # ode_to_pde projects v_ode (DG0, quadrature space, ...) into v_pde (CG1)
     def ode_to_pde(self) -> None:
-        self.v_pde.vector().set_local(self.v_ode.vector().get_local())
+        local_project(self.v_ode, self.v_pde.function_space(), self.v_pde)
 
-    # pde_to_ode projects v_pde (CG1) into v_ode (belonging to quadrature space or any other type of not CG1 space)
-    # TODO : For now this assumes v_ode and v_pde to be both CG1. Needs to implement projection
+    # pde_to_ode projects v_pde (CG1) into v_ode (DG0, quadrature space, ...)
     def pde_to_ode(self) -> None:
-        self.v_ode.vector().set_local(self.v_pde.vector().get_local())
+        local_project(self.v_pde, self.v_ode.function_space(), self.v_ode)
 
     def values(self, marker: int) -> npt.NDArray:
         return self._values[marker]

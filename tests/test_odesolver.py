@@ -209,7 +209,7 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
     ode.ode_to_pde()
 
     for m, v in marker_values.items():
-        assert (ode.v_pde.vector()[markers.vector().get_local() == m] == v).all()
+        assert np.allclose(ode.v_pde.vector()[markers.vector().get_local() == m], v)
 
     # Now go the other way
     marker_values = {0: 4, 1: 5, 2: 6}
@@ -222,7 +222,7 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
 
     v_arr = np.zeros_like(arr)
     for m, v in marker_values.items():
-        assert (ode.values(m)[v_index[m], :] == v).all()
+        assert np.allclose(ode.values(m)[v_index[m], :], v)
         v_arr[markers.vector().get_local() == m] = v
 
     assert ode.full_values.shape == (len(init_states[0]), len(arr))

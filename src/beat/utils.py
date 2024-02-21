@@ -100,3 +100,20 @@ def expand_layer(
     arr[sol_arr < endo_size] = endo_marker
     arr[sol_arr > 1 - epi_size] = epi_marker
     return arr
+
+
+def local_project(v, V, u=None):
+    """Element-wise projection using LocalSolver"""
+    dv = dolfin.TrialFunction(V)
+    v_ = dolfin.TestFunction(V)
+    a_proj = ufl.inner(dv, v_)*ufl.dx
+    b_proj = ufl.inner(v, v_)*ufl.dx
+    solver = dolfin.LocalSolver(a_proj, b_proj)
+    solver.factorize()
+    if u is None:
+        u = dolfin.Function(V)
+        solver.solve_local_rhs(u)
+        return u
+    else:
+        solver.solve_local_rhs(u)
+        return
