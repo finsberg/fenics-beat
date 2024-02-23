@@ -106,8 +106,8 @@ def local_project(v, V, u=None):
     """Element-wise projection using LocalSolver"""
     dv = dolfin.TrialFunction(V)
     v_ = dolfin.TestFunction(V)
-    a_proj = ufl.inner(dv, v_)*ufl.dx
-    b_proj = ufl.inner(v, v_)*ufl.dx
+    a_proj = ufl.inner(dv, v_) * ufl.dx
+    b_proj = ufl.inner(v, v_) * ufl.dx
     solver = dolfin.LocalSolver(a_proj, b_proj)
     solver.factorize()
     if u is None:
