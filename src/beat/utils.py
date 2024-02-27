@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Any
 import logging
 import dolfin
 import numpy.typing as npt
@@ -102,18 +104,36 @@ def expand_layer(
     return arr
 
 
-def local_project(v, V, u=None):
-    """Element-wise projection using LocalSolver"""
+def local_project(
+    v: dolfin.Function,
+    V: dolfin.FunctionSpace,
+    u: dolfin.Function | None = None,
+    metadata: dict[str, Any] | None = None,
+) -> dolfin.Function | None:
+    """Element-wise projection using LocalSolver
+
+    Parameters
+    ----------
+    v : dolfin.Function
+        Function to be projected
+    V : dolfin.FunctionSpace
+        Function space to project into
+    u : dolfin.Function | None, optional
+        Optional function to save the projected function, by default None
+
+    Returns
+    -------
+    dolfin.Function | None
+        The projected function
+    """
+
     dv = dolfin.TrialFunction(V)
     v_ = dolfin.TestFunction(V)
-    a_proj = ufl.inner(dv, v_) * ufl.dx
-    b_proj = ufl.inner(v, v_) * ufl.dx
+    a_proj = ufl.inner(dv, v_) * ufl.dx(metadata=metadata)
+    b_proj = ufl.inner(v, v_) * ufl.dx(metadata=metadata)
     solver = dolfin.LocalSolver(a_proj, b_proj)
     solver.factorize()
     if u is None:
         u = dolfin.Function(V)
-        solver.solve_local_rhs(u)
-        return u
-    else:
-        solver.solve_local_rhs(u)
-        return
+    solver.solve_local_rhs(u)
+    return u

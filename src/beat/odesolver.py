@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import NamedTuple, Callable
+import abc
+from typing import NamedTuple, Callable, Any
 
 import numpy as np
 import numpy.typing as npt
@@ -58,8 +59,55 @@ class ODESystemSolver:
         )
 
 
+class BaseDolfinODESolver(abc.ABC):
+    v_ode: dolfin.Function
+    v_pde: dolfin.Function
+    _metadata: dict[str, Any] | None = None
+
+    def _initialize_metadata(self):
+        if self.v_ode.ufl_element().family() == "Quadrature":
+            self._metadata = {"quadrature_degree": self.v_ode.ufl_element().degree()}
+        else:
+            self._metadata = None
+
+    @abc.abstractmethod
+    def to_dolfin(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    def from_dolfin(self) -> None:
+        pass
+
+    def ode_to_pde(self) -> None:
+        """Projects v_ode (DG0, quadrature space, ...) into v_pde (CG1)"""
+        local_project(
+            self.v_ode,
+            self.v_pde.function_space(),
+            self.v_pde,
+            metadata=self._metadata,
+        )
+
+    def pde_to_ode(self) -> None:
+        """Projects v_pde (CG1) into v_ode (DG0, quadrature space, ...)"""
+        local_project(
+            self.v_pde,
+            self.v_ode.function_space(),
+            self.v_ode,
+            metadata=self._metadata,
+        )
+
+    @abc.abstractmethod
+    def step(self, t0: float, dt: float) -> None:
+        pass
+
+    @property
+    @abc.abstractmethod
+    def full_values(self) -> npt.NDArray:
+        pass
+
+
 @dataclass
-class DolfinODESolver:
+class DolfinODESolver(BaseDolfinODESolver):
     v_ode: dolfin.Function
     v_pde: dolfin.Function
     init_states: npt.NDArray
@@ -80,6 +128,7 @@ class DolfinODESolver:
             states=self._values,
             parameters=self.parameters,
         )
+        self._initialize_metadata()
 
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
@@ -88,14 +137,6 @@ class DolfinODESolver:
     def from_dolfin(self) -> None:
         """Assign values from dolfin function to numpy array"""
         self._values[self.v_index, :] = self.v_ode.vector().get_local()
-
-    # ode_to_pde projects v_ode (DG0, quadrature space, ...) into v_pde (CG1)
-    def ode_to_pde(self) -> None:
-        local_project(self.v_ode, self.v_pde.function_space(), self.v_pde)
-
-    # pde_to_ode projects v_pde (CG1) into v_ode (DG0, quadrature space, ...)
-    def pde_to_ode(self) -> None:
-        local_project(self.v_pde, self.v_ode.function_space(), self.v_ode)
 
     @property
     def values(self):
@@ -122,7 +163,7 @@ class DolfinODESolver:
 
 
 @dataclass
-class DolfinMultiODESolver:
+class DolfinMultiODESolver(BaseDolfinODESolver):
     v_ode: dolfin.Function
     v_pde: dolfin.Function
     markers: dolfin.Function
@@ -162,6 +203,7 @@ class DolfinMultiODESolver:
                 states=self._values[marker],
                 parameters=self.parameters[marker],
             )
+        self._initialize_metadata()
 
     def _initialize_full_values(self):
         self._all_states_equal_size = (
@@ -185,14 +227,6 @@ class DolfinMultiODESolver:
         arr = self.v_ode.vector().get_local()
         for marker in self._marker_values:
             self._values[marker][self.v_index[marker], :] = arr[self._inds[marker]]
-
-    # ode_to_pde projects v_ode (DG0, quadrature space, ...) into v_pde (CG1)
-    def ode_to_pde(self) -> None:
-        local_project(self.v_ode, self.v_pde.function_space(), self.v_pde)
-
-    # pde_to_ode projects v_pde (CG1) into v_ode (DG0, quadrature space, ...)
-    def pde_to_ode(self) -> None:
-        local_project(self.v_pde, self.v_ode.function_space(), self.v_ode)
 
     def values(self, marker: int) -> npt.NDArray:
         return self._values[marker]
