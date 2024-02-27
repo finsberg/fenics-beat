@@ -162,7 +162,7 @@ def test_monodomain_splitting_spatial_convergence(odespace):
     if degree > int(ode_degree):  # DG_0 (ODE) -> CG_1 (PDE)
         assert np.isclose(cvg_rate, int(ode_degree) + 1, rtol=0.1)
     else:
-        assert(np.isclose(cvg_rate, degree + 1, rtol=0.1))
+        assert np.isclose(cvg_rate, degree + 1, rtol=0.1)
 
 
 def test_monodomain_splitting_temporal_convergence():
@@ -222,7 +222,7 @@ def test_monodomain_splitting_temporal_convergence():
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
     cvg_rate = sum(rates) / len(rates)
     # Forward Euler has error of order one in time
-    assert(np.isclose(cvg_rate, 1, rtol=0.01))
+    assert np.isclose(cvg_rate, 1, rtol=0.01)
 
 
 @pytest.mark.parametrize(
