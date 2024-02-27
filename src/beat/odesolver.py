@@ -62,7 +62,7 @@ class ODESystemSolver:
 class BaseDolfinODESolver(abc.ABC):
     v_ode: dolfin.Function
     v_pde: dolfin.Function
-    _metdata: dict[str, Any] | None = None
+    _metadata: dict[str, Any] | None = None
 
     def _initialize_metadata(self):
         if self.v_ode.ufl_element().family() == "Quadrature":
