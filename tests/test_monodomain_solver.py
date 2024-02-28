@@ -13,7 +13,18 @@ def simple_ode_forward_euler(states, t, dt, parameters):
     return values
 
 
-def test_monodomain_splitting_analytic():
+@pytest.mark.parametrize(
+    "odespace",
+    [
+        "CG_1",
+        "CG_2",
+        "DG_0",
+        "DG_1",
+        "Quadrature_2",
+        "Quadrature_4",
+    ],
+)
+def test_monodomain_splitting_analytic(odespace):
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
@@ -42,13 +53,21 @@ def test_monodomain_splitting_analytic():
 
     pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
 
-    s = dolfin.interpolate(s_exact, pde.V)
+    family, degree = odespace.split("_")
+    element = dolfin.FiniteElement(
+        family, mesh.ufl_cell(), int(degree), quad_scheme="default"
+    )
+    V_ode = dolfin.FunctionSpace(mesh, element)
+    v_ode = dolfin.Function(V_ode)
+
+    s = dolfin.interpolate(s_exact, V_ode)
     s_arr = s.vector().get_local()
     init_states = np.zeros((2, s_arr.size))
     init_states[1, :] = s_arr
 
     ode = beat.odesolver.DolfinODESolver(
-        pde.state,
+        v_ode=v_ode,
+        v_pde=pde.state,
         fun=simple_ode_forward_euler,
         init_states=init_states,
         parameters=None,
@@ -65,7 +84,18 @@ def test_monodomain_splitting_analytic():
     assert v_error < 0.002
 
 
-def test_monodomain_splitting_spatial_convergence():
+@pytest.mark.parametrize(
+    "odespace",
+    [
+        "CG_1",
+        "CG_2",
+        "DG_0",
+        "DG_1",
+        "Quadrature_2",
+        "Quadrature_4",
+    ],
+)
+def test_monodomain_splitting_spatial_convergence(odespace):
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
@@ -90,6 +120,7 @@ def test_monodomain_splitting_spatial_convergence():
     }
 
     errors = []
+    ode_family, ode_degree = odespace.split("_")
     Ns = [2**level for level in (3, 4, 5)]
     for N in Ns:
         mesh = dolfin.UnitSquareMesh(N, N)
@@ -98,13 +129,21 @@ def test_monodomain_splitting_spatial_convergence():
 
         pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
         s_exact = dolfin.Expression(s_exact_str, t=0, degree=1)
-        s = dolfin.interpolate(s_exact, pde.V)
+
+        element = dolfin.FiniteElement(
+            ode_family, mesh.ufl_cell(), int(ode_degree), quad_scheme="default"
+        )
+        V_ode = dolfin.FunctionSpace(mesh, element)
+        v_ode = dolfin.Function(V_ode)
+
+        s = dolfin.interpolate(s_exact, V_ode)
         s_arr = s.vector().get_local()
         init_states = np.zeros((2, s_arr.size))
         init_states[1, :] = s_arr
 
         ode = beat.odesolver.DolfinODESolver(
-            pde.state,
+            v_ode=v_ode,
+            v_pde=pde.state,
             fun=simple_ode_forward_euler,
             init_states=init_states,
             num_states=2,
@@ -119,11 +158,13 @@ def test_monodomain_splitting_spatial_convergence():
         errors.append(v_error)
 
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
-    # FIXME: This should be 2
-    assert all(rate >= 1.77 for rate in rates)
+    cvg_rate = sum(rates) / len(rates)
+    if degree > int(ode_degree):  # DG_0 (ODE) -> CG_1 (PDE)
+        assert np.isclose(cvg_rate, int(ode_degree) + 1, rtol=0.1)
+    else:
+        assert np.isclose(cvg_rate, degree + 1, rtol=0.1)
 
 
-@pytest.mark.xfail(reason="Don't know why this does not work")
 def test_monodomain_splitting_temporal_convergence():
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
@@ -150,7 +191,7 @@ def test_monodomain_splitting_temporal_convergence():
 
     errors = []
     mesh = dolfin.UnitSquareMesh(150, 150)
-    dts = [1.0 / (2**level) for level in (0, 1, 2, 3)]
+    dts = [1.0 / (2**level) for level in (2, 3, 4)]
     for dt in dts:
         time = dolfin.Constant(0.0)
         I_s = dolfin.Expression(ac_str, t=time, degree=5)
@@ -163,7 +204,8 @@ def test_monodomain_splitting_temporal_convergence():
         init_states[1, :] = s_arr
 
         ode = beat.odesolver.DolfinODESolver(
-            pde.state,
+            v_ode=dolfin.Function(pde.V),
+            v_pde=pde.state,
             fun=simple_ode_forward_euler,
             init_states=init_states,
             num_states=2,
@@ -178,11 +220,23 @@ def test_monodomain_splitting_temporal_convergence():
         errors.append(v_error)
 
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
+    cvg_rate = sum(rates) / len(rates)
+    # Forward Euler has error of order one in time
+    assert np.isclose(cvg_rate, 1, rtol=0.01)
 
-    assert all(rate >= 1.73 for rate in rates)
 
-
-def test_monodomain_splitting_analytic_multiODE():
+@pytest.mark.parametrize(
+    "odespace",
+    [
+        "CG_1",
+        "CG_2",
+        "DG_0",
+        "DG_1",
+        "Quadrature_2",
+        "Quadrature_4",
+    ],
+)
+def test_monodomain_splitting_analytic_multiODE(odespace):
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
@@ -211,13 +265,21 @@ def test_monodomain_splitting_analytic_multiODE():
 
     pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
 
-    s = dolfin.interpolate(s_exact, pde.V)
+    family, degree = odespace.split("_")
+    element = dolfin.FiniteElement(
+        family, mesh.ufl_cell(), int(degree), quad_scheme="default"
+    )
+    V_ode = dolfin.FunctionSpace(mesh, element)
+    v_ode = dolfin.Function(V_ode)
+
+    s = dolfin.interpolate(s_exact, V_ode)
     s_arr = s.vector().get_local()
     init_states = np.zeros((2, s_arr.size))
     init_states[1, :] = s_arr
 
     ode = beat.odesolver.DolfinODESolver(
-        pde.state,
+        v_ode=v_ode,
+        v_pde=pde.state,
         fun=simple_ode_forward_euler,
         init_states=init_states,
         parameters=None,

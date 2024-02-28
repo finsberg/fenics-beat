@@ -288,7 +288,8 @@ def main():
     pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, params=params)
 
     ode = beat.odesolver.DolfinMultiODESolver(
-        pde.state,
+        v_ode=dolfin.Function(V),
+        v_pde=pde.state,
         markers=markers,
         num_states={i: len(s) for i, s in init_states.items()},
         fun=fun,

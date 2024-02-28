@@ -82,17 +82,19 @@ def test_beeler_reuter_unit_square():
     t0 = 0.0
 
     dolfin_ode = DolfinODESolver(
-        s,
+        v_ode=dolfin.Function(V),
+        v_pde=s,
         num_states=len(init_states),
         fun=beat.cellmodels.beeler_reuter_1977.forward_generalized_rush_larsen,
         init_states=init_states,
         parameters=parameters,
     )
-    assert np.allclose(dolfin_ode.v.vector().get_local(), 0.0)
+    assert np.allclose(dolfin_ode.v_ode.vector().get_local(), 0.0)
     dolfin_ode.to_dolfin()
+    dolfin_ode.ode_to_pde()
 
     # Just check that values have been updated
-    old_state = dolfin_ode.v.vector().get_local().copy()
+    old_state = dolfin_ode.v_pde.vector().get_local().copy()
     assert not np.allclose(old_state, 0.0)
 
     N = 10
@@ -102,8 +104,8 @@ def test_beeler_reuter_unit_square():
         t += dt
 
     dolfin_ode.to_dolfin()
-
-    assert not np.allclose(dolfin_ode.v.vector().get_local(), old_state)
+    dolfin_ode.ode_to_pde()
+    assert not np.allclose(dolfin_ode.v_pde.vector().get_local(), old_state)
 
 
 def test_assignment_ode():
@@ -117,27 +119,31 @@ def test_assignment_ode():
     V = dolfin.FunctionSpace(mesh, "Lagrange", 1)
     v = dolfin.Function(V)
     ode = DolfinODESolver(
-        v,
+        v_ode=dolfin.Function(V),
+        v_pde=v,
         num_states=len(init_states),
         fun=beat.cellmodels.beeler_reuter_1977.forward_generalized_rush_larsen,
         init_states=init_states,
         parameters=parameters,
         v_index=v_index,
     )
-    assert np.allclose(ode.v.vector().get_local(), 0)
+    assert np.allclose(ode.v_ode.vector().get_local(), 0)
     assert np.allclose(ode.values[:, 0], init_states)
 
     ode.to_dolfin()
-    assert np.allclose(ode.v.vector().get_local(), init_states[v_index])
+    ode.ode_to_pde()
+    assert np.allclose(ode.v_pde.vector().get_local(), init_states[v_index])
 
     # Now update values for v
     ode.values[v_index, :] = 42.0
-    assert np.allclose(ode.v.vector().get_local(), init_states[v_index])
+    assert np.allclose(ode.v_ode.vector().get_local(), init_states[v_index])
     ode.to_dolfin()
-    assert np.allclose(ode.v.vector().get_local(), 42.0)
+    ode.ode_to_pde()
+    assert np.allclose(ode.v_pde.vector().get_local(), 42.0)
 
     # Now update dolfin function for v
-    ode.v.assign(dolfin.Constant(13.0))
+    ode.v_pde.assign(dolfin.Constant(13.0))
+    ode.pde_to_ode()
     ode.from_dolfin()
     assert np.allclose(ode.values[v_index, :], 13.0)
     assert np.allclose(ode.full_values[v_index, :], 13.0)
@@ -185,7 +191,8 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
     }
 
     ode = DolfinMultiODESolver(
-        v,
+        v_ode=dolfin.Function(V),
+        v_pde=v,
         markers=markers,
         num_states={i: len(s) for i, s in init_states.items()},
         fun=fun,
@@ -199,21 +206,23 @@ def test_ode_with_markers_3D_to_and_from_dolfin():
     for m, v in marker_values.items():
         ode.values(m)[ode.v_index[m], :] = v
     ode.to_dolfin()
+    ode.ode_to_pde()
 
     for m, v in marker_values.items():
-        assert (ode.v.vector()[markers.vector().get_local() == m] == v).all()
+        assert np.allclose(ode.v_pde.vector()[markers.vector().get_local() == m], v)
 
     # Now go the other way
     marker_values = {0: 4, 1: 5, 2: 6}
-    arr = ode.v.vector().get_local().copy()
+    arr = ode.v_pde.vector().get_local().copy()
     for m, v in marker_values.items():
         arr[markers.vector().get_local() == m] = v
-    ode.v.vector().set_local(arr)
+    ode.v_pde.vector().set_local(arr)
+    ode.pde_to_ode()
     ode.from_dolfin()
 
     v_arr = np.zeros_like(arr)
     for m, v in marker_values.items():
-        assert (ode.values(m)[v_index[m], :] == v).all()
+        assert np.allclose(ode.values(m)[v_index[m], :], v)
         v_arr[markers.vector().get_local() == m] = v
 
     assert ode.full_values.shape == (len(init_states[0]), len(arr))

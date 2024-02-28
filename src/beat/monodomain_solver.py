@@ -15,6 +15,12 @@ class ODESolver(Protocol):
     def from_dolfin(self) -> None:
         ...
 
+    def ode_to_pde(self) -> None:
+        ...
+
+    def pde_to_ode(self) -> None:
+        ...
+
     def step(self, t0: float, t1: float) -> None:
         ...
 
@@ -26,7 +32,8 @@ class MonodomainSplittingSolver:
     theta: float = 0.5
 
     def __post_init__(self) -> None:
-        self.ode.to_dolfin()
+        self.ode.to_dolfin()  # numpy array (ODE solver) -> dolfin function
+        self.ode.ode_to_pde()  # dolfin function in ODE space (quad?) -> CG1 dolfin function
         self.pde.assign_previous()
 
     def solve(self, interval, dt):
@@ -58,7 +65,8 @@ class MonodomainSplittingSolver:
         # Solve ODE
         self.ode.step(t0=t0, dt=theta * dt)
         # Move voltage to FEniCS
-        self.ode.to_dolfin()
+        self.ode.to_dolfin()  # numpy array (ODE solver) -> dolfin function
+        self.ode.ode_to_pde()  # dolfin function in ODE space (quad?) -> CG1 dolfin function
 
         logger.info("PDE step")
         # Solve PDE
@@ -81,5 +89,6 @@ class MonodomainSplittingSolver:
         # To the correction step
         self.ode.step(t, (1.0 - theta) * dt)
         # And copy the solution back to FEniCS
-        self.ode.to_dolfin()
+        self.ode.to_dolfin()  # numpy array (ODE solver) -> dolfin function
+        self.ode.ode_to_pde()  # dolfin function in ODE space (quad?) -> CG1 dolfin function
         self.pde.assign_previous()

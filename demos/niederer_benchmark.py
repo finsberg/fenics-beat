@@ -135,9 +135,11 @@ def main():
 
     # params = {"linear_solver_type": "direct"}
     params = {"preconditioner": "sor", "use_custom_preconditioner": False}
+    ode_space = dolfin.FunctionSpace(mesh, "Lagrange", 1)  # TODO : quadrature space!
     pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
     ode = beat.odesolver.DolfinODESolver(
-        pde.state,
+        v_ode=dolfin.Function(ode_space),
+        v_pde=pde.state,
         fun=fun,
         init_states=init_states,
         parameters=parameters,
