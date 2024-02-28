@@ -1,0 +1,33 @@
+name: Test package
+
+on: [push]
+jobs:
+
+  test-code:
+    # This code depends on the result of check-code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10   # Tests shouldn't use more than 10 minutes to run
+    container:
+      image: ghcr.io/scientificcomputing/fenics-gmsh:2023-08-16
+
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache
+        id: cache-primes
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/instant
+            ~/.cache/dijitso
+            ~/.cache/pip
+          key: cache_v1
+          restore-keys: |
+            cache_v1
+
+      - name: Install package
+        run: python3 -m pip install -e .[test]
+
+      - name: Run tests with mpi
+        run: mpirun -n 2 python3 -m pytest
