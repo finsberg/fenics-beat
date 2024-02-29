@@ -29,5 +29,8 @@ jobs:
       - name: Install package
         run: python3 -m pip install -e .
 
-      - name: Run tests with mpi
+      - name: Run Niederer benchmark
         run: mpirun -n 2 python3 demos/niederer_benchmark.py
+
+      - name: Run endocadial stimulation
+        run: mpirun -n 2 python3 demos/endocardial_stimulation.py
