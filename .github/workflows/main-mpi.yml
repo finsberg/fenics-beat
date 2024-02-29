@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10   # Tests shouldn't use more than 10 minutes to run
     container:
-      image: ghcr.io/scientificcomputing/fenics-gmsh:2023-08-16
+      image: ghcr.io/scientificcomputing/fenics-gmsh:2024-02-19
 
 
     steps:

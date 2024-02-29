@@ -7,7 +7,7 @@ jobs:
     # This code depends on the result of check-code
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/scientificcomputing/fenics-gmsh:2023-08-16
+      image: ghcr.io/scientificcomputing/fenics-gmsh:2024-02-19
 
 
     steps:
