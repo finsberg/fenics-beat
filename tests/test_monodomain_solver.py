@@ -86,7 +86,6 @@ def test_monodomain_splitting_analytic(odespace):
     assert v_error < 0.002
 
 
-@skip_in_parallel
 @pytest.mark.parametrize(
     "odespace",
     [
@@ -98,6 +97,7 @@ def test_monodomain_splitting_analytic(odespace):
         "Quadrature_4",
     ],
 )
+@skip_in_parallel
 def test_monodomain_splitting_spatial_convergence(odespace):
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
