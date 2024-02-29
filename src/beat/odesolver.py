@@ -134,7 +134,6 @@ class DolfinODESolver(BaseDolfinODESolver):
         """Assign values from numpy array to dolfin function"""
 
         self.v_ode.vector()[:] = self._values[self.v_index, :]
-        dolfin.as_backend_type(self.v_ode.vector()).update_ghost_values()
 
     def from_dolfin(self) -> None:
         """Assign values from dolfin function to numpy array"""
@@ -223,7 +222,6 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
         for marker in self._marker_values:
             arr[self._inds[marker]] = self._values[marker][self.v_index[marker], :]
         self.v_ode.vector().set_local(arr)
-        dolfin.as_backend_type(self.v_ode.vector()).update_ghost_values()
 
     def from_dolfin(self) -> None:
         """Assign values from dolifn function to numpy array"""
