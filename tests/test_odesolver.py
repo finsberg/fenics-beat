@@ -4,8 +4,6 @@ import dolfin
 import beat
 from beat.odesolver import ODESystemSolver, DolfinODESolver, DolfinMultiODESolver
 
-from fixtures import skip_in_parallel
-
 
 def test_simple_ode_odesystemsolver():
     def simple_ode_forward_euler(states, t, dt, parameters):
@@ -165,7 +163,6 @@ def test_assignment_ode():
     assert np.allclose(ode.full_values[v_index, :], 13.0)
 
 
-@skip_in_parallel
 def test_ode_with_markers_3D_to_and_from_dolfin():
     model = beat.cellmodels.tentusscher_panfilov_2006
     mesh = dolfin.UnitCubeMesh(3, 3, 3)
