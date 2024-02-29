@@ -24,7 +24,7 @@ Tracker = "https://github.com/finsberg/fenics-beat/issues"
 [project.optional-dependencies]
 test = [
     "pytest",
-    "coverage",
+    "pytest-cov",
 ]
 dev = [
     "pdbpp",
@@ -57,14 +57,6 @@ all = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
-
-# [tool.pytest.ini_options]
-# addopts = [
-#    "--cov=beat",
-#    "--cov-report=html",
-#    "--cov-report=term-missing",
-#    "-v"
-# ]
 
 testpaths = [
     "tests"

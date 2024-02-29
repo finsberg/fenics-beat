@@ -29,7 +29,7 @@ jobs:
         run: python3 -m pip install -e .[test]
 
       - name: Run tests
-        run: python3 -m pytest
+        run: python3 -m pytest --cov=beat --cov-report=html --cov-report=term-missing -v
 
       - name: Coverage report
         if: github.ref == 'refs/heads/main'
