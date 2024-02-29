@@ -1,4 +1,4 @@
-name: Test package
+name: Test package (MPI)
 
 on: [push]
 jobs:
@@ -27,7 +27,7 @@ jobs:
             cache_v1
 
       - name: Install package
-        run: python3 -m pip install -e .[test]
+        run: python3 -m pip install -e .
 
       - name: Run tests with mpi
-        run: mpirun -n 2 python3 -m pytest -vv
+        run: mpirun -n 2 python3 demos/niederer_benchmark.py
