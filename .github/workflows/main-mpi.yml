@@ -30,4 +30,4 @@ jobs:
         run: python3 -m pip install -e .[test]
 
       - name: Run tests with mpi
-        run: mpirun -n 2 python3 -m pytest
+        run: mpirun -n 2 python3 -m pytest -vv
