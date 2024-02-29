@@ -64,11 +64,12 @@ class BaseDolfinODESolver(abc.ABC):
     v_pde: dolfin.Function
     _metadata: dict[str, Any] | None = None
 
-    def _initialize_metadata(self):
+    def _initialize_v_ode(self):
         if self.v_ode.ufl_element().family() == "Quadrature":
             self._metadata = {"quadrature_degree": self.v_ode.ufl_element().degree()}
         else:
             self._metadata = None
+        self._ownership_range = self.v_ode.function_space().dofmap().ownership_range()
 
     @abc.abstractmethod
     def to_dolfin(self) -> None:
@@ -128,11 +129,13 @@ class DolfinODESolver(BaseDolfinODESolver):
             states=self._values,
             parameters=self.parameters,
         )
-        self._initialize_metadata()
+        self._initialize_v_ode()
 
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
-        self.v_ode.vector().set_local(self._values[self.v_index, :])
+
+        self.v_ode.vector()[:] = self._values[self.v_index, :]
+        dolfin.as_backend_type(self.v_ode.vector()).update_ghost_values()
 
     def from_dolfin(self) -> None:
         """Assign values from dolfin function to numpy array"""
@@ -152,7 +155,7 @@ class DolfinODESolver(BaseDolfinODESolver):
 
     @property
     def num_points(self) -> int:
-        return self.v_ode.vector().size()
+        return self.v_ode.vector().local_size()
 
     def step(self, t0: float, dt: float):
         self._ode.step(t0=t0, dt=dt)
@@ -203,7 +206,7 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
                 states=self._values[marker],
                 parameters=self.parameters[marker],
             )
-        self._initialize_metadata()
+        self._initialize_v_ode()
 
     def _initialize_full_values(self):
         self._all_states_equal_size = (
@@ -219,13 +222,26 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
         """Assign values from numpy array to dolfin function"""
         arr = self.v_ode.vector().get_local().copy()
         for marker in self._marker_values:
+            # arr[
+            #     self._inds[marker][self._ownership_range[0] : self._ownership_range[1]]
+            # ] = self._values[marker][
+            #     self.v_index[marker],
+            #     self._ownership_range[0] : self._ownership_range[1],
+            # ]
             arr[self._inds[marker]] = self._values[marker][self.v_index[marker], :]
         self.v_ode.vector().set_local(arr)
+        dolfin.as_backend_type(self.v_ode.vector()).update_ghost_values()
 
     def from_dolfin(self) -> None:
         """Assign values from dolifn function to numpy array"""
         arr = self.v_ode.vector().get_local()
         for marker in self._marker_values:
+            # self._values[marker][
+            #     self.v_index[marker],
+            #     self._ownership_range[0] : self._ownership_range[1],
+            # ] = arr[
+            #     self._inds[marker][self._ownership_range[0] : self._ownership_range[1]]
+            # ]
             self._values[marker][self.v_index[marker], :] = arr[self._inds[marker]]
 
     def values(self, marker: int) -> npt.NDArray:

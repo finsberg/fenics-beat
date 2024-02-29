@@ -4,6 +4,8 @@ import pytest
 
 import beat
 
+from fixtures import skip_in_parallel
+
 
 def simple_ode_forward_euler(states, t, dt, parameters):
     v, s = states
@@ -84,6 +86,7 @@ def test_monodomain_splitting_analytic(odespace):
     assert v_error < 0.002
 
 
+@skip_in_parallel
 @pytest.mark.parametrize(
     "odespace",
     [
