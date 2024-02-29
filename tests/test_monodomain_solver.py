@@ -97,7 +97,6 @@ def test_monodomain_splitting_analytic(odespace):
     ],
 )
 def test_monodomain_splitting_spatial_convergence(odespace):
-    print(odespace, "1111111")
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
@@ -120,8 +119,6 @@ def test_monodomain_splitting_spatial_convergence(odespace):
         "degree": degree,
         "linear_solver_type": "direct",
     }
-    # print(f"comm: {mesh.mpi_comm().rank}: 1 - ", N)
-    print("a")
     errors = []
     ode_family, ode_degree = odespace.split("_")
     Ns = [2**level for level in (3, 4, 5)]
@@ -144,8 +141,6 @@ def test_monodomain_splitting_spatial_convergence(odespace):
         init_states = np.zeros((2, s_arr.size))
         init_states[1, :] = s_arr
 
-        print(f"comm: {mesh.mpi_comm().rank}: 0 - ", init_states.shape)
-
         ode = beat.odesolver.DolfinODESolver(
             v_ode=v_ode,
             v_pde=pde.state,
@@ -155,17 +150,13 @@ def test_monodomain_splitting_spatial_convergence(odespace):
             parameters=None,
             v_index=0,
         )
-        print(f"comm: {mesh.mpi_comm().rank}: 1 - ", N)
+
         solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
         solver.solve((t0, T), dt=dt)
-        print(f"comm: {mesh.mpi_comm().rank}: 2 - ", N)
 
         v_exact = dolfin.Expression(v_exact_str, t=T, degree=3)
         v_error = dolfin.errornorm(v_exact, pde.state, "L2", degree_rise=2)
         errors.append(v_error)
-        print(f"comm: {mesh.mpi_comm().rank}: 3 - ", N)
-        mesh.mpi_comm().barrier()
-        print(f"comm: {mesh.mpi_comm().rank}: 4 - ", N)
 
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
     cvg_rate = sum(rates) / len(rates)

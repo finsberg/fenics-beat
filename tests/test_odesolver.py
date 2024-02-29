@@ -144,20 +144,8 @@ def test_assignment_ode():
     # Now update dolfin function for v
     ode.v_pde.assign(dolfin.Constant(13.0))
 
-    print("Before (pde)", ode.v_pde.vector().get_local())
-    print("Before (ode)", ode.v_ode.vector().get_local())
-    print("Before (values)", ode.values[v_index, :])
-
     ode.pde_to_ode()
-    print("\nAfter (pde)", ode.v_pde.vector().get_local())
-    print("After (ode)", ode.v_ode.vector().get_local())
-    print("After (values)", ode.values[v_index, :])
-
     ode.from_dolfin()
-
-    print("\nAfter2 (pde)", ode.v_pde.vector().get_local())
-    print("After2 (ode)", ode.v_ode.vector().get_local())
-    print("After2 (values)", ode.values[v_index, :])
 
     assert np.allclose(ode.values[v_index, :], 13.0)
     assert np.allclose(ode.full_values[v_index, :], 13.0)
