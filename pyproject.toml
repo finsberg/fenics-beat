@@ -53,11 +53,6 @@ all = [
    "fenics-beat[demos]"
 ]
 
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-
 testpaths = [
     "tests"
 ]
