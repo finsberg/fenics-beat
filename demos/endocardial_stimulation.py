@@ -305,9 +305,9 @@ def main():
         v_index=v_index,
     )
 
-    # T = 1
+    T = 1
     # Change to 500 to simulate the full cardiac cycle
-    T = 10
+    # T = 500
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)

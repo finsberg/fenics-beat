@@ -27,7 +27,7 @@ jobs:
             cache_v1
 
       - name: Install package
-        run: python3 -m pip install -e .
+        run: python3 -m pip install -e .[demos]
 
       - name: Run Niederer benchmark
         run: mpirun -n 2 python3 demos/niederer_benchmark.py
