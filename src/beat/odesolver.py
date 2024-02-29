@@ -64,12 +64,11 @@ class BaseDolfinODESolver(abc.ABC):
     v_pde: dolfin.Function
     _metadata: dict[str, Any] | None = None
 
-    def _initialize_v_ode(self):
+    def _initialize_metadata(self):
         if self.v_ode.ufl_element().family() == "Quadrature":
             self._metadata = {"quadrature_degree": self.v_ode.ufl_element().degree()}
         else:
             self._metadata = None
-        self._ownership_range = self.v_ode.function_space().dofmap().ownership_range()
 
     @abc.abstractmethod
     def to_dolfin(self) -> None:
@@ -129,7 +128,7 @@ class DolfinODESolver(BaseDolfinODESolver):
             states=self._values,
             parameters=self.parameters,
         )
-        self._initialize_v_ode()
+        self._initialize_metadata()
 
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
@@ -206,7 +205,7 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
                 states=self._values[marker],
                 parameters=self.parameters[marker],
             )
-        self._initialize_v_ode()
+        self._initialize_metadata()
 
     def _initialize_full_values(self):
         self._all_states_equal_size = (
@@ -222,12 +221,6 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
         """Assign values from numpy array to dolfin function"""
         arr = self.v_ode.vector().get_local().copy()
         for marker in self._marker_values:
-            # arr[
-            #     self._inds[marker][self._ownership_range[0] : self._ownership_range[1]]
-            # ] = self._values[marker][
-            #     self.v_index[marker],
-            #     self._ownership_range[0] : self._ownership_range[1],
-            # ]
             arr[self._inds[marker]] = self._values[marker][self.v_index[marker], :]
         self.v_ode.vector().set_local(arr)
         dolfin.as_backend_type(self.v_ode.vector()).update_ghost_values()
@@ -236,12 +229,6 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
         """Assign values from dolifn function to numpy array"""
         arr = self.v_ode.vector().get_local()
         for marker in self._marker_values:
-            # self._values[marker][
-            #     self.v_index[marker],
-            #     self._ownership_range[0] : self._ownership_range[1],
-            # ] = arr[
-            #     self._inds[marker][self._ownership_range[0] : self._ownership_range[1]]
-            # ]
             self._values[marker][self.v_index[marker], :] = arr[self._inds[marker]]
 
     def values(self, marker: int) -> npt.NDArray:

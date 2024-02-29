@@ -147,7 +147,7 @@ def main():
         v_index=model.state_indices("V"),
     )
 
-    T = 10
+    T = 1
     # T = 100  # Change to 100 to reproduce Niederer benchmark
     t = 0.0
     dt = 0.05
