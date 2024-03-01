@@ -54,14 +54,6 @@ all = [
 ]
 
 
-[tool.pytest.ini_options]
-addopts = [
-   "--cov=beat",
-   "--cov-report=html",
-   "--cov-report=term-missing",
-   "-v"
-]
-
 testpaths = [
     "tests"
 ]
