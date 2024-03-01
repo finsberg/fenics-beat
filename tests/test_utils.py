@@ -1,6 +1,29 @@
 import numpy as np
 import dolfin
 import beat
+from mpi4py import MPI as pyMPI
+
+
+def mpi4py_comm(comm):
+    """Get mpi4py communicator"""
+    try:
+        return comm.tompi4py()
+    except AttributeError:
+        return comm
+
+
+def peval(f, *x):
+    """Parallel synced eval"""
+    try:
+        yloc = f(*x)
+    except RuntimeError:
+        yloc = np.inf * np.ones(f.value_shape())
+
+    comm = mpi4py_comm(f.function_space().mesh().mpi_comm())
+    yglob = np.zeros_like(yloc)
+    comm.Allreduce(yloc, yglob, op=pyMPI.MIN)
+
+    return yglob
 
 
 def test_expand_layer_single():
@@ -32,9 +55,9 @@ def test_expand_layer_single():
     # Just check a few values
     for x in [0.0, 0.1, 0.2]:
         for y in [0.0, 0.5, 1.0]:
-            assert np.isclose(markers(x, y), endo_marker)
-            assert np.isclose(markers(x + 0.4, y), mid_marker)
-            assert np.isclose(markers(1 - x, y), epi_marker)
+            assert np.isclose(peval(markers, (x, y)), endo_marker)
+            assert np.isclose(peval(markers, (x + 0.4, y)), mid_marker)
+            assert np.isclose(peval(markers, (1 - x, y)), epi_marker)
 
 
 def test_expand_layer_double():
@@ -68,6 +91,6 @@ def test_expand_layer_double():
     # Just check a few values
     for x in [0.0, 0.1, 0.2]:
         for y in [0.0, 0.5, 1.0]:
-            assert np.isclose(markers(x, y), endo_marker)
-            assert np.isclose(markers(x + 0.4, y), mid_marker)
-            assert np.isclose(markers(1 - x, y), epi_marker)
+            assert np.isclose(peval(markers, (x, y)), endo_marker)
+            assert np.isclose(peval(markers, (x + 0.4, y)), mid_marker)
+            assert np.isclose(peval(markers, (1 - x, y)), epi_marker)

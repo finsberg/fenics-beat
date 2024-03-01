@@ -27,13 +27,7 @@ jobs:
             cache_v1
 
       - name: Install package
-        run: python3 -m pip install -e .[demos]
+        run: python3 -m pip install -e .[test]
 
       - name: Run Niederer benchmark
-        run: mpirun -n 2 python3 demos/niederer_benchmark.py
-
-      - name: Run endocadial stimulation to generate mesh
-        run: python3 demos/endocardial_stimulation.py
-
-      - name: Run endocadial stimulation in paralell
-        run: mpirun -n 2 python3 demos/endocardial_stimulation.py
+        run: mpirun -n 2 python3 -m pytest

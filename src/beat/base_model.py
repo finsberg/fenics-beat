@@ -71,9 +71,16 @@ class BaseModel:
     def _create_linear_solver(self):
         "Helper function for creating linear solver based on parameters."
         solver_type = self.parameters["linear_solver_type"]
+        # solver_type = "iterative"
 
         if solver_type == "direct":
-            solver = dolfin.LUSolver(self._lhs_matrix, self.parameters["lu_type"])
+            # Some bug in the docker image which makes MUMPS hang in parallel
+            # So let us just hardcode to superlu_dist for now
+            self.parameters["lu_type"] = "superlu_dist"
+
+            solver = dolfin.LUSolver(
+                self._mesh.mpi_comm(), self._lhs_matrix, self.parameters["lu_type"]
+            )
             solver.parameters.update(self.parameters["lu_solver"])
             update_routine = self._update_lu_solver
 
@@ -187,6 +194,13 @@ class BaseModel:
 
         # Assemble right-hand-side
         dolfin.assemble(self._rhs, tensor=self._rhs_vector)
+
+        # exit()
+
+        # viewer_A = PETSc.Viewer().createBinary("sandbox/dolfin-A.dat", "w")
+        # viewer_b = PETSc.Viewer().createBinary("sandbox/dolfin-b.dat", "w")
+        # dolfin.as_backend_type(self._lhs_matrix).mat().view(viewer_A)
+        # dolfin.as_backend_type(self._rhs_vector).vec().view(viewer_b)
 
         # Solve problem
         self.linear_solver.solve(self.state.vector(), self._rhs_vector)

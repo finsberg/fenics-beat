@@ -97,6 +97,7 @@ def test_monodomain_splitting_analytic(odespace):
     ],
 )
 def test_monodomain_splitting_spatial_convergence(odespace):
+
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
