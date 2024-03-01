@@ -93,12 +93,12 @@ class BaseModel:
             prec = self.parameters["preconditioner"]
             if self.parameters["use_custom_preconditioner"]:
                 self._prec_matrix = dolfin.assemble(self._prec)
-                solver = dolfin.PETScKrylovSolver(alg, prec)
+                solver = dolfin.PETScKrylovSolver(self._mesh.mpi_comm(), alg, prec)
                 solver.parameters.update(self.parameters["krylov_solver"])
                 solver.set_operators(self._lhs_matrix, self._prec_matrix)
                 solver.ksp().setFromOptions()
             else:
-                solver = dolfin.PETScKrylovSolver(alg, prec)
+                solver = dolfin.PETScKrylovSolver(self._mesh.mpi_comm(), alg, prec)
                 solver.parameters.update(self.parameters["krylov_solver"])
                 solver.set_operator(self._lhs_matrix)
                 solver.ksp().setFromOptions()
