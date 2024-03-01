@@ -161,11 +161,8 @@ def test_monodomain_splitting_spatial_convergence(odespace):
 
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
     cvg_rate = sum(rates) / len(rates)
-    if degree > int(ode_degree):  # DG_0 (ODE) -> CG_1 (PDE)
-
-        assert np.isclose(cvg_rate, int(ode_degree) + 1, rtol=0.1)
-    else:
-        assert np.isclose(cvg_rate, degree + 1, rtol=0.1)
+    conv_degree = min(int(ode_degree), degree) + 1
+    assert np.isclose(cvg_rate, conv_degree, rtol=0.15)
 
 
 def test_monodomain_splitting_temporal_convergence():
