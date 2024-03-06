@@ -50,6 +50,7 @@ def test_monodomain_analtyic(M, ac_str, exact, err):
     assert v_error < err
 
 
+@pytest.mark.skip_in_parallel
 def test_monodomain_spatial_convergence():
     time = dolfin.Constant(0.0)
     ac_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*(cos(t) +  8*pow(pi, 2)*sin(t))"
@@ -78,6 +79,7 @@ def test_monodomain_spatial_convergence():
     assert all(rate >= 2.0 for rate in rates)
 
 
+@pytest.mark.skip_in_parallel
 def test_monodomain_temporal_convergence():
     time = dolfin.Constant(0.0)
     ac_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*(cos(t) +  8*pow(pi, 2)*sin(t))"

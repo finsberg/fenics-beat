@@ -85,7 +85,6 @@ def test_monodomain_splitting_analytic(odespace):
     assert v_error < 0.002
 
 
-@pytest.mark.skip_in_parallel
 @pytest.mark.parametrize(
     "odespace",
     [
@@ -166,7 +165,6 @@ def test_monodomain_splitting_spatial_convergence(odespace):
     assert np.isclose(cvg_rate, conv_degree, rtol=0.15)
 
 
-@pytest.mark.skip_in_parallel
 @pytest.mark.parametrize(
     "odespace",
     [
