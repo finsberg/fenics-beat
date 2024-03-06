@@ -165,7 +165,18 @@ def test_monodomain_splitting_spatial_convergence(odespace):
     assert np.isclose(cvg_rate, conv_degree, rtol=0.15)
 
 
-def test_monodomain_splitting_temporal_convergence():
+@pytest.mark.parametrize(
+    "odespace",
+    [
+        "CG_1",
+        "CG_2",
+        "DG_0",
+        "DG_1",
+        "Quadrature_2",
+        "Quadrature_4",
+    ],
+)
+def test_monodomain_splitting_temporal_convergence(odespace):
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
@@ -189,8 +200,16 @@ def test_monodomain_splitting_temporal_convergence():
         "linear_solver_type": "direct",
     }
 
+    ode_family, ode_degree = odespace.split("_")
+
     errors = []
     mesh = dolfin.UnitSquareMesh(150, 150)
+
+    element = dolfin.FiniteElement(
+        ode_family, mesh.ufl_cell(), int(ode_degree), quad_scheme="default"
+    )
+    V_ode = dolfin.FunctionSpace(mesh, element)
+    v_ode = dolfin.Function(V_ode)
     dts = [1.0 / (2**level) for level in (2, 3, 4)]
     for dt in dts:
         time = dolfin.Constant(0.0)
@@ -198,13 +217,13 @@ def test_monodomain_splitting_temporal_convergence():
 
         pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
         s_exact = dolfin.Expression(s_exact_str, t=0, degree=1)
-        s = dolfin.interpolate(s_exact, pde.V)
+        s = dolfin.interpolate(s_exact, V_ode)
         s_arr = s.vector().get_local()
         init_states = np.zeros((2, s_arr.size))
         init_states[1, :] = s_arr
 
         ode = beat.odesolver.DolfinODESolver(
-            v_ode=dolfin.Function(pde.V),
+            v_ode=v_ode,
             v_pde=pde.state,
             fun=simple_ode_forward_euler,
             init_states=init_states,
@@ -221,8 +240,11 @@ def test_monodomain_splitting_temporal_convergence():
 
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
     cvg_rate = sum(rates) / len(rates)
+
+    expected_rate = (min(int(ode_degree), degree) + 1) / 2
+
     # Forward Euler has error of order one in time
-    assert np.isclose(cvg_rate, 1, rtol=0.01)
+    assert np.isclose(cvg_rate, expected_rate, rtol=0.1)
 
 
 @pytest.mark.parametrize(

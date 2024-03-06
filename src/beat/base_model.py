@@ -144,7 +144,7 @@ class BaseModel:
             "family": "Lagrange",
             "default_timestep": 1.0,
             "linear_solver_type": "iterative",
-            "lu_type": "default",
+            "lu_type": "superlu_dist",
             "algorithm": "cg",
             "preconditioner": "petsc_amg",
             "krylov_solver": krylov_solver_params,
