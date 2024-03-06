@@ -18,4 +18,4 @@ jobs:
         run: python3 -m pip install -e .[test]
 
       - name: Run tests
-        run: mpirun -n 2 python3 -m pytest -v
+        run: mpirun -n 2 python3 -m pytest -v  -m "not skip_in_parallel"
