@@ -67,11 +67,13 @@ class MonodomainSplittingSolver:
         # Move voltage to FEniCS
         self.ode.to_dolfin()  # numpy array (ODE solver) -> dolfin function
         self.ode.ode_to_pde()  # dolfin function in ODE space (quad?) -> CG1 dolfin function
+        # self.pde.assign_previous()
 
         logger.info("PDE step")
         # Solve PDE
         self.pde.step((t0, t1))
 
+        self.ode.pde_to_ode()  # CG1 dolfin function -> dolfin function in ODE space (quad?)
         # Copy voltage from PDE to ODE
         self.ode.from_dolfin()
 
