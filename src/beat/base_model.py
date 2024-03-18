@@ -27,7 +27,7 @@ class Stimulus(NamedTuple):
     expr: dolfin.Expression
 
 
-class BaseModel:
+class BaseModel(abc.ABC):
     def __init__(
         self,
         time: dolfin.Constant,
