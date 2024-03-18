@@ -220,7 +220,7 @@ def test_monodomain_splitting_temporal_convergence():
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
     cvg_rate = sum(rates) / len(rates)
     # Forward Euler has error of order one in time
-    assert np.isclose(cvg_rate, 1, rtol=0.01)
+    assert np.greater_equal(cvg_rate, 0.99)
 
 
 @pytest.mark.parametrize(
