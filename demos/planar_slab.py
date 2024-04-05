@@ -11,7 +11,6 @@ from pathlib import Path
 import numpy.typing as npt
 
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 
 import beat
 
@@ -137,7 +136,7 @@ def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
 
     timesteps = load_timesteps_from_xdmf(xdmffile)
     with dolfin.XDMFFile(Path(xdmffile).as_posix()) as f:
-        for i, t in tqdm(timesteps.items()):
+        for i, t in timesteps.items():
             f.read_checkpoint(v, key, i)
             yield v.copy(deepcopy=True), t
 
@@ -294,7 +293,8 @@ def main(datadir=Path("planar_slab")):
     pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
 
     ode = beat.odesolver.DolfinMultiODESolver(
-        pde.state,
+        v_ode=dolfin.Function(V),
+        v_pde=pde.state,
         markers=markers,
         num_states={i: len(s) for i, s in init_states.items()},
         fun=fun,
@@ -303,23 +303,37 @@ def main(datadir=Path("planar_slab")):
         v_index=v_index,
     )
 
-    # T = 1
+    # Let us also save the intracellular calcium as well
+    Cai = dolfin.Function(V)
+    Cai_index = model.endo.state_indices("Ca_i")
+
+    T = 1
     # Change to 500 to simulate the full cardiac cycle
-    T = 500
+    # T = 500
     t = 0.0
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
-    fname = (datadir / f"state_{model_name}.xdmf").as_posix()
+    fname = datadir / f"state_{model_name}.xdmf"
+    fname.unlink(missing_ok=True)
+    fname.with_suffix(".h5").unlink(missing_ok=True)
     i = 0
     while t < T + 1e-12:
         if i % 20 == 0:
+            Cai.vector().set_local(ode.full_values[Cai_index, :])
             v = solver.pde.state.vector().get_local()
             print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
-            with dolfin.XDMFFile(dolfin.MPI.comm_world, fname) as xdmf:
+            with dolfin.XDMFFile(dolfin.MPI.comm_world, fname.as_posix()) as xdmf:
                 xdmf.write_checkpoint(
                     solver.pde.state,
                     "V",
+                    float(t),
+                    dolfin.XDMFFile.Encoding.HDF5,
+                    True,
+                )
+                xdmf.write_checkpoint(
+                    Cai,
+                    "Cai",
                     float(t),
                     dolfin.XDMFFile.Encoding.HDF5,
                     True,
