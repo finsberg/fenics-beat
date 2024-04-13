@@ -1,6 +1,7 @@
 name: Test package (MPI)
 
-on: [push]
+on: [workflow_dispatch]
+
 jobs:
 
   test-code:
