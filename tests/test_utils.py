@@ -22,12 +22,12 @@ def peval(f, *x):
     comm = mpi4py_comm(f.function_space().mesh().mpi_comm())
     yglob = np.zeros_like(yloc)
     comm.Allreduce(yloc, yglob, op=pyMPI.MIN)
-
     return yglob
 
 
 def test_expand_layer_single():
-    mesh = dolfin.UnitSquareMesh(10, 10)
+    comm = dolfin.MPI.comm_world
+    mesh = dolfin.UnitSquareMesh(comm, 10, 10)
 
     mfun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
     mfun.set_all(0)

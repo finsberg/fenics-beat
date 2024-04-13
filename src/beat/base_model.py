@@ -74,10 +74,6 @@ class BaseModel(abc.ABC):
         # solver_type = "iterative"
 
         if solver_type == "direct":
-            # Some bug in the docker image which makes MUMPS hang in parallel
-            # So let us just hardcode to superlu_dist for now
-            self.parameters["lu_type"] = "superlu_dist"
-
             solver = dolfin.LUSolver(
                 self._mesh.mpi_comm(), self._lhs_matrix, self.parameters["lu_type"]
             )

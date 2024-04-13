@@ -58,6 +58,11 @@ testpaths = [
     "tests"
 ]
 
+[tool.pytest.ini_options]
+markers = [
+    "skip_in_parallel: Skip test when running in parallel",
+]
+
 [tool.ruff]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
 select = ["E", "F"]

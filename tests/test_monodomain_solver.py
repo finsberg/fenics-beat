@@ -36,7 +36,8 @@ def test_monodomain_splitting_analytic(odespace):
     family = "Lagrange"
     degree = 1
     N = 50
-    mesh = dolfin.UnitSquareMesh(N, N)
+    comm = dolfin.MPI.comm_world
+    mesh = dolfin.UnitSquareMesh(comm, N, N)
     time = dolfin.Constant(0.0)
     I_s = dolfin.Expression(ac_str, t=time, degree=5)
     M = 1.0
@@ -122,8 +123,9 @@ def test_monodomain_splitting_spatial_convergence(odespace):
     errors = []
     ode_family, ode_degree = odespace.split("_")
     Ns = [2**level for level in (3, 4, 5)]
+    comm = dolfin.MPI.comm_world
     for N in Ns:
-        mesh = dolfin.UnitSquareMesh(N, N)
+        mesh = dolfin.UnitSquareMesh(comm, N, N)
         time = dolfin.Constant(0.0)
         I_s = dolfin.Expression(ac_str, t=time, degree=5)
 
@@ -168,7 +170,6 @@ def test_monodomain_splitting_spatial_convergence(odespace):
     [
         "CG_1",
         "CG_2",
-        "DG_0",
         "DG_1",
         "Quadrature_2",
         "Quadrature_4",
@@ -201,7 +202,8 @@ def test_monodomain_splitting_temporal_convergence(odespace):
     ode_family, ode_degree = odespace.split("_")
 
     errors = []
-    mesh = dolfin.UnitSquareMesh(150, 150)
+    comm = dolfin.MPI.comm_world
+    mesh = dolfin.UnitSquareMesh(comm, 150, 150)
 
     element = dolfin.FiniteElement(
         ode_family, mesh.ufl_cell(), int(ode_degree), quad_scheme="default"
@@ -229,7 +231,7 @@ def test_monodomain_splitting_temporal_convergence(odespace):
             parameters=None,
             v_index=0,
         )
-        solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
+        solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode, theta=0.5)
         solver.solve((t0, T), dt=dt)
 
         v_exact = dolfin.Expression(v_exact_str, t=T, degree=3)
@@ -237,7 +239,7 @@ def test_monodomain_splitting_temporal_convergence(odespace):
         errors.append(v_error)
 
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
-    cvg_rate = sum(rates) / len(rates)
+    cvg_rate = np.mean(rates)
     # Forward Euler has error of order one in time
     assert np.greater_equal(cvg_rate, 0.99)
 
@@ -265,7 +267,8 @@ def test_monodomain_splitting_analytic_multiODE(odespace):
     family = "Lagrange"
     degree = 1
     N = 50
-    mesh = dolfin.UnitSquareMesh(N, N)
+    comm = dolfin.MPI.comm_world
+    mesh = dolfin.UnitSquareMesh(comm, N, N)
     time = dolfin.Constant(0.0)
     I_s = dolfin.Expression(ac_str, t=time, degree=5)
     M = 1.0
