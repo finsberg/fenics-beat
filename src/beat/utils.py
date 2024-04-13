@@ -5,6 +5,7 @@ import dolfin
 import numpy.typing as npt
 import numpy as np
 import ufl_legacy as ufl
+from contextlib import contextmanager
 
 
 logger = logging.getLogger(__name__)
@@ -104,6 +105,15 @@ def expand_layer(
     return arr
 
 
+@contextmanager
+def form_compiler_representation(name: str):
+    """Context manager to set the form compiler representation"""
+    old = dolfin.parameters["form_compiler"]["representation"]
+    dolfin.parameters["form_compiler"]["representation"] = name
+    yield
+    dolfin.parameters["form_compiler"]["representation"] = old
+
+
 def local_project(
     v: dolfin.Function,
     V: dolfin.FunctionSpace,
@@ -131,7 +141,14 @@ def local_project(
     v_ = dolfin.TestFunction(V)
     a_proj = ufl.inner(dv, v_) * ufl.dx(metadata=metadata)
     b_proj = ufl.inner(v, v_) * ufl.dx(metadata=metadata)
-    solver = dolfin.LocalSolver(a_proj, b_proj)
+
+    if metadata is None:
+        solver = dolfin.LocalSolver(a_proj, b_proj)
+    else:
+
+        with form_compiler_representation("quadrature"):
+            solver = dolfin.LocalSolver(a_proj, b_proj)
+
     solver.factorize()
     if u is None:
         u = dolfin.Function(V)

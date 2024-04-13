@@ -81,7 +81,6 @@ def test_monodomain_splitting_analytic(odespace):
     v_error = dolfin.errornorm(v_exact, pde.state, "L2", degree_rise=2)
     # dolfin.File("v_exact.pvd") << dolfin.interpolate(v_exact, pde.V)
     # dolfin.File("v.pvd") << pde.state
-
     assert v_error < 0.002
 
 
@@ -161,8 +160,7 @@ def test_monodomain_splitting_spatial_convergence(odespace):
 
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
     cvg_rate = sum(rates) / len(rates)
-    conv_degree = min(int(ode_degree), degree) + 1
-    assert np.isclose(cvg_rate, conv_degree, rtol=0.15)
+    assert np.isclose(cvg_rate, degree + 1, rtol=0.1)
 
 
 @pytest.mark.parametrize(
@@ -240,11 +238,8 @@ def test_monodomain_splitting_temporal_convergence(odespace):
 
     rates = [np.log(e1 / e2) / np.log(2) for e1, e2 in zip(errors[:-1], errors[1:])]
     cvg_rate = sum(rates) / len(rates)
-
-    expected_rate = (min(int(ode_degree), degree) + 1) / 2
-
     # Forward Euler has error of order one in time
-    assert np.isclose(cvg_rate, expected_rate, rtol=0.1)
+    assert np.greater_equal(cvg_rate, 0.99)
 
 
 @pytest.mark.parametrize(
