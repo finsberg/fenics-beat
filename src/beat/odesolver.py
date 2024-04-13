@@ -132,7 +132,8 @@ class DolfinODESolver(BaseDolfinODESolver):
 
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
-        self.v_ode.vector().set_local(self._values[self.v_index, :])
+
+        self.v_ode.vector()[:] = self._values[self.v_index, :]
 
     def from_dolfin(self) -> None:
         """Assign values from dolfin function to numpy array"""
@@ -152,7 +153,7 @@ class DolfinODESolver(BaseDolfinODESolver):
 
     @property
     def num_points(self) -> int:
-        return self.v_ode.vector().size()
+        return self.v_ode.vector().local_size()
 
     def step(self, t0: float, dt: float):
         self._ode.step(t0=t0, dt=dt)

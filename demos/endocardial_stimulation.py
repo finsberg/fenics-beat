@@ -224,21 +224,28 @@ def main():
     V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 
     markers = dolfin.Function(V)
-    arr = beat.utils.expand_layer(
-        markers=markers,
-        mfun=data.ffun,
-        endo_markers=[data.markers["ENDO_LV"][0], data.markers["ENDO_RV"][0]],
-        epi_markers=[data.markers["EPI"][0]],
-        endo_marker=1,
-        epi_marker=2,
-        endo_size=0.3,
-        epi_size=0.3,
-    )
+    markers_path = datadir / "markers.xdmf"
+    if not markers_path.is_file():
+        arr = beat.utils.expand_layer(
+            markers=markers,
+            mfun=data.ffun,
+            endo_markers=[data.markers["ENDO_LV"][0], data.markers["ENDO_RV"][0]],
+            epi_markers=[data.markers["EPI"][0]],
+            endo_marker=1,
+            epi_marker=2,
+            endo_size=0.3,
+            epi_size=0.3,
+        )
 
-    markers.vector().set_local(arr)
+        markers.vector().set_local(arr)
 
-    with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
-        xdmf.write(markers)
+        with dolfin.XDMFFile(markers_path.as_posix()) as xdmf:
+            xdmf.write_checkpoint(
+                markers, "markers", 0.0, dolfin.XDMFFile.Encoding.HDF5, False
+            )
+
+    with dolfin.XDMFFile(markers_path.as_posix()) as xdmf:
+        xdmf.read_checkpoint(markers, "markers", 0)
 
     init_states = {
         0: model.mid.init_state_values(),

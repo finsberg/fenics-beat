@@ -54,20 +54,13 @@ all = [
 ]
 
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
-
-[tool.pytest.ini_options]
-addopts = [
-   "--cov=beat",
-   "--cov-report=html",
-   "--cov-report=term-missing",
-   "-v"
-]
-
 testpaths = [
     "tests"
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "skip_in_parallel: Skip test when running in parallel",
 ]
 
 [tool.ruff]

@@ -1,0 +1,22 @@
+name: Test package (MPI)
+
+on: [workflow_dispatch]
+
+jobs:
+
+  test-code:
+    # This code depends on the result of check-code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10   # Tests shouldn't use more than 10 minutes to run
+    container:
+      image: ghcr.io/scientificcomputing/fenics-gmsh:2024-02-19
+
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install package
+        run: python3 -m pip install -e .[test]
+
+      - name: Run tests
+        run: mpirun -n 2 python3 -m pytest -v  -m "not skip_in_parallel"
