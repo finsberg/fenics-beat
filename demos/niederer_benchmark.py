@@ -119,7 +119,7 @@ def define_conductivity_tensor(chi, C_m, mesh_unit):
     return M
 
 
-def main(dx=0.5, dt=0.05):
+def main(dx=0.5, dt=0.05, T=200.0):
     fun = model.forward_generalized_rush_larsen
     init_states = setup_initial_conditions()
     parameters = model.init_parameter_values(stim_amplitude=0.0)
@@ -161,7 +161,6 @@ def main(dx=0.5, dt=0.05):
         v_index=model.state_indices("V"),
     )
 
-    T = 2.0
     t = 0.0
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode, theta=0.0)
     output_dir = Path("output-niederer-benchmark")
@@ -231,7 +230,7 @@ def run_all():
 
 
 if __name__ == "__main__":
-    main(dx=0.5, dt=0.05)
+    main(dx=0.5, dt=0.05, T=2.0)
 
 # The activation times are saved in the file `output-niederer-benchmark/activation_times.json`.
 # The file contains a list of dictionaries, each dictionary contains the activation times for a specific dx and dt.
