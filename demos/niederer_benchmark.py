@@ -161,7 +161,7 @@ def main(dx=0.5, dt=0.05):
         v_index=model.state_indices("V"),
     )
 
-    T = 200
+    T = 2.0
     t = 0.0
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode, theta=0.0)
     output_dir = Path("output-niederer-benchmark")
@@ -224,10 +224,14 @@ def main(dx=0.5, dt=0.05):
         at_file_name.write_text(json.dumps(all_at, indent=2))
 
 
-if __name__ == "__main__":
+def run_all():
     for dx in [0.5, 0.2, 0.1]:
         for dt in [0.05, 0.01, 0.005]:
             main(dx=dx, dt=dt)
+
+
+if __name__ == "__main__":
+    main(dx=0.5, dt=0.05)
 
 # The activation times are saved in the file `output-niederer-benchmark/activation_times.json`.
 # The file contains a list of dictionaries, each dictionary contains the activation times for a specific dx and dt.
