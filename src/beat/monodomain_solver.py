@@ -84,9 +84,7 @@ class MonodomainSplittingSolver:
             return
 
         # Otherwise, we do another ode_step:
-        logger.info(
-            f"Corrective ODE step with t0={t:5f} and dt={(1.0 - theta) * dt:.5f}"
-        )
+        logger.info(f"Corrective ODE step with t0={t:5f} and dt={(1.0 - theta) * dt:.5f}")
 
         # To the correction step
         self.ode.step(t, (1.0 - theta) * dt)

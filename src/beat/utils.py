@@ -6,9 +6,31 @@ import numpy.typing as npt
 import numpy as np
 import ufl_legacy as ufl
 from contextlib import contextmanager
+from mpi4py import MPI as pyMPI
 
 
 logger = logging.getLogger(__name__)
+
+
+def mpi4py_comm(comm):
+    """Get mpi4py communicator"""
+    try:
+        return comm.tompi4py()
+    except AttributeError:
+        return comm
+
+
+def peval(f, *x):
+    """Parallel synced eval"""
+    try:
+        yloc = f(*x)
+    except RuntimeError:
+        yloc = np.inf * np.ones(f.value_shape())
+
+    comm = mpi4py_comm(f.function_space().mesh().mpi_comm())
+    yglob = np.zeros_like(yloc)
+    comm.Allreduce(yloc, yglob, op=pyMPI.MIN)
+    return yglob
 
 
 def expand_layer(
@@ -145,7 +167,6 @@ def local_project(
     if metadata is None:
         solver = dolfin.LocalSolver(a_proj, b_proj)
     else:
-
         with form_compiler_representation("quadrature"):
             solver = dolfin.LocalSolver(a_proj, b_proj)
 
