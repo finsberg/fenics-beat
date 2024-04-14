@@ -596,9 +596,7 @@ def rhs(states, t, parameters, values=None):
         (1 + 15212.593285654404 * np.exp(0.13458950201884254 * V))
         * (1 + 15212.593285654404 * np.exp(0.13458950201884254 * V))
     )
-    alpha_h = np.where(
-        V < -40, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * V), 0
-    )
+    alpha_h = np.where(V < -40, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * V), 0)
     beta_h = np.where(
         V < -40,
         310000 * np.exp(0.3485 * V) + 2.7 * np.exp(0.079 * V),
@@ -621,9 +619,7 @@ def rhs(states, t, parameters, values=None):
     )
     beta_j = np.where(
         V < -40,
-        0.02424
-        * np.exp(-0.01052 * V)
-        / (1 + 0.003960868339904256 * np.exp(-0.1378 * V)),
+        0.02424 * np.exp(-0.01052 * V) / (1 + 0.003960868339904256 * np.exp(-0.1378 * V)),
         0.6 * np.exp(0.057 * V) / (1 + 0.040762203978366204 * np.exp(-0.1 * V)),
     )
     tau_j = 1.0 / (alpha_j + beta_j)
@@ -702,11 +698,7 @@ def rhs(states, t, parameters, values=None):
         / (
             (K_mNa + Na_i)
             * (K_mk + K_o)
-            * (
-                1
-                + 0.0353 * np.exp(-F * V / (R * T))
-                + 0.1245 * np.exp(-0.1 * F * V / (R * T))
-            )
+            * (1 + 0.0353 * np.exp(-F * V / (R * T)) + 0.1245 * np.exp(-0.1 * F * V / (R * T)))
         )
     )
 
@@ -715,10 +707,7 @@ def rhs(states, t, parameters, values=None):
         K_NaCa
         * (
             Ca_o * (Na_i * Na_i * Na_i) * np.exp(F * gamma * V / (R * T))
-            - alpha
-            * (Na_o * Na_o * Na_o)
-            * Ca_i
-            * np.exp(F * (-1 + gamma) * V / (R * T))
+            - alpha * (Na_o * Na_o * Na_o) * Ca_i * np.exp(F * (-1 + gamma) * V / (R * T))
         )
         / (
             (1 + K_sat * np.exp(F * (-1 + gamma) * V / (R * T)))
@@ -731,9 +720,7 @@ def rhs(states, t, parameters, values=None):
     i_p_Ca = g_pCa * Ca_i / (K_pCa + Ca_i)
 
     # Expressions for the Potassium pump current component
-    i_p_K = (
-        g_pK * (-E_K + V) / (1 + 65.40521574193832 * np.exp(-0.16722408026755853 * V))
-    )
+    i_p_K = g_pK * (-E_K + V) / (1 + 65.40521574193832 * np.exp(-0.16722408026755853 * V))
 
     # Expressions for the Calcium dynamics component
     i_up = Vmax_up / (1 + (K_up * K_up) / (Ca_i * Ca_i))
@@ -746,12 +733,8 @@ def rhs(states, t, parameters, values=None):
         + i_xfer
     )
     f_JCa_i_free = 1.0 / (1 + Buf_c * K_buf_c / ((K_buf_c + Ca_i) * (K_buf_c + Ca_i)))
-    f_JCa_sr_free = 1.0 / (
-        1 + Buf_sr * K_buf_sr / ((K_buf_sr + Ca_SR) * (K_buf_sr + Ca_SR))
-    )
-    f_JCa_ss_free = 1.0 / (
-        1 + Buf_ss * K_buf_ss / ((K_buf_ss + Ca_ss) * (K_buf_ss + Ca_ss))
-    )
+    f_JCa_sr_free = 1.0 / (1 + Buf_sr * K_buf_sr / ((K_buf_sr + Ca_SR) * (K_buf_sr + Ca_SR)))
+    f_JCa_ss_free = 1.0 / (1 + Buf_ss * K_buf_ss / ((K_buf_ss + Ca_ss) * (K_buf_ss + Ca_ss)))
     values[12] = ddt_Ca_i_total * f_JCa_i_free
     k1 = k1_prime / kcasr
     k2 = k2_prime * kcasr
@@ -759,9 +742,7 @@ def rhs(states, t, parameters, values=None):
     values[13] = k4 * (1 - R_prime) - Ca_ss * R_prime * k2
     i_rel = V_rel * (-Ca_ss + Ca_SR) * O
     ddt_Ca_sr_total = -i_leak - i_rel + i_up
-    ddt_Ca_ss_total = (
-        V_sr * i_rel / V_ss - V_c * i_xfer / V_ss - Cm * i_CaL / (2 * F * V_ss)
-    )
+    ddt_Ca_ss_total = V_sr * i_rel / V_ss - V_c * i_xfer / V_ss - Cm * i_CaL / (2 * F * V_ss)
     values[14] = ddt_Ca_sr_total * f_JCa_sr_free
     values[15] = ddt_Ca_ss_total * f_JCa_ss_free
 
@@ -794,9 +775,7 @@ def rhs(states, t, parameters, values=None):
     )
 
     # Expressions for the Potassium dynamics component
-    values[18] = (
-        Cm * (-i_K1 - i_Kr - i_Ks - i_Stim - i_p_K - i_to + 2 * i_NaK) / (F * V_c)
-    )
+    values[18] = Cm * (-i_K1 - i_Kr - i_Ks - i_Stim - i_p_K - i_to + 2 * i_NaK) / (F * V_c)
 
     # Return results
     return values
@@ -902,22 +881,16 @@ def monitor(states, t, parameters, monitored=None):
     monitored[3] = 0.5 * R * T * np.log(Ca_o / Ca_i) / F
 
     # Expressions for the Inward rectifier potassium current component
-    monitored[4] = 0.1 / (
-        1 + 6.14421235332821e-06 * np.exp(0.06 * V - 0.06 * monitored[1])
-    )
+    monitored[4] = 0.1 / (1 + 6.14421235332821e-06 * np.exp(0.06 * V - 0.06 * monitored[1]))
     monitored[5] = (
         0.36787944117144233 * np.exp(0.1 * V - 0.1 * monitored[1])
         + 3.0606040200802673 * np.exp(0.0002 * V - 0.0002 * monitored[1])
     ) / (1 + np.exp(0.5 * monitored[1] - 0.5 * V))
     monitored[6] = monitored[4] / (monitored[4] + monitored[5])
-    monitored[7] = (
-        0.4303314829119352 * g_K1 * np.sqrt(K_o) * (-monitored[1] + V) * monitored[6]
-    )
+    monitored[7] = 0.4303314829119352 * g_K1 * np.sqrt(K_o) * (-monitored[1] + V) * monitored[6]
 
     # Expressions for the Rapid time dependent potassium current component
-    monitored[8] = (
-        0.4303314829119352 * g_Kr * np.sqrt(K_o) * (-monitored[1] + V) * Xr1 * Xr2
-    )
+    monitored[8] = 0.4303314829119352 * g_Kr * np.sqrt(K_o) * (-monitored[1] + V) * Xr1 * Xr2
 
     # Expressions for the Xr1 gate component
     monitored[9] = 1.0 / (1 + np.exp(-26 / 7 - V / 7))
@@ -961,9 +934,7 @@ def monitor(states, t, parameters, monitored=None):
         (1 + 15212.593285654404 * np.exp(0.13458950201884254 * V))
         * (1 + 15212.593285654404 * np.exp(0.13458950201884254 * V))
     )
-    monitored[28] = np.where(
-        V < -40, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * V), 0
-    )
+    monitored[28] = np.where(V < -40, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * V), 0)
     monitored[29] = np.where(
         V < -40,
         310000 * np.exp(0.3485 * V) + 2.7 * np.exp(0.079 * V),
@@ -986,9 +957,7 @@ def monitor(states, t, parameters, monitored=None):
     )
     monitored[33] = np.where(
         V < -40,
-        0.02424
-        * np.exp(-0.01052 * V)
-        / (1 + 0.003960868339904256 * np.exp(-0.1378 * V)),
+        0.02424 * np.exp(-0.01052 * V) / (1 + 0.003960868339904256 * np.exp(-0.1378 * V)),
         0.6 * np.exp(0.057 * V) / (1 + 0.040762203978366204 * np.exp(-0.1 * V)),
     )
     monitored[34] = 1.0 / (monitored[32] + monitored[33])
@@ -1051,9 +1020,7 @@ def monitor(states, t, parameters, monitored=None):
 
     # Expressions for the s gate component
     monitored[50] = 1.0 / (1 + np.exp(4 + V / 5))
-    monitored[51] = (
-        3 + 5 / (1 + np.exp(-4 + V / 5)) + 85 * np.exp(-((45 + V) * (45 + V)) / 320)
-    )
+    monitored[51] = 3 + 5 / (1 + np.exp(-4 + V / 5)) + 85 * np.exp(-((45 + V) * (45 + V)) / 320)
     monitored[83] = (-s + monitored[50]) / monitored[51]
 
     # Expressions for the r gate component
@@ -1069,11 +1036,7 @@ def monitor(states, t, parameters, monitored=None):
         / (
             (K_mNa + Na_i)
             * (K_mk + K_o)
-            * (
-                1
-                + 0.0353 * np.exp(-F * V / (R * T))
-                + 0.1245 * np.exp(-0.1 * F * V / (R * T))
-            )
+            * (1 + 0.0353 * np.exp(-F * V / (R * T)) + 0.1245 * np.exp(-0.1 * F * V / (R * T)))
         )
     )
 
@@ -1082,10 +1045,7 @@ def monitor(states, t, parameters, monitored=None):
         K_NaCa
         * (
             Ca_o * (Na_i * Na_i * Na_i) * np.exp(F * gamma * V / (R * T))
-            - alpha
-            * (Na_o * Na_o * Na_o)
-            * Ca_i
-            * np.exp(F * (-1 + gamma) * V / (R * T))
+            - alpha * (Na_o * Na_o * Na_o) * Ca_i * np.exp(F * (-1 + gamma) * V / (R * T))
         )
         / (
             (1 + K_sat * np.exp(F * (-1 + gamma) * V / (R * T)))
@@ -1099,9 +1059,7 @@ def monitor(states, t, parameters, monitored=None):
 
     # Expressions for the Potassium pump current component
     monitored[57] = (
-        g_pK
-        * (-monitored[1] + V)
-        / (1 + 65.40521574193832 * np.exp(-0.16722408026755853 * V))
+        g_pK * (-monitored[1] + V) / (1 + 65.40521574193832 * np.exp(-0.16722408026755853 * V))
     )
 
     # Expressions for the Calcium dynamics component
@@ -1115,20 +1073,13 @@ def monitor(states, t, parameters, monitored=None):
         + monitored[60]
     )
     monitored[63] = 1.0 / (1 + Buf_c * K_buf_c / ((K_buf_c + Ca_i) * (K_buf_c + Ca_i)))
-    monitored[64] = 1.0 / (
-        1 + Buf_sr * K_buf_sr / ((K_buf_sr + Ca_SR) * (K_buf_sr + Ca_SR))
-    )
-    monitored[65] = 1.0 / (
-        1 + Buf_ss * K_buf_ss / ((K_buf_ss + Ca_ss) * (K_buf_ss + Ca_ss))
-    )
+    monitored[64] = 1.0 / (1 + Buf_sr * K_buf_sr / ((K_buf_sr + Ca_SR) * (K_buf_sr + Ca_SR)))
+    monitored[65] = 1.0 / (1 + Buf_ss * K_buf_ss / ((K_buf_ss + Ca_ss) * (K_buf_ss + Ca_ss)))
     monitored[85] = monitored[62] * monitored[63]
     monitored[66] = k1_prime / monitored[61]
     monitored[67] = k2_prime * monitored[61]
     monitored[68] = (
-        (Ca_ss * Ca_ss)
-        * R_prime
-        * monitored[66]
-        / (k3 + (Ca_ss * Ca_ss) * monitored[66])
+        (Ca_ss * Ca_ss) * R_prime * monitored[66] / (k3 + (Ca_ss * Ca_ss) * monitored[66])
     )
     monitored[86] = k4 * (1 - R_prime) - Ca_ss * R_prime * monitored[67]
     monitored[69] = V_rel * (-Ca_ss + Ca_SR) * monitored[68]
@@ -1143,9 +1094,7 @@ def monitor(states, t, parameters, monitored=None):
 
     # Expressions for the Sodium dynamics component
     monitored[89] = (
-        Cm
-        * (-monitored[22] - monitored[35] - 3 * monitored[54] - 3 * monitored[55])
-        / (F * V_c)
+        Cm * (-monitored[22] - monitored[35] - 3 * monitored[54] - 3 * monitored[55]) / (F * V_c)
     )
 
     # Expressions for the Membrane component
@@ -1344,9 +1293,7 @@ def forward_explicit_euler(states, t, dt, parameters):
         (1 + 15212.593285654404 * np.exp(0.13458950201884254 * V))
         * (1 + 15212.593285654404 * np.exp(0.13458950201884254 * V))
     )
-    alpha_h = np.where(
-        V < -40, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * V), 0
-    )
+    alpha_h = np.where(V < -40, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * V), 0)
     beta_h = np.where(
         V < -40,
         310000 * np.exp(0.3485 * V) + 2.7 * np.exp(0.079 * V),
@@ -1370,9 +1317,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     )
     beta_j = np.where(
         V < -40,
-        0.02424
-        * np.exp(-0.01052 * V)
-        / (1 + 0.003960868339904256 * np.exp(-0.1378 * V)),
+        0.02424 * np.exp(-0.01052 * V) / (1 + 0.003960868339904256 * np.exp(-0.1378 * V)),
         0.6 * np.exp(0.057 * V) / (1 + 0.040762203978366204 * np.exp(-0.1 * V)),
     )
     tau_j = 1.0 / (alpha_j + beta_j)
@@ -1458,11 +1403,7 @@ def forward_explicit_euler(states, t, dt, parameters):
         / (
             (K_mNa + Na_i)
             * (K_mk + K_o)
-            * (
-                1
-                + 0.0353 * np.exp(-F * V / (R * T))
-                + 0.1245 * np.exp(-0.1 * F * V / (R * T))
-            )
+            * (1 + 0.0353 * np.exp(-F * V / (R * T)) + 0.1245 * np.exp(-0.1 * F * V / (R * T)))
         )
     )
 
@@ -1471,10 +1412,7 @@ def forward_explicit_euler(states, t, dt, parameters):
         K_NaCa
         * (
             Ca_o * (Na_i * Na_i * Na_i) * np.exp(F * gamma * V / (R * T))
-            - alpha
-            * (Na_o * Na_o * Na_o)
-            * Ca_i
-            * np.exp(F * (-1 + gamma) * V / (R * T))
+            - alpha * (Na_o * Na_o * Na_o) * Ca_i * np.exp(F * (-1 + gamma) * V / (R * T))
         )
         / (
             (1 + K_sat * np.exp(F * (-1 + gamma) * V / (R * T)))
@@ -1487,9 +1425,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     i_p_Ca = g_pCa * Ca_i / (K_pCa + Ca_i)
 
     # Expressions for the Potassium pump current component
-    i_p_K = (
-        g_pK * (-E_K + V) / (1 + 65.40521574193832 * np.exp(-0.16722408026755853 * V))
-    )
+    i_p_K = g_pK * (-E_K + V) / (1 + 65.40521574193832 * np.exp(-0.16722408026755853 * V))
 
     # Expressions for the Calcium dynamics component
     i_up = Vmax_up / (1 + (K_up * K_up) / (Ca_i * Ca_i))
@@ -1502,12 +1438,8 @@ def forward_explicit_euler(states, t, dt, parameters):
         + i_xfer
     )
     f_JCa_i_free = 1.0 / (1 + Buf_c * K_buf_c / ((K_buf_c + Ca_i) * (K_buf_c + Ca_i)))
-    f_JCa_sr_free = 1.0 / (
-        1 + Buf_sr * K_buf_sr / ((K_buf_sr + Ca_SR) * (K_buf_sr + Ca_SR))
-    )
-    f_JCa_ss_free = 1.0 / (
-        1 + Buf_ss * K_buf_ss / ((K_buf_ss + Ca_ss) * (K_buf_ss + Ca_ss))
-    )
+    f_JCa_sr_free = 1.0 / (1 + Buf_sr * K_buf_sr / ((K_buf_sr + Ca_SR) * (K_buf_sr + Ca_SR)))
+    f_JCa_ss_free = 1.0 / (1 + Buf_ss * K_buf_ss / ((K_buf_ss + Ca_ss) * (K_buf_ss + Ca_ss)))
     dCa_i_dt = ddt_Ca_i_total * f_JCa_i_free
     states[12] = dt * dCa_i_dt + Ca_i
     k1 = k1_prime / kcasr
@@ -1517,9 +1449,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     states[13] = dt * dR_prime_dt + R_prime
     i_rel = V_rel * (-Ca_ss + Ca_SR) * O
     ddt_Ca_sr_total = -i_leak - i_rel + i_up
-    ddt_Ca_ss_total = (
-        V_sr * i_rel / V_ss - V_c * i_xfer / V_ss - Cm * i_CaL / (2 * F * V_ss)
-    )
+    ddt_Ca_ss_total = V_sr * i_rel / V_ss - V_c * i_xfer / V_ss - Cm * i_CaL / (2 * F * V_ss)
     dCa_SR_dt = ddt_Ca_sr_total * f_JCa_sr_free
     states[14] = dt * dCa_SR_dt + Ca_SR
     dCa_ss_dt = ddt_Ca_ss_total * f_JCa_ss_free
@@ -1676,9 +1606,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     tau_xr1 = alpha_xr1 * beta_xr1
     dXr1_dt = (-Xr1 + xr1_inf) / tau_xr1
     dXr1_dt_linearized = -1 / tau_xr1
-    states[0] = (
-        -1 + np.exp(dt * dXr1_dt_linearized)
-    ) * dXr1_dt / dXr1_dt_linearized + Xr1
+    states[0] = (-1 + np.exp(dt * dXr1_dt_linearized)) * dXr1_dt / dXr1_dt_linearized + Xr1
 
     # Expressions for the Xr2 gate component
     xr2_inf = 1.0 / (1 + np.exp(11 / 3 + V / 24))
@@ -1687,9 +1615,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     tau_xr2 = alpha_xr2 * beta_xr2
     dXr2_dt = (-Xr2 + xr2_inf) / tau_xr2
     dXr2_dt_linearized = -1 / tau_xr2
-    states[1] = (
-        -1 + np.exp(dt * dXr2_dt_linearized)
-    ) * dXr2_dt / dXr2_dt_linearized + Xr2
+    states[1] = (-1 + np.exp(dt * dXr2_dt_linearized)) * dXr2_dt / dXr2_dt_linearized + Xr2
 
     # Expressions for the Slow time dependent potassium current component
     i_Ks = g_Ks * (Xs * Xs) * (-E_Ks + V)
@@ -1723,9 +1649,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (1 + 15212.593285654404 * np.exp(0.13458950201884254 * V))
         * (1 + 15212.593285654404 * np.exp(0.13458950201884254 * V))
     )
-    alpha_h = np.where(
-        V < -40, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * V), 0
-    )
+    alpha_h = np.where(V < -40, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * V), 0)
     beta_h = np.where(
         V < -40,
         310000 * np.exp(0.3485 * V) + 2.7 * np.exp(0.079 * V),
@@ -1750,9 +1674,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     )
     beta_j = np.where(
         V < -40,
-        0.02424
-        * np.exp(-0.01052 * V)
-        / (1 + 0.003960868339904256 * np.exp(-0.1378 * V)),
+        0.02424 * np.exp(-0.01052 * V) / (1 + 0.003960868339904256 * np.exp(-0.1378 * V)),
         0.6 * np.exp(0.057 * V) / (1 + 0.040762203978366204 * np.exp(-0.1 * V)),
     )
     tau_j = 1.0 / (alpha_j + beta_j)
@@ -1815,9 +1737,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     tau_fCass = 2 + 80 / (1 + 400.0 * (Ca_ss * Ca_ss))
     dfCass_dt = (-fCass + fCass_inf) / tau_fCass
     dfCass_dt_linearized = -1 / tau_fCass
-    states[9] = (
-        -1 + np.exp(dt * dfCass_dt_linearized)
-    ) * dfCass_dt / dfCass_dt_linearized + fCass
+    states[9] = (-1 + np.exp(dt * dfCass_dt_linearized)) * dfCass_dt / dfCass_dt_linearized + fCass
 
     # Expressions for the Calcium background current component
     i_b_Ca = g_bca * (-E_Ca + V)
@@ -1847,11 +1767,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         / (
             (K_mNa + Na_i)
             * (K_mk + K_o)
-            * (
-                1
-                + 0.0353 * np.exp(-F * V / (R * T))
-                + 0.1245 * np.exp(-0.1 * F * V / (R * T))
-            )
+            * (1 + 0.0353 * np.exp(-F * V / (R * T)) + 0.1245 * np.exp(-0.1 * F * V / (R * T)))
         )
     )
 
@@ -1860,10 +1776,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         K_NaCa
         * (
             Ca_o * (Na_i * Na_i * Na_i) * np.exp(F * gamma * V / (R * T))
-            - alpha
-            * (Na_o * Na_o * Na_o)
-            * Ca_i
-            * np.exp(F * (-1 + gamma) * V / (R * T))
+            - alpha * (Na_o * Na_o * Na_o) * Ca_i * np.exp(F * (-1 + gamma) * V / (R * T))
         )
         / (
             (1 + K_sat * np.exp(F * (-1 + gamma) * V / (R * T)))
@@ -1876,9 +1789,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     i_p_Ca = g_pCa * Ca_i / (K_pCa + Ca_i)
 
     # Expressions for the Potassium pump current component
-    i_p_K = (
-        g_pK * (-E_K + V) / (1 + 65.40521574193832 * np.exp(-0.16722408026755853 * V))
-    )
+    i_p_K = g_pK * (-E_K + V) / (1 + 65.40521574193832 * np.exp(-0.16722408026755853 * V))
 
     # Expressions for the Calcium dynamics component
     i_up = Vmax_up / (1 + (K_up * K_up) / (Ca_i * Ca_i))
@@ -1891,12 +1802,8 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         + i_xfer
     )
     f_JCa_i_free = 1.0 / (1 + Buf_c * K_buf_c / ((K_buf_c + Ca_i) * (K_buf_c + Ca_i)))
-    f_JCa_sr_free = 1.0 / (
-        1 + Buf_sr * K_buf_sr / ((K_buf_sr + Ca_SR) * (K_buf_sr + Ca_SR))
-    )
-    f_JCa_ss_free = 1.0 / (
-        1 + Buf_ss * K_buf_ss / ((K_buf_ss + Ca_ss) * (K_buf_ss + Ca_ss))
-    )
+    f_JCa_sr_free = 1.0 / (1 + Buf_sr * K_buf_sr / ((K_buf_sr + Ca_SR) * (K_buf_sr + Ca_SR)))
+    f_JCa_ss_free = 1.0 / (1 + Buf_ss * K_buf_ss / ((K_buf_ss + Ca_ss) * (K_buf_ss + Ca_ss)))
     dCa_i_dt = ddt_Ca_i_total * f_JCa_i_free
     dE_Ca_dCa_i = -0.5 * R * T / (F * Ca_i)
     dddt_Ca_i_total_di_NaCa = Cm / (F * V_c)
@@ -1927,9 +1834,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
             * ((Km_Nai * Km_Nai * Km_Nai) + (Na_o * Na_o * Na_o))
         )
     )
-    di_p_Ca_dCa_i = g_pCa / (K_pCa + Ca_i) - g_pCa * Ca_i / (
-        (K_pCa + Ca_i) * (K_pCa + Ca_i)
-    )
+    di_p_Ca_dCa_i = g_pCa / (K_pCa + Ca_i) - g_pCa * Ca_i / ((K_pCa + Ca_i) * (K_pCa + Ca_i))
     di_up_dCa_i = (
         2
         * Vmax_up
@@ -1960,18 +1865,14 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     states[13] = (
         np.where(
             np.abs(dR_prime_dt_linearized) > 1e-08,
-            (-1 + np.exp(dt * dR_prime_dt_linearized))
-            * dR_prime_dt
-            / dR_prime_dt_linearized,
+            (-1 + np.exp(dt * dR_prime_dt_linearized)) * dR_prime_dt / dR_prime_dt_linearized,
             dt * dR_prime_dt,
         )
         + R_prime
     )
     i_rel = V_rel * (-Ca_ss + Ca_SR) * O
     ddt_Ca_sr_total = -i_leak - i_rel + i_up
-    ddt_Ca_ss_total = (
-        V_sr * i_rel / V_ss - V_c * i_xfer / V_ss - Cm * i_CaL / (2 * F * V_ss)
-    )
+    ddt_Ca_ss_total = V_sr * i_rel / V_ss - V_c * i_xfer / V_ss - Cm * i_CaL / (2 * F * V_ss)
     dCa_SR_dt = ddt_Ca_sr_total * f_JCa_sr_free
     dO_dk1 = (Ca_ss * Ca_ss) * R_prime / (k3 + (Ca_ss * Ca_ss) * k1) - np.power(
         Ca_ss, 4
@@ -1998,9 +1899,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
             * (Ca_SR * Ca_SR * Ca_SR)
         )
     )
-    di_rel_dCa_SR = (
-        V_rel * O + V_rel * (-Ca_ss + Ca_SR) * dO_dk1 * dk1_dkcasr * dkcasr_dCa_SR
-    )
+    di_rel_dCa_SR = V_rel * O + V_rel * (-Ca_ss + Ca_SR) * dO_dk1 * dk1_dkcasr * dkcasr_dCa_SR
     di_rel_dO = V_rel * (-Ca_ss + Ca_SR)
     dCa_SR_dt_linearized = (
         -V_leak - di_rel_dCa_SR - dO_dk1 * di_rel_dO * dk1_dkcasr * dkcasr_dCa_SR
@@ -2072,28 +1971,15 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     di_NaK_dNa_i = K_o * P_NaK / (
         (K_mNa + Na_i)
         * (K_mk + K_o)
-        * (
-            1
-            + 0.0353 * np.exp(-F * V / (R * T))
-            + 0.1245 * np.exp(-0.1 * F * V / (R * T))
-        )
+        * (1 + 0.0353 * np.exp(-F * V / (R * T)) + 0.1245 * np.exp(-0.1 * F * V / (R * T)))
     ) - K_o * P_NaK * Na_i / (
         ((K_mNa + Na_i) * (K_mNa + Na_i))
         * (K_mk + K_o)
-        * (
-            1
-            + 0.0353 * np.exp(-F * V / (R * T))
-            + 0.1245 * np.exp(-0.1 * F * V / (R * T))
-        )
+        * (1 + 0.0353 * np.exp(-F * V / (R * T)) + 0.1245 * np.exp(-0.1 * F * V / (R * T)))
     )
     dNa_i_dt_linearized = (
         Cm
-        * (
-            -3 * di_NaCa_dNa_i
-            - 3 * di_NaK_dNa_i
-            + g_bna * dE_Na_dNa_i
-            - dE_Na_dNa_i * di_Na_dE_Na
-        )
+        * (-3 * di_NaCa_dNa_i - 3 * di_NaK_dNa_i + g_bna * dE_Na_dNa_i - dE_Na_dNa_i * di_Na_dE_Na)
         / (F * V_c)
     )
     states[16] = Na_i + np.where(
@@ -2140,9 +2026,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     ) / (1 + np.exp(0.5 * E_K - 0.5 * V)) + 0.5 * (
         0.36787944117144233 * np.exp(0.1 * V - 0.1 * E_K)
         + 3.0606040200802673 * np.exp(0.0002 * V - 0.0002 * E_K)
-    ) * np.exp(
-        0.5 * E_K - 0.5 * V
-    ) / (
+    ) * np.exp(0.5 * E_K - 0.5 * V) / (
         (1 + np.exp(0.5 * E_K - 0.5 * V)) * (1 + np.exp(0.5 * E_K - 0.5 * V))
     )
     di_CaL_dV = (
@@ -2199,12 +2083,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     di_Ks_dV = g_Ks * (Xs * Xs)
     di_Na_dV = g_Na * (m * m * m) * h * j
     di_NaCa_dV = K_NaCa * (
-        Ca_o
-        * F
-        * gamma
-        * (Na_i * Na_i * Na_i)
-        * np.exp(F * gamma * V / (R * T))
-        / (R * T)
+        Ca_o * F * gamma * (Na_i * Na_i * Na_i) * np.exp(F * gamma * V / (R * T)) / (R * T)
         - F
         * alpha
         * (Na_o * Na_o * Na_o)
@@ -2216,14 +2095,10 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (1 + K_sat * np.exp(F * (-1 + gamma) * V / (R * T)))
         * (Ca_o + Km_Ca)
         * ((Km_Nai * Km_Nai * Km_Nai) + (Na_o * Na_o * Na_o))
-    ) - F * K_NaCa * K_sat * (
-        -1 + gamma
-    ) * (
+    ) - F * K_NaCa * K_sat * (-1 + gamma) * (
         Ca_o * (Na_i * Na_i * Na_i) * np.exp(F * gamma * V / (R * T))
         - alpha * (Na_o * Na_o * Na_o) * Ca_i * np.exp(F * (-1 + gamma) * V / (R * T))
-    ) * np.exp(
-        F * (-1 + gamma) * V / (R * T)
-    ) / (
+    ) * np.exp(F * (-1 + gamma) * V / (R * T)) / (
         R
         * T
         * (
@@ -2245,16 +2120,8 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
             (K_mNa + Na_i)
             * (K_mk + K_o)
             * (
-                (
-                    1
-                    + 0.0353 * np.exp(-F * V / (R * T))
-                    + 0.1245 * np.exp(-0.1 * F * V / (R * T))
-                )
-                * (
-                    1
-                    + 0.0353 * np.exp(-F * V / (R * T))
-                    + 0.1245 * np.exp(-0.1 * F * V / (R * T))
-                )
+                (1 + 0.0353 * np.exp(-F * V / (R * T)) + 0.1245 * np.exp(-0.1 * F * V / (R * T)))
+                * (1 + 0.0353 * np.exp(-F * V / (R * T)) + 0.1245 * np.exp(-0.1 * F * V / (R * T)))
             )
         )
     )
@@ -2277,8 +2144,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         - di_Na_dV
         - di_p_K_dV
         - di_to_dV
-        - (dalpha_K1_dV * dxK1_inf_dalpha_K1 + dbeta_K1_dV * dxK1_inf_dbeta_K1)
-        * di_K1_dxK1_inf
+        - (dalpha_K1_dV * dxK1_inf_dalpha_K1 + dbeta_K1_dV * dxK1_inf_dbeta_K1) * di_K1_dxK1_inf
     )
     states[17] = (
         np.where(
@@ -2307,9 +2173,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     ) / (1 + np.exp(0.5 * E_K - 0.5 * V)) - 0.5 * (
         0.36787944117144233 * np.exp(0.1 * V - 0.1 * E_K)
         + 3.0606040200802673 * np.exp(0.0002 * V - 0.0002 * E_K)
-    ) * np.exp(
-        0.5 * E_K - 0.5 * V
-    ) / (
+    ) * np.exp(0.5 * E_K - 0.5 * V) / (
         (1 + np.exp(0.5 * E_K - 0.5 * V)) * (1 + np.exp(0.5 * E_K - 0.5 * V))
     )
     di_K1_dE_K = -0.4303314829119352 * g_K1 * np.sqrt(

@@ -43,9 +43,7 @@ class BidomainModel(BaseModel):
         if use_R:
             Re = dolfin.FiniteElement("R", self._mesh.ufl_cell(), 0)
             dolfin.FunctionSpace(self._mesh, "R", 0)
-            self.VUR = dolfin.FunctionSpace(
-                self._mesh, dolfin.MixedElement((Ve, Ue, Re))
-            )
+            self.VUR = dolfin.FunctionSpace(self._mesh, dolfin.MixedElement((Ve, Ue, Re)))
         else:
             self.VUR = dolfin.FunctionSpace(self._mesh, dolfin.MixedElement((Ve, Ue)))
 
@@ -149,12 +147,7 @@ class BidomainModel(BaseModel):
             ufl.inner(M_i * ufl.grad(v_mid), ufl.grad(q)) * dz()
             + ufl.inner((M_i + M_e) * ufl.grad(u), ufl.grad(q)) * dz()
         )
-        G = (
-            Dt_v_k_n * w * dz()
-            + k_n * theta_parabolic
-            + k_n * theta_elliptic
-            - k_n * rhs
-        )
+        G = Dt_v_k_n * w * dz() + k_n * theta_parabolic + k_n * theta_elliptic - k_n * rhs
 
         if use_R:
             G += k_n * (lamda * u + l * q) * dz()

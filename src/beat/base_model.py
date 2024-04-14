@@ -56,17 +56,14 @@ class BaseModel(abc.ABC):
 
         logger.debug("Preassembling monodomain matrix (and initializing vector)")
         self._lhs_matrix = dolfin.assemble(self._lhs)
-        self._rhs_vector = dolfin.Vector(
-            self._mesh.mpi_comm(), self._lhs_matrix.size(0)
-        )
+        self._rhs_vector = dolfin.Vector(self._mesh.mpi_comm(), self._lhs_matrix.size(0))
         self._lhs_matrix.init_vector(self._rhs_vector, 0)
 
         # Create linear solver (based on parameter choices)
         self.linear_solver, self._update_solver = self._create_linear_solver()
 
     @abc.abstractmethod
-    def _setup_state_space(self) -> None:
-        ...
+    def _setup_state_space(self) -> None: ...
 
     def _create_linear_solver(self):
         "Helper function for creating linear solver based on parameters."
@@ -108,12 +105,10 @@ class BaseModel(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def state(self) -> dolfin.Function:
-        ...
+    def state(self) -> dolfin.Function: ...
 
     @abc.abstractmethod
-    def assign_previous(self) -> None:
-        ...
+    def assign_previous(self) -> None: ...
 
     @staticmethod
     def default_parameters():

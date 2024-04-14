@@ -3,9 +3,7 @@ import beat
 import numpy as np
 
 
-@pytest.mark.parametrize(
-    "rhs", ("forward_explicit_euler", "forward_generalized_rush_larsen")
-)
+@pytest.mark.parametrize("rhs", ("forward_explicit_euler", "forward_generalized_rush_larsen"))
 @pytest.mark.parametrize("model", beat.cellmodels.all_cellmodels())
 def test_all_cellmodels(rhs, model):
     states = model.init_state_values()

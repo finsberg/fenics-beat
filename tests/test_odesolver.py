@@ -152,9 +152,7 @@ def test_assignment_ode():
     assert np.allclose(ode.full_values[v_index, :], 13.0)
 
 
-@pytest.mark.skipif(
-    dolfin.MPI.comm_world.size > 1, reason="Need to be fixed for parallel"
-)
+@pytest.mark.skipif(dolfin.MPI.comm_world.size > 1, reason="Need to be fixed for parallel")
 def test_ode_with_markers_3D_to_and_from_dolfin():
     model = beat.cellmodels.tentusscher_panfilov_2006
     mesh = dolfin.UnitCubeMesh(3, 3, 3)

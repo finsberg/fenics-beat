@@ -10,9 +10,7 @@ def test_bidomain_model():
     theta = 0.5
     mesh = dolfin.UnitSquareMesh(N, N)
     time = dolfin.Constant(0.0)
-    ac_str = (
-        "cos(t)*cos(pi*x[0])*cos(pi*x[1]) + pow(pi, 2)*cos(pi*x[0])*cos(pi*x[1])*sin(t)"
-    )
+    ac_str = "cos(t)*cos(pi*x[0])*cos(pi*x[1]) + pow(pi, 2)*cos(pi*x[0])*cos(pi*x[1])*sin(t)"
     stimulus = dolfin.Expression(ac_str, t=time, degree=5)
     M_i = 1.0
     M_e = 1.0
