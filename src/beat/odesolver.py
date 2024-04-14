@@ -54,7 +54,9 @@ class ODESystemSolver:
         return self.states.shape[0]
 
     def step(self, t0: float, dt: float) -> None:
-        self.states[:] = self.fun(states=self.states, t=t0, parameters=self.parameters, dt=dt)
+        self.states[:] = self.fun(
+            states=self.states, t=t0, parameters=self.parameters, dt=dt
+        )
 
 
 class BaseDolfinODESolver(abc.ABC):
@@ -173,7 +175,9 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
 
     def __post_init__(self):
         if self.v_ode.vector().size() != self.markers.vector().size():
-            raise RuntimeError("Marker and voltage need to be in the same function space")
+            raise RuntimeError(
+                "Marker and voltage need to be in the same function space"
+            )
 
         self._marker_values = tuple(self.init_states.keys())
         self._num_points = {}
@@ -203,7 +207,8 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
 
     def _initialize_full_values(self):
         self._all_states_equal_size = (
-            np.array(tuple(self.num_states.values())) == tuple(self.num_states.values())[0]
+            np.array(tuple(self.num_states.values()))
+            == tuple(self.num_states.values())[0]
         ).all()
         if self._all_states_equal_size:
             self._full_values = np.zeros(
