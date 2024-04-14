@@ -55,9 +55,7 @@ def test_monodomain_splitting_analytic(odespace):
     pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
 
     family, degree = odespace.split("_")
-    element = dolfin.FiniteElement(
-        family, mesh.ufl_cell(), int(degree), quad_scheme="default"
-    )
+    element = dolfin.FiniteElement(family, mesh.ufl_cell(), int(degree), quad_scheme="default")
     V_ode = dolfin.FunctionSpace(mesh, element)
     v_ode = dolfin.Function(V_ode)
 
@@ -97,7 +95,6 @@ def test_monodomain_splitting_analytic(odespace):
     ],
 )
 def test_monodomain_splitting_spatial_convergence(odespace):
-
     # Exact solutions
     v_exact_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*sin(t)"
     s_exact_str = "-cos(2*pi*x[0])*cos(2*pi*x[1])*cos(t)"
@@ -286,9 +283,7 @@ def test_monodomain_splitting_analytic_multiODE(odespace):
     pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
 
     family, degree = odespace.split("_")
-    element = dolfin.FiniteElement(
-        family, mesh.ufl_cell(), int(degree), quad_scheme="default"
-    )
+    element = dolfin.FiniteElement(family, mesh.ufl_cell(), int(degree), quad_scheme="default")
     V_ode = dolfin.FunctionSpace(mesh, element)
     v_ode = dolfin.Function(V_ode)
 

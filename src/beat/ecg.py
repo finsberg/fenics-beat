@@ -21,9 +21,7 @@ def ecg_recovery(
 
     r3 = ufl.sqrt((r**2)) ** 3
     # https://carp.medunigraz.at/knowledge-base/tissue-scale-ep.html
-    return (1 / (4 * ufl.pi * sigma_b)) * dolfin.assemble(
-        (ufl.inner(ufl.grad(v), r) / r3) * dx
-    )
+    return (1 / (4 * ufl.pi * sigma_b)) * dolfin.assemble((ufl.inner(ufl.grad(v), r) / r3) * dx)
 
 
 def _check_attr(attr: np.ndarray | None):

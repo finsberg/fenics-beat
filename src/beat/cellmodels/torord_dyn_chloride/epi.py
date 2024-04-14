@@ -1185,9 +1185,7 @@ def rhs(states, t, parameters, values=None):
     allo_i = 1.0 / (1 + (KmCaAct * KmCaAct) / (cai * cai))
     JncxNa_i = E3_i * k4pp_i - E2_i * k3pp_i - 3 * E1_i * k8_i + 3 * E4_i * k7_i
     JncxCa_i = E2_i * k2_i - E1_i * k1_i
-    Gncx = np.where(
-        celltype == 1, 1.1 * Gncx_b, np.where(celltype == 2, 1.4 * Gncx_b, Gncx_b)
-    )
+    Gncx = np.where(celltype == 1, 1.1 * Gncx_b, np.where(celltype == 2, 1.4 * Gncx_b, Gncx_b))
     INaCa_i = (1 - INaCa_fractionSS) * (zca * JncxCa_i + zna * JncxNa_i) * Gncx * allo_i
     h1_ss = 1 + (1 + hna) * nass / kna3
     h2_ss = hna * nass / (kna3 * h1_ss)
@@ -1222,9 +1220,7 @@ def rhs(states, t, parameters, values=None):
     E3_ss = x3_ss / (x1_ss + x2_ss + x3_ss + x4_ss)
     E4_ss = x4_ss / (x1_ss + x2_ss + x3_ss + x4_ss)
     allo_ss = 1.0 / (1 + (KmCaAct * KmCaAct) / (cass * cass))
-    JncxNa_ss = (
-        E3_ss * k4pp_ss - E2_ss * k3pp_ss - 3 * E1_ss * k8_ss + 3 * E4_ss * k7_ss
-    )
+    JncxNa_ss = E3_ss * k4pp_ss - E2_ss * k3pp_ss - 3 * E1_ss * k8_ss + 3 * E4_ss * k7_ss
     JncxCa_ss = E2_ss * k2_ss - E1_ss * k1_ss
     INaCa_ss = INaCa_fractionSS * (zca * JncxCa_ss + zna * JncxNa_ss) * Gncx * allo_ss
 
@@ -1294,9 +1290,7 @@ def rhs(states, t, parameters, values=None):
     E4 = x4 / (x1 + x2 + x3 + x4)
     JnakNa = -3 * E2 * b3 + 3 * E1 * a3
     JnakK = -2 * E3 * a1 + 2 * E4 * b1
-    Pnak = np.where(
-        celltype == 1, 0.9 * Pnak_b, np.where(celltype == 2, 0.7 * Pnak_b, Pnak_b)
-    )
+    Pnak = np.where(celltype == 1, 0.9 * Pnak_b, np.where(celltype == 2, 0.7 * Pnak_b, Pnak_b))
     INaK = (zk * JnakK + zna * JnakNa) * Pnak
 
     # Expressions for the b component
@@ -1328,9 +1322,7 @@ def rhs(states, t, parameters, values=None):
     values[1] = (-d + dss) / td
     fss = 1.0 / (1 + 199.86038496778565 * np.exp(0.27056277056277056 * v))
     tff = 7 + 1.0 / (0.0045 * np.exp(-2 - v / 10) + 0.0045 * np.exp(2 + v / 10))
-    tfs = 1000 + 1.0 / (
-        3.5e-05 * np.exp(-5 / 4 - v / 4) + 3.5e-05 * np.exp(5 / 6 + v / 6)
-    )
+    tfs = 1000 + 1.0 / (3.5e-05 * np.exp(-5 / 4 - v / 4) + 3.5e-05 * np.exp(5 / 6 + v / 6))
     Afs = 1 - Aff
     values[2] = (-ff + fss) / tff
     values[3] = (-fs + fss) / tfs
@@ -1369,17 +1361,9 @@ def rhs(states, t, parameters, values=None):
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
-    PhiCaNa_ss = (
-        (-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass)
-        * vffrt
-        / (-1 + np.exp(vfrt))
-    )
-    PhiCaK_ss = (
-        (-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) * vffrt / (-1 + np.exp(vfrt))
-    )
-    PCa = np.where(
-        celltype == 1, 1.2 * PCa_b, np.where(celltype == 2, 2 * PCa_b, PCa_b)
-    )
+    PhiCaNa_ss = (-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass) * vffrt / (-1 + np.exp(vfrt))
+    PhiCaK_ss = (-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) * vffrt / (-1 + np.exp(vfrt))
+    PCa = np.where(celltype == 1, 1.2 * PCa_b, np.where(celltype == 2, 2 * PCa_b, PCa_b))
     PCap = 1.1 * PCa
     PCaNa = 0.00125 * PCa
     PCaK = 0.0003574 * PCa
@@ -1410,14 +1394,8 @@ def rhs(states, t, parameters, values=None):
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
-    PhiCaNa_i = (
-        (-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai)
-        * vffrt
-        / (-1 + np.exp(vfrt))
-    )
-    PhiCaK_i = (
-        (-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) * vffrt / (-1 + np.exp(vfrt))
-    )
+    PhiCaNa_i = (-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai) * vffrt / (-1 + np.exp(vfrt))
+    PhiCaK_i = (-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) * vffrt / (-1 + np.exp(vfrt))
     ICaL_i = (1 - ICaL_fractionSS) * (
         (1 - fICaLp) * ((1 - nca_i) * f + fca * jca * nca_i) * PCa * PhiCaL_i * d
         + ((1 - nca_i) * fp + fcap * jca * nca_i) * PCap * PhiCaL_i * d * fICaLp
@@ -1468,9 +1446,7 @@ def rhs(states, t, parameters, values=None):
         (1 + 15212.593285654404 * np.exp(0.13458950201884254 * v))
         * (1 + 15212.593285654404 * np.exp(0.13458950201884254 * v))
     )
-    ah = np.where(
-        v >= -40, 0, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * v)
-    )
+    ah = np.where(v >= -40, 0, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * v))
     bh = np.where(
         v >= -40,
         0.77 / (0.13 + 0.049758141083938695 * np.exp(-0.0900900900900901 * v)),
@@ -1488,9 +1464,7 @@ def rhs(states, t, parameters, values=None):
     bj = np.where(
         v >= -40,
         0.6 * np.exp(0.057 * v) / (1 + 0.040762203978366204 * np.exp(-0.1 * v)),
-        0.02424
-        * np.exp(-0.01052 * v)
-        / (1 + 0.003960868339904256 * np.exp(-0.1378 * v)),
+        0.02424 * np.exp(-0.01052 * v) / (1 + 0.003960868339904256 * np.exp(-0.1378 * v)),
     )
     jss = hss
     tj = 1.0 / (aj + bj)
@@ -1530,66 +1504,46 @@ def rhs(states, t, parameters, values=None):
 
     # Expressions for the Ito component
     ass = 1.0 / (
-        1
-        + 2.6316508161673635
-        * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
+        1 + 2.6316508161673635 * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
     )
     ta = 1.0515 / (
         1.0
         / (
             1.2089
-            + 2.2621017070578837
-            * np.exp(-0.03403513787634354 * EKshift - 0.03403513787634354 * v)
+            + 2.2621017070578837 * np.exp(-0.03403513787634354 * EKshift - 0.03403513787634354 * v)
         )
         + 3.5
-        / (
-            1
-            + 30.069572727397507
-            * np.exp(0.03403513787634354 * EKshift + 0.03403513787634354 * v)
-        )
+        / (1 + 30.069572727397507 * np.exp(0.03403513787634354 * EKshift + 0.03403513787634354 * v))
     )
     values[19] = (-a + ass) / ta
     iss = 1.0 / (
-        1
-        + 2194.970764538301
-        * np.exp(0.17510068289266328 * EKshift + 0.17510068289266328 * v)
+        1 + 2194.970764538301 * np.exp(0.17510068289266328 * EKshift + 0.17510068289266328 * v)
     )
-    delta_epi = np.where(
-        celltype == 1, 1 - 0.95 / (1 + np.exp(14 + EKshift / 5 + v / 5)), 1
-    )
+    delta_epi = np.where(celltype == 1, 1 - 0.95 / (1 + np.exp(14 + EKshift / 5 + v / 5)), 1)
     tiF_b = 4.562 + 1.0 / (
         0.3933 * np.exp(-1 - EKshift / 100 - v / 100)
-        + 1.6300896349780942
-        * np.exp(0.06027727546714889 * EKshift + 0.06027727546714889 * v)
+        + 1.6300896349780942 * np.exp(0.06027727546714889 * EKshift + 0.06027727546714889 * v)
     )
     tiS_b = 23.62 + 1.0 / (
-        0.00027617763953377436
-        * np.exp(-0.01693480101608806 * EKshift - 0.01693480101608806 * v)
-        + 0.024208962804604526
-        * np.exp(0.12377769525931426 * EKshift + 0.12377769525931426 * v)
+        0.00027617763953377436 * np.exp(-0.01693480101608806 * EKshift - 0.01693480101608806 * v)
+        + 0.024208962804604526 * np.exp(0.12377769525931426 * EKshift + 0.12377769525931426 * v)
     )
     tiF = delta_epi * tiF_b
     tiS = delta_epi * tiS_b
     AiF = 1.0 / (
-        1
-        + 0.24348537187522867
-        * np.exp(0.006613756613756614 * EKshift + 0.006613756613756614 * v)
+        1 + 0.24348537187522867 * np.exp(0.006613756613756614 * EKshift + 0.006613756613756614 * v)
     )
     AiS = 1 - AiF
     values[20] = (-iF + iss) / tiF
     values[21] = (-iS + iss) / tiS
     i = AiF * iF + AiS * iS
     assp = 1.0 / (
-        1
-        + 5.167428462230666
-        * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
+        1 + 5.167428462230666 * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
     )
     values[22] = (-ap + assp) / ta
     dti_develop = 1.354 + 0.0001 / (
-        2.6591269045230603e-05
-        * np.exp(0.06293266205160478 * EKshift + 0.06293266205160478 * v)
-        + 4.5541779737128264e24
-        * np.exp(-4.642525533890436 * EKshift - 4.642525533890436 * v)
+        2.6591269045230603e-05 * np.exp(0.06293266205160478 * EKshift + 0.06293266205160478 * v)
+        + 4.5541779737128264e24 * np.exp(-4.642525533890436 * EKshift - 4.642525533890436 * v)
     )
     dti_recover = 1 - 0.5 / (1 + 33.11545195869231 * np.exp(0.05 * EKshift + 0.05 * v))
     tiFp = dti_develop * dti_recover * tiF
@@ -1612,17 +1566,10 @@ def rhs(states, t, parameters, values=None):
     beta_ItoC2 = alpha_C2ToI * beta_2 * beta_i / (alpha_2 * alpha_i)
     values[25] = C2 * beta - C3 * alpha
     values[26] = beta_1 * C1 + C3 * alpha - (alpha_1 + beta) * C2
-    values[27] = (
-        alpha_1 * C2
-        + I * beta_ItoC2
-        + O * beta_2
-        - (beta_1 + alpha_2 + alpha_C2ToI) * C1
-    )
+    values[27] = alpha_1 * C2 + I * beta_ItoC2 + O * beta_2 - (beta_1 + alpha_2 + alpha_C2ToI) * C1
     values[28] = C1 * alpha_2 + I * beta_i - (alpha_i + beta_2) * O
     values[29] = C1 * alpha_C2ToI + O * alpha_i - (beta_ItoC2 + beta_i) * I
-    GKr = np.where(
-        celltype == 1, 1.3 * GKr_b, np.where(celltype == 2, 0.8 * GKr_b, GKr_b)
-    )
+    GKr = np.where(celltype == 1, 1.3 * GKr_b, np.where(celltype == 2, 0.8 * GKr_b, GKr_b))
     IKr = np.sqrt(5) * np.sqrt(ko) * (-EK + v) * GKr * O / 5
 
     # Expressions for the IKs component
@@ -1633,9 +1580,7 @@ def rhs(states, t, parameters, values=None):
     )
     values[30] = (-xs1 + xs1ss) / txs1
     xs2ss = xs1ss
-    txs2 = 1.0 / (
-        0.0022561357010639103 * np.exp(-v / 31) + 0.01 * np.exp(-5 / 2 + v / 20)
-    )
+    txs2 = 1.0 / (0.0022561357010639103 * np.exp(-v / 31) + 0.01 * np.exp(-5 / 2 + v / 20))
     values[31] = (-xs2 + xs2ss) / txs2
     KsCa = 1 + 0.6 / (1 + 6.481821026062645e-07 * np.power(1.0 / cai, 1.4))
     GKs = np.where(celltype == 1, 1.4 * GKs_b, GKs_b)
@@ -1648,9 +1593,7 @@ def rhs(states, t, parameters, values=None):
         + 1.1196358381249121e-16 * np.exp(0.0618 * v - 0.0618 * EK)
     ) / (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v))
     K1ss = aK1 / (aK1 + bK1)
-    GK1 = np.where(
-        celltype == 1, 1.2 * GK1_b, np.where(celltype == 2, 1.3 * GK1_b, GK1_b)
-    )
+    GK1 = np.where(celltype == 1, 1.2 * GK1_b, np.where(celltype == 2, 1.3 * GK1_b, GK1_b))
     IK1 = np.sqrt(5) * np.sqrt(ko) * (-EK + v) * GK1 * K1ss / 5
 
     # Expressions for the IKb component
@@ -1694,9 +1637,7 @@ def rhs(states, t, parameters, values=None):
     Istim = np.where(
         np.logical_and(
             t >= i_Stim_Start,
-            t
-            - i_Stim_Start
-            - i_Stim_Period * np.floor((t - i_Stim_Start) / i_Stim_Period)
+            t - i_Stim_Start - i_Stim_Period * np.floor((t - i_Stim_Start) / i_Stim_Period)
             <= i_Stim_PulseDuration,
         ),
         i_Stim_Amplitude,
@@ -2001,18 +1942,10 @@ def monitor(states, t, parameters, monitored=None):
     monitored[57] = (monitored[42] + monitored[53]) * monitored[46] * monitored[50] + (
         monitored[49] + monitored[50]
     ) * monitored[43] * monitored[53]
-    monitored[58] = monitored[54] / (
-        monitored[54] + monitored[55] + monitored[56] + monitored[57]
-    )
-    monitored[59] = monitored[55] / (
-        monitored[54] + monitored[55] + monitored[56] + monitored[57]
-    )
-    monitored[60] = monitored[56] / (
-        monitored[54] + monitored[55] + monitored[56] + monitored[57]
-    )
-    monitored[61] = monitored[57] / (
-        monitored[54] + monitored[55] + monitored[56] + monitored[57]
-    )
+    monitored[58] = monitored[54] / (monitored[54] + monitored[55] + monitored[56] + monitored[57])
+    monitored[59] = monitored[55] / (monitored[54] + monitored[55] + monitored[56] + monitored[57])
+    monitored[60] = monitored[56] / (monitored[54] + monitored[55] + monitored[56] + monitored[57])
+    monitored[61] = monitored[57] / (monitored[54] + monitored[55] + monitored[56] + monitored[57])
     monitored[62] = 1.0 / (1 + (KmCaAct * KmCaAct) / (cai * cai))
     monitored[63] = (
         monitored[48] * monitored[60]
@@ -2066,18 +1999,10 @@ def monitor(states, t, parameters, monitored=None):
     monitored[94] = (monitored[79] + monitored[90]) * monitored[83] * monitored[87] + (
         monitored[86] + monitored[87]
     ) * monitored[80] * monitored[90]
-    monitored[95] = monitored[91] / (
-        monitored[91] + monitored[92] + monitored[93] + monitored[94]
-    )
-    monitored[96] = monitored[92] / (
-        monitored[91] + monitored[92] + monitored[93] + monitored[94]
-    )
-    monitored[97] = monitored[93] / (
-        monitored[91] + monitored[92] + monitored[93] + monitored[94]
-    )
-    monitored[98] = monitored[94] / (
-        monitored[91] + monitored[92] + monitored[93] + monitored[94]
-    )
+    monitored[95] = monitored[91] / (monitored[91] + monitored[92] + monitored[93] + monitored[94])
+    monitored[96] = monitored[92] / (monitored[91] + monitored[92] + monitored[93] + monitored[94])
+    monitored[97] = monitored[93] / (monitored[91] + monitored[92] + monitored[93] + monitored[94])
+    monitored[98] = monitored[94] / (monitored[91] + monitored[92] + monitored[93] + monitored[94])
     monitored[99] = 1.0 / (1 + (KmCaAct * KmCaAct) / (cass * cass))
     monitored[100] = (
         monitored[85] * monitored[97]
@@ -2201,12 +2126,8 @@ def monitor(states, t, parameters, monitored=None):
     monitored[121] = monitored[117] / (
         monitored[114] + monitored[115] + monitored[116] + monitored[117]
     )
-    monitored[122] = (
-        -3 * monitored[111] * monitored[119] + 3 * monitored[110] * monitored[118]
-    )
-    monitored[123] = (
-        -2 * monitored[106] * monitored[120] + 2 * monitored[107] * monitored[121]
-    )
+    monitored[122] = -3 * monitored[111] * monitored[119] + 3 * monitored[110] * monitored[118]
+    monitored[123] = -2 * monitored[106] * monitored[120] + 2 * monitored[107] * monitored[121]
     monitored[124] = np.where(
         celltype == 1, 0.9 * Pnak_b, np.where(celltype == 2, 0.7 * Pnak_b, Pnak_b)
     )
@@ -2233,9 +2154,7 @@ def monitor(states, t, parameters, monitored=None):
     monitored[275] = -cajsr / 60 + cansr / 60
 
     # Expressions for the ICaL component
-    monitored[140] = np.where(
-        v >= 31.4978, 1, 1.0763 * np.exp(-1.007 * np.exp(-0.0829 * v))
-    )
+    monitored[140] = np.where(v >= 31.4978, 1, 1.0763 * np.exp(-1.007 * np.exp(-0.0829 * v)))
     monitored[141] = (
         0.6
         + offset
@@ -2247,9 +2166,7 @@ def monitor(states, t, parameters, monitored=None):
     )
     monitored[277] = (-d + monitored[140]) / monitored[141]
     monitored[142] = 1.0 / (1 + 199.86038496778565 * np.exp(0.27056277056277056 * v))
-    monitored[143] = 7 + 1.0 / (
-        0.0045 * np.exp(-2 - v / 10) + 0.0045 * np.exp(2 + v / 10)
-    )
+    monitored[143] = 7 + 1.0 / (0.0045 * np.exp(-2 - v / 10) + 0.0045 * np.exp(2 + v / 10))
     monitored[144] = 1000 + 1.0 / (
         3.5e-05 * np.exp(-5 / 4 - v / 4) + 3.5e-05 * np.exp(5 / 6 + v / 6)
     )
@@ -2258,9 +2175,7 @@ def monitor(states, t, parameters, monitored=None):
     monitored[279] = (-fs + monitored[142]) / monitored[144]
     monitored[146] = Aff * ff + fs * monitored[145]
     monitored[147] = monitored[142]
-    monitored[148] = 7 + 1.0 / (
-        0.04 * np.exp(-4 / 7 + v / 7) + 0.04 * np.exp(4 / 7 - v / 7)
-    )
+    monitored[148] = 7 + 1.0 / (0.04 * np.exp(-4 / 7 + v / 7) + 0.04 * np.exp(4 / 7 - v / 7))
     monitored[149] = 100 + 1.0 / (0.00012 * np.exp(-v / 3) + 0.00012 * np.exp(v / 7))
     monitored[150] = 0.3 + 0.6 / (1 + np.exp(-1 + v / 10))
     monitored[151] = 1 - monitored[150]
@@ -2283,46 +2198,28 @@ def monitor(states, t, parameters, monitored=None):
     monitored[162] = 1820000.0 * np.power(T * dielConstant, -1.5)
     monitored[163] = np.exp(
         -4
-        * (
-            -0.3 * monitored[161]
-            + np.sqrt(monitored[161]) / (1 + np.sqrt(monitored[161]))
-        )
+        * (-0.3 * monitored[161] + np.sqrt(monitored[161]) / (1 + np.sqrt(monitored[161])))
         * monitored[162]
     )
     monitored[164] = np.exp(
         -4
-        * (
-            -0.3 * monitored[160]
-            + np.sqrt(monitored[160]) / (1 + np.sqrt(monitored[160]))
-        )
+        * (-0.3 * monitored[160] + np.sqrt(monitored[160]) / (1 + np.sqrt(monitored[160])))
         * monitored[162]
     )
     monitored[165] = np.exp(
-        -(
-            -0.3 * monitored[161]
-            + np.sqrt(monitored[161]) / (1 + np.sqrt(monitored[161]))
-        )
+        -(-0.3 * monitored[161] + np.sqrt(monitored[161]) / (1 + np.sqrt(monitored[161])))
         * monitored[162]
     )
     monitored[166] = np.exp(
-        -(
-            -0.3 * monitored[160]
-            + np.sqrt(monitored[160]) / (1 + np.sqrt(monitored[160]))
-        )
+        -(-0.3 * monitored[160] + np.sqrt(monitored[160]) / (1 + np.sqrt(monitored[160])))
         * monitored[162]
     )
     monitored[167] = np.exp(
-        -(
-            -0.3 * monitored[161]
-            + np.sqrt(monitored[161]) / (1 + np.sqrt(monitored[161]))
-        )
+        -(-0.3 * monitored[161] + np.sqrt(monitored[161]) / (1 + np.sqrt(monitored[161])))
         * monitored[162]
     )
     monitored[168] = np.exp(
-        -(
-            -0.3 * monitored[160]
-            + np.sqrt(monitored[160]) / (1 + np.sqrt(monitored[160]))
-        )
+        -(-0.3 * monitored[160] + np.sqrt(monitored[160]) / (1 + np.sqrt(monitored[160])))
         * monitored[162]
     )
     monitored[169] = (
@@ -2341,9 +2238,7 @@ def monitor(states, t, parameters, monitored=None):
         * monitored[274]
         / (-1 + np.exp(monitored[273]))
     )
-    monitored[172] = np.where(
-        celltype == 1, 1.2 * PCa_b, np.where(celltype == 2, 2 * PCa_b, PCa_b)
-    )
+    monitored[172] = np.where(celltype == 1, 1.2 * PCa_b, np.where(celltype == 2, 2 * PCa_b, PCa_b))
     monitored[173] = 1.1 * monitored[172]
     monitored[174] = 0.00125 * monitored[172]
     monitored[175] = 0.0003574 * monitored[172]
@@ -2391,24 +2286,15 @@ def monitor(states, t, parameters, monitored=None):
     monitored[183] = 0.0005 * cli + 0.0005 * ki + 0.0005 * nai + 0.002 * cai
     monitored[184] = np.exp(
         -4
-        * (
-            -0.3 * monitored[183]
-            + np.sqrt(monitored[183]) / (1 + np.sqrt(monitored[183]))
-        )
+        * (-0.3 * monitored[183] + np.sqrt(monitored[183]) / (1 + np.sqrt(monitored[183])))
         * monitored[162]
     )
     monitored[185] = np.exp(
-        -(
-            -0.3 * monitored[183]
-            + np.sqrt(monitored[183]) / (1 + np.sqrt(monitored[183]))
-        )
+        -(-0.3 * monitored[183] + np.sqrt(monitored[183]) / (1 + np.sqrt(monitored[183])))
         * monitored[162]
     )
     monitored[186] = np.exp(
-        -(
-            -0.3 * monitored[183]
-            + np.sqrt(monitored[183]) / (1 + np.sqrt(monitored[183]))
-        )
+        -(-0.3 * monitored[183] + np.sqrt(monitored[183]) / (1 + np.sqrt(monitored[183])))
         * monitored[162]
     )
     monitored[187] = (
@@ -2474,17 +2360,13 @@ def monitor(states, t, parameters, monitored=None):
     monitored[199] = 1.0 / (1 + KmCaMK / monitored[8])
     monitored[200] = 0.0003255 * cansr
     monitored[201] = Jup_b * (
-        -monitored[200]
-        + (1 - monitored[199]) * monitored[197]
-        + monitored[198] * monitored[199]
+        -monitored[200] + (1 - monitored[199]) * monitored[197] + monitored[198] * monitored[199]
     )
 
     # Expressions for the I_katp component
     monitored[202] = np.power(ko / K_o_n, 0.24)
     monitored[203] = 1.0 / (1 + (A_atp * A_atp) / (K_atp * K_atp))
-    monitored[204] = (
-        fkatp * gkatp * (-monitored[10] + v) * monitored[202] * monitored[203]
-    )
+    monitored[204] = fkatp * gkatp * (-monitored[10] + v) * monitored[202] * monitored[203]
 
     # Expressions for the INa component
     monitored[14] = 1.0 / (
@@ -2507,9 +2389,7 @@ def monitor(states, t, parameters, monitored=None):
         (1 + 15212.593285654404 * np.exp(0.13458950201884254 * v))
         * (1 + 15212.593285654404 * np.exp(0.13458950201884254 * v))
     )
-    monitored[17] = np.where(
-        v >= -40, 0, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * v)
-    )
+    monitored[17] = np.where(v >= -40, 0, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * v))
     monitored[18] = np.where(
         v >= -40,
         0.77 / (0.13 + 0.049758141083938695 * np.exp(-0.0900900900900901 * v)),
@@ -2527,9 +2407,7 @@ def monitor(states, t, parameters, monitored=None):
     monitored[21] = np.where(
         v >= -40,
         0.6 * np.exp(0.057 * v) / (1 + 0.040762203978366204 * np.exp(-0.1 * v)),
-        0.02424
-        * np.exp(-0.01052 * v)
-        / (1 + 0.003960868339904256 * np.exp(-0.1378 * v)),
+        0.02424 * np.exp(-0.01052 * v) / (1 + 0.003960868339904256 * np.exp(-0.1378 * v)),
     )
     monitored[22] = monitored[16]
     monitored[23] = 1.0 / (monitored[20] + monitored[21])
@@ -2579,85 +2457,58 @@ def monitor(states, t, parameters, monitored=None):
 
     # Expressions for the Ito component
     monitored[205] = 1.0 / (
-        1
-        + 2.6316508161673635
-        * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
+        1 + 2.6316508161673635 * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
     )
     monitored[206] = 1.0515 / (
         1.0
         / (
             1.2089
-            + 2.2621017070578837
-            * np.exp(-0.03403513787634354 * EKshift - 0.03403513787634354 * v)
+            + 2.2621017070578837 * np.exp(-0.03403513787634354 * EKshift - 0.03403513787634354 * v)
         )
         + 3.5
-        / (
-            1
-            + 30.069572727397507
-            * np.exp(0.03403513787634354 * EKshift + 0.03403513787634354 * v)
-        )
+        / (1 + 30.069572727397507 * np.exp(0.03403513787634354 * EKshift + 0.03403513787634354 * v))
     )
     monitored[295] = (-a + monitored[205]) / monitored[206]
     monitored[207] = 1.0 / (
-        1
-        + 2194.970764538301
-        * np.exp(0.17510068289266328 * EKshift + 0.17510068289266328 * v)
+        1 + 2194.970764538301 * np.exp(0.17510068289266328 * EKshift + 0.17510068289266328 * v)
     )
-    monitored[208] = np.where(
-        celltype == 1, 1 - 0.95 / (1 + np.exp(14 + EKshift / 5 + v / 5)), 1
-    )
+    monitored[208] = np.where(celltype == 1, 1 - 0.95 / (1 + np.exp(14 + EKshift / 5 + v / 5)), 1)
     monitored[209] = 4.562 + 1.0 / (
         0.3933 * np.exp(-1 - EKshift / 100 - v / 100)
-        + 1.6300896349780942
-        * np.exp(0.06027727546714889 * EKshift + 0.06027727546714889 * v)
+        + 1.6300896349780942 * np.exp(0.06027727546714889 * EKshift + 0.06027727546714889 * v)
     )
     monitored[210] = 23.62 + 1.0 / (
-        0.00027617763953377436
-        * np.exp(-0.01693480101608806 * EKshift - 0.01693480101608806 * v)
-        + 0.024208962804604526
-        * np.exp(0.12377769525931426 * EKshift + 0.12377769525931426 * v)
+        0.00027617763953377436 * np.exp(-0.01693480101608806 * EKshift - 0.01693480101608806 * v)
+        + 0.024208962804604526 * np.exp(0.12377769525931426 * EKshift + 0.12377769525931426 * v)
     )
     monitored[211] = monitored[208] * monitored[209]
     monitored[212] = monitored[208] * monitored[210]
     monitored[213] = 1.0 / (
-        1
-        + 0.24348537187522867
-        * np.exp(0.006613756613756614 * EKshift + 0.006613756613756614 * v)
+        1 + 0.24348537187522867 * np.exp(0.006613756613756614 * EKshift + 0.006613756613756614 * v)
     )
     monitored[214] = 1 - monitored[213]
     monitored[296] = (-iF + monitored[207]) / monitored[211]
     monitored[297] = (-iS + monitored[207]) / monitored[212]
     monitored[215] = iF * monitored[213] + iS * monitored[214]
     monitored[216] = 1.0 / (
-        1
-        + 5.167428462230666
-        * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
+        1 + 5.167428462230666 * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
     )
     monitored[298] = (-ap + monitored[216]) / monitored[206]
     monitored[217] = 1.354 + 0.0001 / (
-        2.6591269045230603e-05
-        * np.exp(0.06293266205160478 * EKshift + 0.06293266205160478 * v)
-        + 4.5541779737128264e24
-        * np.exp(-4.642525533890436 * EKshift - 4.642525533890436 * v)
+        2.6591269045230603e-05 * np.exp(0.06293266205160478 * EKshift + 0.06293266205160478 * v)
+        + 4.5541779737128264e24 * np.exp(-4.642525533890436 * EKshift - 4.642525533890436 * v)
     )
-    monitored[218] = 1 - 0.5 / (
-        1 + 33.11545195869231 * np.exp(0.05 * EKshift + 0.05 * v)
-    )
+    monitored[218] = 1 - 0.5 / (1 + 33.11545195869231 * np.exp(0.05 * EKshift + 0.05 * v))
     monitored[219] = monitored[211] * monitored[217] * monitored[218]
     monitored[220] = monitored[212] * monitored[217] * monitored[218]
     monitored[299] = (-iFp + monitored[207]) / monitored[219]
     monitored[300] = (-iSp + monitored[207]) / monitored[220]
     monitored[221] = iFp * monitored[213] + iSp * monitored[214]
-    monitored[222] = np.where(
-        celltype == 1, 2 * Gto_b, np.where(celltype == 2, 2 * Gto_b, Gto_b)
-    )
+    monitored[222] = np.where(celltype == 1, 2 * Gto_b, np.where(celltype == 2, 2 * Gto_b, Gto_b))
     monitored[223] = 1.0 / (1 + KmCaMK / monitored[8])
     monitored[224] = (
         (-monitored[10] + v)
-        * (
-            (1 - monitored[223]) * a * monitored[215]
-            + ap * monitored[221] * monitored[223]
-        )
+        * ((1 - monitored[223]) * a * monitored[215] + ap * monitored[221] * monitored[223])
         * monitored[222]
     )
 
@@ -2670,10 +2521,7 @@ def monitor(states, t, parameters, monitored=None):
     monitored[230] = 0.06525 * np.exp(-0.8209 * monitored[273])
     monitored[231] = 5.2e-05 * np.exp(1.525 * monitored[273])
     monitored[232] = (
-        monitored[228]
-        * monitored[230]
-        * monitored[231]
-        / (monitored[227] * monitored[229])
+        monitored[228] * monitored[230] * monitored[231] / (monitored[227] * monitored[229])
     )
     monitored[301] = C2 * monitored[226] - C3 * monitored[225]
     monitored[302] = beta_1 * C1 + C3 * monitored[225] - (alpha_1 + monitored[226]) * C2
@@ -2692,9 +2540,7 @@ def monitor(states, t, parameters, monitored=None):
     monitored[233] = np.where(
         celltype == 1, 1.3 * GKr_b, np.where(celltype == 2, 0.8 * GKr_b, GKr_b)
     )
-    monitored[234] = (
-        np.sqrt(5) * np.sqrt(ko) * (-monitored[10] + v) * O * monitored[233] / 5
-    )
+    monitored[234] = np.sqrt(5) * np.sqrt(ko) * (-monitored[10] + v) * O * monitored[233] / 5
 
     # Expressions for the IKs component
     monitored[235] = 1.0 / (1 + 0.27288596035656526 * np.exp(-0.11195700850873264 * v))
@@ -2725,12 +2571,7 @@ def monitor(states, t, parameters, monitored=None):
         celltype == 1, 1.2 * GK1_b, np.where(celltype == 2, 1.3 * GK1_b, GK1_b)
     )
     monitored[246] = (
-        np.sqrt(5)
-        * np.sqrt(ko)
-        * (-monitored[10] + v)
-        * monitored[244]
-        * monitored[245]
-        / 5
+        np.sqrt(5) * np.sqrt(ko) * (-monitored[10] + v) * monitored[244] * monitored[245] / 5
     )
 
     # Expressions for the IKb component
@@ -2756,9 +2597,7 @@ def monitor(states, t, parameters, monitored=None):
     # Expressions for the Ryr component
     monitored[255] = 0.5 * bt
     monitored[256] = (
-        -monitored[179]
-        * monitored[255]
-        / (1 + np.power(cajsr_half, 8) / np.power(cajsr, 8))
+        -monitored[179] * monitored[255] / (1 + np.power(cajsr_half, 8) / np.power(cajsr, 8))
     )
     monitored[257] = np.where(celltype == 2, 1.7 * monitored[256], monitored[256])
     monitored[258] = bt / (1 + 0.0123 / cajsr)
@@ -2767,9 +2606,7 @@ def monitor(states, t, parameters, monitored=None):
     monitored[260] = 1.25 * bt
     monitored[261] = 0.5 * monitored[260]
     monitored[262] = (
-        -monitored[179]
-        * monitored[261]
-        / (1 + np.power(cajsr_half, 8) / np.power(cajsr, 8))
+        -monitored[179] * monitored[261] / (1 + np.power(cajsr_half, 8) / np.power(cajsr, 8))
     )
     monitored[263] = np.where(celltype == 2, 1.7 * monitored[262], monitored[262])
     monitored[264] = monitored[260] / (1 + 0.0123 / cajsr)
@@ -2782,9 +2619,7 @@ def monitor(states, t, parameters, monitored=None):
     monitored[268] = np.where(
         np.logical_and(
             t >= i_Stim_Start,
-            t
-            - i_Stim_Start
-            - i_Stim_Period * np.floor((t - i_Stim_Start) / i_Stim_Period)
+            t - i_Stim_Start - i_Stim_Period * np.floor((t - i_Stim_Start) / i_Stim_Period)
             <= i_Stim_PulseDuration,
         ),
         i_Stim_Amplitude,
@@ -2823,9 +2658,9 @@ def monitor(states, t, parameters, monitored=None):
         - 3 * monitored[125]
         - 3 * monitored[66]
     ) * monitored[2] / (F * monitored[3])
-    monitored[312] = -monitored[136] + (
-        -monitored[180] - 3 * monitored[102]
-    ) * monitored[2] / (F * monitored[6])
+    monitored[312] = -monitored[136] + (-monitored[180] - 3 * monitored[102]) * monitored[2] / (
+        F * monitored[6]
+    )
     monitored[313] = monitored[137] * monitored[6] / monitored[3] + (
         -monitored[192]
         - monitored[204]
@@ -2837,15 +2672,11 @@ def monitor(states, t, parameters, monitored=None):
         - monitored[268]
         + 2 * monitored[125]
     ) * monitored[2] / (F * monitored[3])
-    monitored[314] = -monitored[137] - monitored[181] * monitored[2] / (
-        F * monitored[6]
-    )
+    monitored[314] = -monitored[137] - monitored[181] * monitored[2] / (F * monitored[6])
     monitored[315] = monitored[139] * monitored[6] / monitored[3] + (
         monitored[251] + monitored[253]
     ) * monitored[2] / (F * monitored[3])
-    monitored[316] = -monitored[139] + monitored[250] * monitored[2] / (
-        F * monitored[6]
-    )
+    monitored[316] = -monitored[139] + monitored[250] * monitored[2] / (F * monitored[6])
     monitored[270] = 1.0 / (
         1
         + kmcmdn * monitored[269] / ((kmcmdn + cai) * (kmcmdn + cai))
@@ -2869,9 +2700,7 @@ def monitor(states, t, parameters, monitored=None):
         + (-monitored[179] + 2 * monitored[102]) * monitored[2] / (2 * F * monitored[6])
     ) * monitored[271]
     monitored[319] = -monitored[275] * monitored[5] / monitored[4] + monitored[201]
-    monitored[272] = 1.0 / (
-        1 + csqnmax * kmcsqn / ((kmcsqn + cajsr) * (kmcsqn + cajsr))
-    )
+    monitored[272] = 1.0 / (1 + csqnmax * kmcsqn / ((kmcsqn + cajsr) * (kmcsqn + cajsr)))
     monitored[320] = (-monitored[267] + monitored[275]) * monitored[272]
 
     # Return results
@@ -3111,9 +2940,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     allo_i = 1.0 / (1 + (KmCaAct * KmCaAct) / (cai * cai))
     JncxNa_i = E3_i * k4pp_i - E2_i * k3pp_i - 3 * E1_i * k8_i + 3 * E4_i * k7_i
     JncxCa_i = E2_i * k2_i - E1_i * k1_i
-    Gncx = np.where(
-        celltype == 1, 1.1 * Gncx_b, np.where(celltype == 2, 1.4 * Gncx_b, Gncx_b)
-    )
+    Gncx = np.where(celltype == 1, 1.1 * Gncx_b, np.where(celltype == 2, 1.4 * Gncx_b, Gncx_b))
     INaCa_i = (1 - INaCa_fractionSS) * (zca * JncxCa_i + zna * JncxNa_i) * Gncx * allo_i
     h1_ss = 1 + (1 + hna) * nass / kna3
     h2_ss = hna * nass / (kna3 * h1_ss)
@@ -3148,9 +2975,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     E3_ss = x3_ss / (x1_ss + x2_ss + x3_ss + x4_ss)
     E4_ss = x4_ss / (x1_ss + x2_ss + x3_ss + x4_ss)
     allo_ss = 1.0 / (1 + (KmCaAct * KmCaAct) / (cass * cass))
-    JncxNa_ss = (
-        E3_ss * k4pp_ss - E2_ss * k3pp_ss - 3 * E1_ss * k8_ss + 3 * E4_ss * k7_ss
-    )
+    JncxNa_ss = E3_ss * k4pp_ss - E2_ss * k3pp_ss - 3 * E1_ss * k8_ss + 3 * E4_ss * k7_ss
     JncxCa_ss = E2_ss * k2_ss - E1_ss * k1_ss
     INaCa_ss = INaCa_fractionSS * (zca * JncxCa_ss + zna * JncxNa_ss) * Gncx * allo_ss
 
@@ -3220,9 +3045,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     E4 = x4 / (x1 + x2 + x3 + x4)
     JnakNa = -3 * E2 * b3 + 3 * E1 * a3
     JnakK = -2 * E3 * a1 + 2 * E4 * b1
-    Pnak = np.where(
-        celltype == 1, 0.9 * Pnak_b, np.where(celltype == 2, 0.7 * Pnak_b, Pnak_b)
-    )
+    Pnak = np.where(celltype == 1, 0.9 * Pnak_b, np.where(celltype == 2, 0.7 * Pnak_b, Pnak_b))
     INaK = (zk * JnakK + zna * JnakNa) * Pnak
 
     # Expressions for the b component
@@ -3255,9 +3078,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     states[1] = dt * dd_dt + d
     fss = 1.0 / (1 + 199.86038496778565 * np.exp(0.27056277056277056 * v))
     tff = 7 + 1.0 / (0.0045 * np.exp(-2 - v / 10) + 0.0045 * np.exp(2 + v / 10))
-    tfs = 1000 + 1.0 / (
-        3.5e-05 * np.exp(-5 / 4 - v / 4) + 3.5e-05 * np.exp(5 / 6 + v / 6)
-    )
+    tfs = 1000 + 1.0 / (3.5e-05 * np.exp(-5 / 4 - v / 4) + 3.5e-05 * np.exp(5 / 6 + v / 6))
     Afs = 1 - Aff
     dff_dt = (-ff + fss) / tff
     states[2] = dt * dff_dt + ff
@@ -3304,17 +3125,9 @@ def forward_explicit_euler(states, t, dt, parameters):
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
-    PhiCaNa_ss = (
-        (-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass)
-        * vffrt
-        / (-1 + np.exp(vfrt))
-    )
-    PhiCaK_ss = (
-        (-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) * vffrt / (-1 + np.exp(vfrt))
-    )
-    PCa = np.where(
-        celltype == 1, 1.2 * PCa_b, np.where(celltype == 2, 2 * PCa_b, PCa_b)
-    )
+    PhiCaNa_ss = (-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass) * vffrt / (-1 + np.exp(vfrt))
+    PhiCaK_ss = (-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) * vffrt / (-1 + np.exp(vfrt))
+    PCa = np.where(celltype == 1, 1.2 * PCa_b, np.where(celltype == 2, 2 * PCa_b, PCa_b))
     PCap = 1.1 * PCa
     PCaNa = 0.00125 * PCa
     PCaK = 0.0003574 * PCa
@@ -3346,14 +3159,8 @@ def forward_explicit_euler(states, t, dt, parameters):
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
-    PhiCaNa_i = (
-        (-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai)
-        * vffrt
-        / (-1 + np.exp(vfrt))
-    )
-    PhiCaK_i = (
-        (-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) * vffrt / (-1 + np.exp(vfrt))
-    )
+    PhiCaNa_i = (-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai) * vffrt / (-1 + np.exp(vfrt))
+    PhiCaK_i = (-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) * vffrt / (-1 + np.exp(vfrt))
     ICaL_i = (1 - ICaL_fractionSS) * (
         (1 - fICaLp) * ((1 - nca_i) * f + fca * jca * nca_i) * PCa * PhiCaL_i * d
         + ((1 - nca_i) * fp + fcap * jca * nca_i) * PCap * PhiCaL_i * d * fICaLp
@@ -3405,9 +3212,7 @@ def forward_explicit_euler(states, t, dt, parameters):
         (1 + 15212.593285654404 * np.exp(0.13458950201884254 * v))
         * (1 + 15212.593285654404 * np.exp(0.13458950201884254 * v))
     )
-    ah = np.where(
-        v >= -40, 0, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * v)
-    )
+    ah = np.where(v >= -40, 0, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * v))
     bh = np.where(
         v >= -40,
         0.77 / (0.13 + 0.049758141083938695 * np.exp(-0.0900900900900901 * v)),
@@ -3426,9 +3231,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     bj = np.where(
         v >= -40,
         0.6 * np.exp(0.057 * v) / (1 + 0.040762203978366204 * np.exp(-0.1 * v)),
-        0.02424
-        * np.exp(-0.01052 * v)
-        / (1 + 0.003960868339904256 * np.exp(-0.1378 * v)),
+        0.02424 * np.exp(-0.01052 * v) / (1 + 0.003960868339904256 * np.exp(-0.1378 * v)),
     )
     jss = hss
     tj = 1.0 / (aj + bj)
@@ -3474,51 +3277,35 @@ def forward_explicit_euler(states, t, dt, parameters):
 
     # Expressions for the Ito component
     ass = 1.0 / (
-        1
-        + 2.6316508161673635
-        * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
+        1 + 2.6316508161673635 * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
     )
     ta = 1.0515 / (
         1.0
         / (
             1.2089
-            + 2.2621017070578837
-            * np.exp(-0.03403513787634354 * EKshift - 0.03403513787634354 * v)
+            + 2.2621017070578837 * np.exp(-0.03403513787634354 * EKshift - 0.03403513787634354 * v)
         )
         + 3.5
-        / (
-            1
-            + 30.069572727397507
-            * np.exp(0.03403513787634354 * EKshift + 0.03403513787634354 * v)
-        )
+        / (1 + 30.069572727397507 * np.exp(0.03403513787634354 * EKshift + 0.03403513787634354 * v))
     )
     da_dt = (-a + ass) / ta
     states[19] = dt * da_dt + a
     iss = 1.0 / (
-        1
-        + 2194.970764538301
-        * np.exp(0.17510068289266328 * EKshift + 0.17510068289266328 * v)
+        1 + 2194.970764538301 * np.exp(0.17510068289266328 * EKshift + 0.17510068289266328 * v)
     )
-    delta_epi = np.where(
-        celltype == 1, 1 - 0.95 / (1 + np.exp(14 + EKshift / 5 + v / 5)), 1
-    )
+    delta_epi = np.where(celltype == 1, 1 - 0.95 / (1 + np.exp(14 + EKshift / 5 + v / 5)), 1)
     tiF_b = 4.562 + 1.0 / (
         0.3933 * np.exp(-1 - EKshift / 100 - v / 100)
-        + 1.6300896349780942
-        * np.exp(0.06027727546714889 * EKshift + 0.06027727546714889 * v)
+        + 1.6300896349780942 * np.exp(0.06027727546714889 * EKshift + 0.06027727546714889 * v)
     )
     tiS_b = 23.62 + 1.0 / (
-        0.00027617763953377436
-        * np.exp(-0.01693480101608806 * EKshift - 0.01693480101608806 * v)
-        + 0.024208962804604526
-        * np.exp(0.12377769525931426 * EKshift + 0.12377769525931426 * v)
+        0.00027617763953377436 * np.exp(-0.01693480101608806 * EKshift - 0.01693480101608806 * v)
+        + 0.024208962804604526 * np.exp(0.12377769525931426 * EKshift + 0.12377769525931426 * v)
     )
     tiF = delta_epi * tiF_b
     tiS = delta_epi * tiS_b
     AiF = 1.0 / (
-        1
-        + 0.24348537187522867
-        * np.exp(0.006613756613756614 * EKshift + 0.006613756613756614 * v)
+        1 + 0.24348537187522867 * np.exp(0.006613756613756614 * EKshift + 0.006613756613756614 * v)
     )
     AiS = 1 - AiF
     diF_dt = (-iF + iss) / tiF
@@ -3527,17 +3314,13 @@ def forward_explicit_euler(states, t, dt, parameters):
     states[21] = dt * diS_dt + iS
     i = AiF * iF + AiS * iS
     assp = 1.0 / (
-        1
-        + 5.167428462230666
-        * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
+        1 + 5.167428462230666 * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
     )
     dap_dt = (-ap + assp) / ta
     states[22] = dt * dap_dt + ap
     dti_develop = 1.354 + 0.0001 / (
-        2.6591269045230603e-05
-        * np.exp(0.06293266205160478 * EKshift + 0.06293266205160478 * v)
-        + 4.5541779737128264e24
-        * np.exp(-4.642525533890436 * EKshift - 4.642525533890436 * v)
+        2.6591269045230603e-05 * np.exp(0.06293266205160478 * EKshift + 0.06293266205160478 * v)
+        + 4.5541779737128264e24 * np.exp(-4.642525533890436 * EKshift - 4.642525533890436 * v)
     )
     dti_recover = 1 - 0.5 / (1 + 33.11545195869231 * np.exp(0.05 * EKshift + 0.05 * v))
     tiFp = dti_develop * dti_recover * tiF
@@ -3564,20 +3347,13 @@ def forward_explicit_euler(states, t, dt, parameters):
     states[25] = dt * dC3_dt + C3
     dC2_dt = beta_1 * C1 + C3 * alpha - (alpha_1 + beta) * C2
     states[26] = dt * dC2_dt + C2
-    dC1_dt = (
-        alpha_1 * C2
-        + I * beta_ItoC2
-        + O * beta_2
-        - (beta_1 + alpha_2 + alpha_C2ToI) * C1
-    )
+    dC1_dt = alpha_1 * C2 + I * beta_ItoC2 + O * beta_2 - (beta_1 + alpha_2 + alpha_C2ToI) * C1
     states[27] = dt * dC1_dt + C1
     dO_dt = C1 * alpha_2 + I * beta_i - (alpha_i + beta_2) * O
     states[28] = dt * dO_dt + O
     dI_dt = C1 * alpha_C2ToI + O * alpha_i - (beta_ItoC2 + beta_i) * I
     states[29] = dt * dI_dt + I
-    GKr = np.where(
-        celltype == 1, 1.3 * GKr_b, np.where(celltype == 2, 0.8 * GKr_b, GKr_b)
-    )
+    GKr = np.where(celltype == 1, 1.3 * GKr_b, np.where(celltype == 2, 0.8 * GKr_b, GKr_b))
     IKr = np.sqrt(5) * np.sqrt(ko) * (-EK + v) * GKr * O / 5
 
     # Expressions for the IKs component
@@ -3589,9 +3365,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     dxs1_dt = (-xs1 + xs1ss) / txs1
     states[30] = dt * dxs1_dt + xs1
     xs2ss = xs1ss
-    txs2 = 1.0 / (
-        0.0022561357010639103 * np.exp(-v / 31) + 0.01 * np.exp(-5 / 2 + v / 20)
-    )
+    txs2 = 1.0 / (0.0022561357010639103 * np.exp(-v / 31) + 0.01 * np.exp(-5 / 2 + v / 20))
     dxs2_dt = (-xs2 + xs2ss) / txs2
     states[31] = dt * dxs2_dt + xs2
     KsCa = 1 + 0.6 / (1 + 6.481821026062645e-07 * np.power(1.0 / cai, 1.4))
@@ -3605,9 +3379,7 @@ def forward_explicit_euler(states, t, dt, parameters):
         + 1.1196358381249121e-16 * np.exp(0.0618 * v - 0.0618 * EK)
     ) / (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v))
     K1ss = aK1 / (aK1 + bK1)
-    GK1 = np.where(
-        celltype == 1, 1.2 * GK1_b, np.where(celltype == 2, 1.3 * GK1_b, GK1_b)
-    )
+    GK1 = np.where(celltype == 1, 1.2 * GK1_b, np.where(celltype == 2, 1.3 * GK1_b, GK1_b))
     IK1 = np.sqrt(5) * np.sqrt(ko) * (-EK + v) * GK1 * K1ss / 5
 
     # Expressions for the IKb component
@@ -3653,9 +3425,7 @@ def forward_explicit_euler(states, t, dt, parameters):
     Istim = np.where(
         np.logical_and(
             t >= i_Stim_Start,
-            t
-            - i_Stim_Start
-            - i_Stim_Period * np.floor((t - i_Stim_Start) / i_Stim_Period)
+            t - i_Stim_Start - i_Stim_Period * np.floor((t - i_Stim_Start) / i_Stim_Period)
             <= i_Stim_PulseDuration,
         ),
         i_Stim_Amplitude,
@@ -3921,9 +3691,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dCaMKt_dt = -bCaMK * CaMKt + aCaMK * (CaMKb + CaMKt) * CaMKb
     dCaMKb_dCaMKt = -CaMKo / (1 + KmCaM / cass)
     dCaMKt_dt_linearized = (
-        -bCaMK
-        + aCaMK * (1 + dCaMKb_dCaMKt) * CaMKb
-        + aCaMK * (CaMKb + CaMKt) * dCaMKb_dCaMKt
+        -bCaMK + aCaMK * (1 + dCaMKb_dCaMKt) * CaMKb + aCaMK * (CaMKb + CaMKt) * dCaMKb_dCaMKt
     )
     states[0] = CaMKt + np.where(
         np.abs(dCaMKt_dt_linearized) > 1e-08,
@@ -3976,9 +3744,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     allo_i = 1.0 / (1 + (KmCaAct * KmCaAct) / (cai * cai))
     JncxNa_i = E3_i * k4pp_i - E2_i * k3pp_i - 3 * E1_i * k8_i + 3 * E4_i * k7_i
     JncxCa_i = E2_i * k2_i - E1_i * k1_i
-    Gncx = np.where(
-        celltype == 1, 1.1 * Gncx_b, np.where(celltype == 2, 1.4 * Gncx_b, Gncx_b)
-    )
+    Gncx = np.where(celltype == 1, 1.1 * Gncx_b, np.where(celltype == 2, 1.4 * Gncx_b, Gncx_b))
     INaCa_i = (1 - INaCa_fractionSS) * (zca * JncxCa_i + zna * JncxNa_i) * Gncx * allo_i
     h1_ss = 1 + (1 + hna) * nass / kna3
     h2_ss = hna * nass / (kna3 * h1_ss)
@@ -4013,9 +3779,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     E3_ss = x3_ss / (x1_ss + x2_ss + x3_ss + x4_ss)
     E4_ss = x4_ss / (x1_ss + x2_ss + x3_ss + x4_ss)
     allo_ss = 1.0 / (1 + (KmCaAct * KmCaAct) / (cass * cass))
-    JncxNa_ss = (
-        E3_ss * k4pp_ss - E2_ss * k3pp_ss - 3 * E1_ss * k8_ss + 3 * E4_ss * k7_ss
-    )
+    JncxNa_ss = E3_ss * k4pp_ss - E2_ss * k3pp_ss - 3 * E1_ss * k8_ss + 3 * E4_ss * k7_ss
     JncxCa_ss = E2_ss * k2_ss - E1_ss * k1_ss
     INaCa_ss = INaCa_fractionSS * (zca * JncxCa_ss + zna * JncxNa_ss) * Gncx * allo_ss
 
@@ -4085,9 +3849,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     E4 = x4 / (x1 + x2 + x3 + x4)
     JnakNa = -3 * E2 * b3 + 3 * E1 * a3
     JnakK = -2 * E3 * a1 + 2 * E4 * b1
-    Pnak = np.where(
-        celltype == 1, 0.9 * Pnak_b, np.where(celltype == 2, 0.7 * Pnak_b, Pnak_b)
-    )
+    Pnak = np.where(celltype == 1, 0.9 * Pnak_b, np.where(celltype == 2, 0.7 * Pnak_b, Pnak_b))
     INaK = (zk * JnakK + zna * JnakNa) * Pnak
 
     # Expressions for the b component
@@ -4121,9 +3883,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     states[1] = (-1 + np.exp(dt * dd_dt_linearized)) * dd_dt / dd_dt_linearized + d
     fss = 1.0 / (1 + 199.86038496778565 * np.exp(0.27056277056277056 * v))
     tff = 7 + 1.0 / (0.0045 * np.exp(-2 - v / 10) + 0.0045 * np.exp(2 + v / 10))
-    tfs = 1000 + 1.0 / (
-        3.5e-05 * np.exp(-5 / 4 - v / 4) + 3.5e-05 * np.exp(5 / 6 + v / 6)
-    )
+    tfs = 1000 + 1.0 / (3.5e-05 * np.exp(-5 / 4 - v / 4) + 3.5e-05 * np.exp(5 / 6 + v / 6))
     Afs = 1 - Aff
     dff_dt = (-ff + fss) / tff
     dff_dt_linearized = -1 / tff
@@ -4139,34 +3899,24 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     Afcas = 1 - Afcaf
     dfcaf_dt = (-fcaf + fcass) / tfcaf
     dfcaf_dt_linearized = -1 / tfcaf
-    states[4] = (
-        -1 + np.exp(dt * dfcaf_dt_linearized)
-    ) * dfcaf_dt / dfcaf_dt_linearized + fcaf
+    states[4] = (-1 + np.exp(dt * dfcaf_dt_linearized)) * dfcaf_dt / dfcaf_dt_linearized + fcaf
     dfcas_dt = (-fcas + fcass) / tfcas
     dfcas_dt_linearized = -1 / tfcas
-    states[5] = (
-        -1 + np.exp(dt * dfcas_dt_linearized)
-    ) * dfcas_dt / dfcas_dt_linearized + fcas
+    states[5] = (-1 + np.exp(dt * dfcas_dt_linearized)) * dfcas_dt / dfcas_dt_linearized + fcas
     fca = Afcaf * fcaf + Afcas * fcas
     jcass = 1.0 / (1.0 + 649.7401897235336 * np.exp(0.35821750967187277 * v))
     djca_dt = (-jca + jcass) / tjca
     djca_dt_linearized = -1 / tjca
-    states[6] = (
-        -1 + np.exp(dt * djca_dt_linearized)
-    ) * djca_dt / djca_dt_linearized + jca
+    states[6] = (-1 + np.exp(dt * djca_dt_linearized)) * djca_dt / djca_dt_linearized + jca
     tffp = 2.5 * tff
     dffp_dt = (-ffp + fss) / tffp
     dffp_dt_linearized = -1 / tffp
-    states[7] = (
-        -1 + np.exp(dt * dffp_dt_linearized)
-    ) * dffp_dt / dffp_dt_linearized + ffp
+    states[7] = (-1 + np.exp(dt * dffp_dt_linearized)) * dffp_dt / dffp_dt_linearized + ffp
     fp = Aff * ffp + Afs * fs
     tfcafp = 2.5 * tfcaf
     dfcafp_dt = (-fcafp + fcass) / tfcafp
     dfcafp_dt_linearized = -1 / tfcafp
-    states[8] = (
-        -1 + np.exp(dt * dfcafp_dt_linearized)
-    ) * dfcafp_dt / dfcafp_dt_linearized + fcafp
+    states[8] = (-1 + np.exp(dt * dfcafp_dt_linearized)) * dfcafp_dt / dfcafp_dt_linearized + fcafp
     fcap = Afcaf * fcafp + Afcas * fcas
     km2n = jca
     anca_ss = 1.0 / (np.power(1 + Kmn / cass, 4) + k2n / km2n)
@@ -4175,9 +3925,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     states[9] = (
         np.where(
             np.abs(dnca_ss_dt_linearized) > 1e-08,
-            (-1 + np.exp(dt * dnca_ss_dt_linearized))
-            * dnca_ss_dt
-            / dnca_ss_dt_linearized,
+            (-1 + np.exp(dt * dnca_ss_dt_linearized)) * dnca_ss_dt / dnca_ss_dt_linearized,
             dt * dnca_ss_dt,
         )
         + nca_ss
@@ -4197,17 +3945,9 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
-    PhiCaNa_ss = (
-        (-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass)
-        * vffrt
-        / (-1 + np.exp(vfrt))
-    )
-    PhiCaK_ss = (
-        (-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) * vffrt / (-1 + np.exp(vfrt))
-    )
-    PCa = np.where(
-        celltype == 1, 1.2 * PCa_b, np.where(celltype == 2, 2 * PCa_b, PCa_b)
-    )
+    PhiCaNa_ss = (-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass) * vffrt / (-1 + np.exp(vfrt))
+    PhiCaK_ss = (-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) * vffrt / (-1 + np.exp(vfrt))
+    PCa = np.where(celltype == 1, 1.2 * PCa_b, np.where(celltype == 2, 2 * PCa_b, PCa_b))
     PCap = 1.1 * PCa
     PCaNa = 0.00125 * PCa
     PCaK = 0.0003574 * PCa
@@ -4247,14 +3987,8 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
-    PhiCaNa_i = (
-        (-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai)
-        * vffrt
-        / (-1 + np.exp(vfrt))
-    )
-    PhiCaK_i = (
-        (-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) * vffrt / (-1 + np.exp(vfrt))
-    )
+    PhiCaNa_i = (-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai) * vffrt / (-1 + np.exp(vfrt))
+    PhiCaK_i = (-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) * vffrt / (-1 + np.exp(vfrt))
     ICaL_i = (1 - ICaL_fractionSS) * (
         (1 - fICaLp) * ((1 - nca_i) * f + fca * jca * nca_i) * PCa * PhiCaL_i * d
         + ((1 - nca_i) * fp + fcap * jca * nca_i) * PCap * PhiCaL_i * d * fICaLp
@@ -4307,9 +4041,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (1 + 15212.593285654404 * np.exp(0.13458950201884254 * v))
         * (1 + 15212.593285654404 * np.exp(0.13458950201884254 * v))
     )
-    ah = np.where(
-        v >= -40, 0, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * v)
-    )
+    ah = np.where(v >= -40, 0, 4.4312679295805147e-07 * np.exp(-0.14705882352941177 * v))
     bh = np.where(
         v >= -40,
         0.77 / (0.13 + 0.049758141083938695 * np.exp(-0.0900900900900901 * v)),
@@ -4329,9 +4061,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     bj = np.where(
         v >= -40,
         0.6 * np.exp(0.057 * v) / (1 + 0.040762203978366204 * np.exp(-0.1 * v)),
-        0.02424
-        * np.exp(-0.01052 * v)
-        / (1 + 0.003960868339904256 * np.exp(-0.1378 * v)),
+        0.02424 * np.exp(-0.01052 * v) / (1 + 0.003960868339904256 * np.exp(-0.1378 * v)),
     )
     jss = hss
     tj = 1.0 / (aj + bj)
@@ -4376,61 +4106,43 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     thLp = 3 * thL
     dhLp_dt = (-hLp + hLssp) / thLp
     dhLp_dt_linearized = -1 / thLp
-    states[18] = (
-        -1 + np.exp(dt * dhLp_dt_linearized)
-    ) * dhLp_dt / dhLp_dt_linearized + hLp
+    states[18] = (-1 + np.exp(dt * dhLp_dt_linearized)) * dhLp_dt / dhLp_dt_linearized + hLp
     GNaL = np.where(celltype == 1, 0.6 * GNaL_b, GNaL_b)
     fINaLp = 1.0 / (1 + KmCaMK / CaMKa)
     INaL = (-ENa + v) * ((1 - fINaLp) * hL + fINaLp * hLp) * GNaL * mL
 
     # Expressions for the Ito component
     ass = 1.0 / (
-        1
-        + 2.6316508161673635
-        * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
+        1 + 2.6316508161673635 * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
     )
     ta = 1.0515 / (
         1.0
         / (
             1.2089
-            + 2.2621017070578837
-            * np.exp(-0.03403513787634354 * EKshift - 0.03403513787634354 * v)
+            + 2.2621017070578837 * np.exp(-0.03403513787634354 * EKshift - 0.03403513787634354 * v)
         )
         + 3.5
-        / (
-            1
-            + 30.069572727397507
-            * np.exp(0.03403513787634354 * EKshift + 0.03403513787634354 * v)
-        )
+        / (1 + 30.069572727397507 * np.exp(0.03403513787634354 * EKshift + 0.03403513787634354 * v))
     )
     da_dt = (-a + ass) / ta
     da_dt_linearized = -1 / ta
     states[19] = (-1 + np.exp(dt * da_dt_linearized)) * da_dt / da_dt_linearized + a
     iss = 1.0 / (
-        1
-        + 2194.970764538301
-        * np.exp(0.17510068289266328 * EKshift + 0.17510068289266328 * v)
+        1 + 2194.970764538301 * np.exp(0.17510068289266328 * EKshift + 0.17510068289266328 * v)
     )
-    delta_epi = np.where(
-        celltype == 1, 1 - 0.95 / (1 + np.exp(14 + EKshift / 5 + v / 5)), 1
-    )
+    delta_epi = np.where(celltype == 1, 1 - 0.95 / (1 + np.exp(14 + EKshift / 5 + v / 5)), 1)
     tiF_b = 4.562 + 1.0 / (
         0.3933 * np.exp(-1 - EKshift / 100 - v / 100)
-        + 1.6300896349780942
-        * np.exp(0.06027727546714889 * EKshift + 0.06027727546714889 * v)
+        + 1.6300896349780942 * np.exp(0.06027727546714889 * EKshift + 0.06027727546714889 * v)
     )
     tiS_b = 23.62 + 1.0 / (
-        0.00027617763953377436
-        * np.exp(-0.01693480101608806 * EKshift - 0.01693480101608806 * v)
-        + 0.024208962804604526
-        * np.exp(0.12377769525931426 * EKshift + 0.12377769525931426 * v)
+        0.00027617763953377436 * np.exp(-0.01693480101608806 * EKshift - 0.01693480101608806 * v)
+        + 0.024208962804604526 * np.exp(0.12377769525931426 * EKshift + 0.12377769525931426 * v)
     )
     tiF = delta_epi * tiF_b
     tiS = delta_epi * tiS_b
     AiF = 1.0 / (
-        1
-        + 0.24348537187522867
-        * np.exp(0.006613756613756614 * EKshift + 0.006613756613756614 * v)
+        1 + 0.24348537187522867 * np.exp(0.006613756613756614 * EKshift + 0.006613756613756614 * v)
     )
     AiS = 1 - AiF
     diF_dt = (-iF + iss) / tiF
@@ -4441,32 +4153,24 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     states[21] = (-1 + np.exp(dt * diS_dt_linearized)) * diS_dt / diS_dt_linearized + iS
     i = AiF * iF + AiS * iS
     assp = 1.0 / (
-        1
-        + 5.167428462230666
-        * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
+        1 + 5.167428462230666 * np.exp(-0.06747638326585695 * EKshift - 0.06747638326585695 * v)
     )
     dap_dt = (-ap + assp) / ta
     dap_dt_linearized = -1 / ta
     states[22] = (-1 + np.exp(dt * dap_dt_linearized)) * dap_dt / dap_dt_linearized + ap
     dti_develop = 1.354 + 0.0001 / (
-        2.6591269045230603e-05
-        * np.exp(0.06293266205160478 * EKshift + 0.06293266205160478 * v)
-        + 4.5541779737128264e24
-        * np.exp(-4.642525533890436 * EKshift - 4.642525533890436 * v)
+        2.6591269045230603e-05 * np.exp(0.06293266205160478 * EKshift + 0.06293266205160478 * v)
+        + 4.5541779737128264e24 * np.exp(-4.642525533890436 * EKshift - 4.642525533890436 * v)
     )
     dti_recover = 1 - 0.5 / (1 + 33.11545195869231 * np.exp(0.05 * EKshift + 0.05 * v))
     tiFp = dti_develop * dti_recover * tiF
     tiSp = dti_develop * dti_recover * tiS
     diFp_dt = (-iFp + iss) / tiFp
     diFp_dt_linearized = -1 / tiFp
-    states[23] = (
-        -1 + np.exp(dt * diFp_dt_linearized)
-    ) * diFp_dt / diFp_dt_linearized + iFp
+    states[23] = (-1 + np.exp(dt * diFp_dt_linearized)) * diFp_dt / diFp_dt_linearized + iFp
     diSp_dt = (-iSp + iss) / tiSp
     diSp_dt_linearized = -1 / tiSp
-    states[24] = (
-        -1 + np.exp(dt * diSp_dt_linearized)
-    ) * diSp_dt / diSp_dt_linearized + iSp
+    states[24] = (-1 + np.exp(dt * diSp_dt_linearized)) * diSp_dt / diSp_dt_linearized + iSp
     ip = AiF * iFp + AiS * iSp
     Gto = np.where(celltype == 1, 2 * Gto_b, np.where(celltype == 2, 2 * Gto_b, Gto_b))
     fItop = 1.0 / (1 + KmCaMK / CaMKa)
@@ -4495,12 +4199,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (-1 + np.exp(dt * dC2_dt_linearized)) * dC2_dt / dC2_dt_linearized,
         dt * dC2_dt,
     )
-    dC1_dt = (
-        alpha_1 * C2
-        + I * beta_ItoC2
-        + O * beta_2
-        - (beta_1 + alpha_2 + alpha_C2ToI) * C1
-    )
+    dC1_dt = alpha_1 * C2 + I * beta_ItoC2 + O * beta_2 - (beta_1 + alpha_2 + alpha_C2ToI) * C1
     dC1_dt_linearized = -beta_1 - alpha_2 - alpha_C2ToI
     states[27] = C1 + np.where(
         np.abs(dC1_dt_linearized) > 1e-08,
@@ -4521,9 +4220,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (-1 + np.exp(dt * dI_dt_linearized)) * dI_dt / dI_dt_linearized,
         dt * dI_dt,
     )
-    GKr = np.where(
-        celltype == 1, 1.3 * GKr_b, np.where(celltype == 2, 0.8 * GKr_b, GKr_b)
-    )
+    GKr = np.where(celltype == 1, 1.3 * GKr_b, np.where(celltype == 2, 0.8 * GKr_b, GKr_b))
     IKr = np.sqrt(5) * np.sqrt(ko) * (-EK + v) * GKr * O / 5
 
     # Expressions for the IKs component
@@ -4534,18 +4231,12 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     )
     dxs1_dt = (-xs1 + xs1ss) / txs1
     dxs1_dt_linearized = -1 / txs1
-    states[30] = (
-        -1 + np.exp(dt * dxs1_dt_linearized)
-    ) * dxs1_dt / dxs1_dt_linearized + xs1
+    states[30] = (-1 + np.exp(dt * dxs1_dt_linearized)) * dxs1_dt / dxs1_dt_linearized + xs1
     xs2ss = xs1ss
-    txs2 = 1.0 / (
-        0.0022561357010639103 * np.exp(-v / 31) + 0.01 * np.exp(-5 / 2 + v / 20)
-    )
+    txs2 = 1.0 / (0.0022561357010639103 * np.exp(-v / 31) + 0.01 * np.exp(-5 / 2 + v / 20))
     dxs2_dt = (-xs2 + xs2ss) / txs2
     dxs2_dt_linearized = -1 / txs2
-    states[31] = (
-        -1 + np.exp(dt * dxs2_dt_linearized)
-    ) * dxs2_dt / dxs2_dt_linearized + xs2
+    states[31] = (-1 + np.exp(dt * dxs2_dt_linearized)) * dxs2_dt / dxs2_dt_linearized + xs2
     KsCa = 1 + 0.6 / (1 + 6.481821026062645e-07 * np.power(1.0 / cai, 1.4))
     GKs = np.where(celltype == 1, 1.4 * GKs_b, GKs_b)
     IKs = (-EKs + v) * GKs * KsCa * xs1 * xs2
@@ -4557,9 +4248,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         + 1.1196358381249121e-16 * np.exp(0.0618 * v - 0.0618 * EK)
     ) / (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v))
     K1ss = aK1 / (aK1 + bK1)
-    GK1 = np.where(
-        celltype == 1, 1.2 * GK1_b, np.where(celltype == 2, 1.3 * GK1_b, GK1_b)
-    )
+    GK1 = np.where(celltype == 1, 1.2 * GK1_b, np.where(celltype == 2, 1.3 * GK1_b, GK1_b))
     IK1 = np.sqrt(5) * np.sqrt(ko) * (-EK + v) * GK1 * K1ss / 5
 
     # Expressions for the IKb component
@@ -4611,9 +4300,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     Istim = np.where(
         np.logical_and(
             t >= i_Stim_Start,
-            t
-            - i_Stim_Start
-            - i_Stim_Period * np.floor((t - i_Stim_Start) / i_Stim_Period)
+            t - i_Stim_Start - i_Stim_Period * np.floor((t - i_Stim_Start) / i_Stim_Period)
             <= i_Stim_PulseDuration,
         ),
         i_Stim_Amplitude,
@@ -4642,9 +4329,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         - Ito
     )
     dAfcaf_dv = (
-        -0.06
-        * np.exp(-1 + v / 10)
-        / ((1 + np.exp(-1 + v / 10)) * (1 + np.exp(-1 + v / 10)))
+        -0.06 * np.exp(-1 + v / 10) / ((1 + np.exp(-1 + v / 10)) * (1 + np.exp(-1 + v / 10)))
     )
     dAiF_dv = (
         -0.0016103529885927823
@@ -4662,9 +4347,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
             )
         )
     )
-    dE1_dx1 = 1.0 / (x1 + x2 + x3 + x4) - x1 / (
-        (x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4)
-    )
+    dE1_dx1 = 1.0 / (x1 + x2 + x3 + x4) - x1 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE1_dx2 = -x1 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE1_dx3 = -x1 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE1_dx4 = -x1 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
@@ -4677,19 +4360,11 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dE1_ss_dx1_ss = 1.0 / (x1_ss + x2_ss + x3_ss + x4_ss) - x1_ss / (
         (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
     )
-    dE1_ss_dx2_ss = -x1_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
-    dE1_ss_dx3_ss = -x1_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
-    dE1_ss_dx4_ss = -x1_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
+    dE1_ss_dx2_ss = -x1_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
+    dE1_ss_dx3_ss = -x1_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
+    dE1_ss_dx4_ss = -x1_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
     dE2_dx1 = -x2 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
-    dE2_dx2 = 1.0 / (x1 + x2 + x3 + x4) - x2 / (
-        (x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4)
-    )
+    dE2_dx2 = 1.0 / (x1 + x2 + x3 + x4) - x2 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE2_dx3 = -x2 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE2_dx4 = -x2 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE2_i_dx1_i = -x2_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
@@ -4698,23 +4373,15 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     )
     dE2_i_dx3_i = -x2_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
     dE2_i_dx4_i = -x2_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
-    dE2_ss_dx1_ss = -x2_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
+    dE2_ss_dx1_ss = -x2_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
     dE2_ss_dx2_ss = 1.0 / (x1_ss + x2_ss + x3_ss + x4_ss) - x2_ss / (
         (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
     )
-    dE2_ss_dx3_ss = -x2_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
-    dE2_ss_dx4_ss = -x2_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
+    dE2_ss_dx3_ss = -x2_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
+    dE2_ss_dx4_ss = -x2_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
     dE3_dx1 = -x3 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE3_dx2 = -x3 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
-    dE3_dx3 = 1.0 / (x1 + x2 + x3 + x4) - x3 / (
-        (x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4)
-    )
+    dE3_dx3 = 1.0 / (x1 + x2 + x3 + x4) - x3 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE3_dx4 = -x3 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE3_i_dx1_i = -x3_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
     dE3_i_dx2_i = -x3_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
@@ -4722,39 +4389,25 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i)
     )
     dE3_i_dx4_i = -x3_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
-    dE3_ss_dx1_ss = -x3_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
-    dE3_ss_dx2_ss = -x3_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
+    dE3_ss_dx1_ss = -x3_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
+    dE3_ss_dx2_ss = -x3_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
     dE3_ss_dx3_ss = 1.0 / (x1_ss + x2_ss + x3_ss + x4_ss) - x3_ss / (
         (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
     )
-    dE3_ss_dx4_ss = -x3_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
+    dE3_ss_dx4_ss = -x3_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
     dE4_dx1 = -x4 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE4_dx2 = -x4 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE4_dx3 = -x4 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
-    dE4_dx4 = 1.0 / (x1 + x2 + x3 + x4) - x4 / (
-        (x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4)
-    )
+    dE4_dx4 = 1.0 / (x1 + x2 + x3 + x4) - x4 / ((x1 + x2 + x3 + x4) * (x1 + x2 + x3 + x4))
     dE4_i_dx1_i = -x4_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
     dE4_i_dx2_i = -x4_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
     dE4_i_dx3_i = -x4_i / ((x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i))
     dE4_i_dx4_i = 1.0 / (x1_i + x2_i + x3_i + x4_i) - x4_i / (
         (x1_i + x2_i + x3_i + x4_i) * (x1_i + x2_i + x3_i + x4_i)
     )
-    dE4_ss_dx1_ss = -x4_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
-    dE4_ss_dx2_ss = -x4_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
-    dE4_ss_dx3_ss = -x4_ss / (
-        (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
-    )
+    dE4_ss_dx1_ss = -x4_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
+    dE4_ss_dx2_ss = -x4_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
+    dE4_ss_dx3_ss = -x4_ss / ((x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss))
     dE4_ss_dx4_ss = 1.0 / (x1_ss + x2_ss + x3_ss + x4_ss) - x4_ss / (
         (x1_ss + x2_ss + x3_ss + x4_ss) * (x1_ss + x2_ss + x3_ss + x4_ss)
     )
@@ -4762,9 +4415,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (1 - fICaLp) * ((1 - nca_i) * f + fca * jca * nca_i) * PCaK * d
         + ((1 - nca_i) * fp + fcap * jca * nca_i) * PCaKp * d * fICaLp
     )
-    dICaK_i_dfca = (
-        (1 - ICaL_fractionSS) * (1 - fICaLp) * PCaK * PhiCaK_i * d * jca * nca_i
-    )
+    dICaK_i_dfca = (1 - ICaL_fractionSS) * (1 - fICaLp) * PCaK * PhiCaK_i * d * jca * nca_i
     dICaK_i_dfcap = (1 - ICaL_fractionSS) * PCaKp * PhiCaK_i * d * fICaLp * jca * nca_i
     dICaK_ss_dPhiCaK_ss = ICaL_fractionSS * (
         (1 - fICaLp) * ((1 - nca_ss) * f + fca * jca * nca_ss) * PCaK * d
@@ -4776,9 +4427,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (1 - fICaLp) * ((1 - nca_i) * f + fca * jca * nca_i) * PCa * d
         + ((1 - nca_i) * fp + fcap * jca * nca_i) * PCap * d * fICaLp
     )
-    dICaL_i_dfca = (
-        (1 - ICaL_fractionSS) * (1 - fICaLp) * PCa * PhiCaL_i * d * jca * nca_i
-    )
+    dICaL_i_dfca = (1 - ICaL_fractionSS) * (1 - fICaLp) * PCa * PhiCaL_i * d * jca * nca_i
     dICaL_i_dfcap = (1 - ICaL_fractionSS) * PCap * PhiCaL_i * d * fICaLp * jca * nca_i
     dICaL_ss_dPhiCaL_ss = ICaL_fractionSS * (
         (1 - fICaLp) * ((1 - nca_ss) * f + fca * jca * nca_ss) * PCa * d
@@ -4790,35 +4439,22 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         (1 - fICaLp) * ((1 - nca_i) * f + fca * jca * nca_i) * PCaNa * d
         + ((1 - nca_i) * fp + fcap * jca * nca_i) * PCaNap * d * fICaLp
     )
-    dICaNa_i_dfca = (
-        (1 - ICaL_fractionSS) * (1 - fICaLp) * PCaNa * PhiCaNa_i * d * jca * nca_i
-    )
-    dICaNa_i_dfcap = (
-        (1 - ICaL_fractionSS) * PCaNap * PhiCaNa_i * d * fICaLp * jca * nca_i
-    )
+    dICaNa_i_dfca = (1 - ICaL_fractionSS) * (1 - fICaLp) * PCaNa * PhiCaNa_i * d * jca * nca_i
+    dICaNa_i_dfcap = (1 - ICaL_fractionSS) * PCaNap * PhiCaNa_i * d * fICaLp * jca * nca_i
     dICaNa_ss_dPhiCaNa_ss = ICaL_fractionSS * (
         (1 - fICaLp) * ((1 - nca_ss) * f + fca * jca * nca_ss) * PCaNa * d
         + ((1 - nca_ss) * fp + fcap * jca * nca_ss) * PCaNap * d * fICaLp
     )
-    dICaNa_ss_dfca = (
-        ICaL_fractionSS * (1 - fICaLp) * PCaNa * PhiCaNa_ss * d * jca * nca_ss
-    )
+    dICaNa_ss_dfca = ICaL_fractionSS * (1 - fICaLp) * PCaNa * PhiCaNa_ss * d * jca * nca_ss
     dICaNa_ss_dfcap = ICaL_fractionSS * PCaNap * PhiCaNa_ss * d * fICaLp * jca * nca_ss
     dICab_dvffrt = (
-        4
-        * PCab
-        * (-cao * gamma_cao + cai * np.exp(2 * vfrt) * gamma_cai)
-        / (-1 + np.exp(2 * vfrt))
+        4 * PCab * (-cao * gamma_cao + cai * np.exp(2 * vfrt) * gamma_cai) / (-1 + np.exp(2 * vfrt))
     )
-    dICab_dvfrt = -8 * PCab * (
-        -cao * gamma_cao + cai * np.exp(2 * vfrt) * gamma_cai
-    ) * np.exp(2 * vfrt) * vffrt / (
-        (-1 + np.exp(2 * vfrt)) * (-1 + np.exp(2 * vfrt))
-    ) + 8 * PCab * cai * np.exp(
+    dICab_dvfrt = -8 * PCab * (-cao * gamma_cao + cai * np.exp(2 * vfrt) * gamma_cai) * np.exp(
         2 * vfrt
-    ) * gamma_cai * vffrt / (
-        -1 + np.exp(2 * vfrt)
-    )
+    ) * vffrt / ((-1 + np.exp(2 * vfrt)) * (-1 + np.exp(2 * vfrt))) + 8 * PCab * cai * np.exp(
+        2 * vfrt
+    ) * gamma_cai * vffrt / (-1 + np.exp(2 * vfrt))
     dIClCa_junc_dv = Fjunc * GClCa / (1 + KdClCa / cass)
     dIClCa_sl_dv = GClCa * (1 - Fjunc) / (1 + KdClCa / cai)
     dIK1_dK1ss = np.sqrt(5) * np.sqrt(ko) * (-EK + v) * GK1 / 5
@@ -4835,14 +4471,10 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dbK1_dv = (
         6.919349479611957e-18 * np.exp(0.0618 * v - 0.0618 * EK)
         + 0.8506978434250505 * np.exp(0.0674 * v - 0.0674 * EK)
-    ) / (
-        1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v)
-    ) + 0.016099950792318272 * (
+    ) / (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v)) + 0.016099950792318272 * (
         12.621629724407278 * np.exp(0.0674 * v - 0.0674 * EK)
         + 1.1196358381249121e-16 * np.exp(0.0618 * v - 0.0618 * EK)
-    ) * np.exp(
-        0.1629 * EK - 0.1629 * v
-    ) / (
+    ) * np.exp(0.1629 * EK - 0.1629 * v) / (
         (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v))
         * (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v))
     )
@@ -4904,61 +4536,28 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dx4_i_dk3_i = (k1_i + k8_i) * k5_i
     dJncxNa_i_dk3pp_i = (
         -E2_i
-        + (
-            dE3_i_dx3_i * dx3_i_dk3_i
-            + dE3_i_dx4_i * dx4_i_dk3_i
-            + dE3_i_dx1_i * k5_i * k7_i
-        )
+        + (dE3_i_dx3_i * dx3_i_dk3_i + dE3_i_dx4_i * dx4_i_dk3_i + dE3_i_dx1_i * k5_i * k7_i)
         * k4pp_i
-        - (
-            dE2_i_dx3_i * dx3_i_dk3_i
-            + dE2_i_dx4_i * dx4_i_dk3_i
-            + dE2_i_dx1_i * k5_i * k7_i
-        )
+        - (dE2_i_dx3_i * dx3_i_dk3_i + dE2_i_dx4_i * dx4_i_dk3_i + dE2_i_dx1_i * k5_i * k7_i)
         * k3pp_i
         - 3
-        * (
-            dE1_i_dx3_i * dx3_i_dk3_i
-            + dE1_i_dx4_i * dx4_i_dk3_i
-            + dE1_i_dx1_i * k5_i * k7_i
-        )
+        * (dE1_i_dx3_i * dx3_i_dk3_i + dE1_i_dx4_i * dx4_i_dk3_i + dE1_i_dx1_i * k5_i * k7_i)
         * k8_i
         + 3
-        * (
-            dE4_i_dx3_i * dx3_i_dk3_i
-            + dE4_i_dx4_i * dx4_i_dk3_i
-            + dE4_i_dx1_i * k5_i * k7_i
-        )
+        * (dE4_i_dx3_i * dx3_i_dk3_i + dE4_i_dx4_i * dx4_i_dk3_i + dE4_i_dx1_i * k5_i * k7_i)
         * k7_i
     )
     dx1_i_dk4_i = (k6_i + k7_i) * k2_i
     dx2_i_dk4_i = (k1_i + k8_i) * k6_i + k1_i * k7_i
     dJncxNa_i_dk4pp_i = (
-        (
-            dE3_i_dx1_i * dx1_i_dk4_i
-            + dE3_i_dx2_i * dx2_i_dk4_i
-            + dE3_i_dx4_i * k2_i * k8_i
-        )
-        * k4pp_i
-        - (
-            dE2_i_dx1_i * dx1_i_dk4_i
-            + dE2_i_dx2_i * dx2_i_dk4_i
-            + dE2_i_dx4_i * k2_i * k8_i
-        )
+        (dE3_i_dx1_i * dx1_i_dk4_i + dE3_i_dx2_i * dx2_i_dk4_i + dE3_i_dx4_i * k2_i * k8_i) * k4pp_i
+        - (dE2_i_dx1_i * dx1_i_dk4_i + dE2_i_dx2_i * dx2_i_dk4_i + dE2_i_dx4_i * k2_i * k8_i)
         * k3pp_i
         - 3
-        * (
-            dE1_i_dx1_i * dx1_i_dk4_i
-            + dE1_i_dx2_i * dx2_i_dk4_i
-            + dE1_i_dx4_i * k2_i * k8_i
-        )
+        * (dE1_i_dx1_i * dx1_i_dk4_i + dE1_i_dx2_i * dx2_i_dk4_i + dE1_i_dx4_i * k2_i * k8_i)
         * k8_i
         + 3
-        * (
-            dE4_i_dx1_i * dx1_i_dk4_i
-            + dE4_i_dx2_i * dx2_i_dk4_i
-            + dE4_i_dx4_i * k2_i * k8_i
-        )
+        * (dE4_i_dx1_i * dx1_i_dk4_i + dE4_i_dx2_i * dx2_i_dk4_i + dE4_i_dx4_i * k2_i * k8_i)
         * k7_i
         + E3_i
     )
@@ -4966,62 +4565,30 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dx2_i_dk7_i = (k4_i + k5_i) * k1_i
     dJncxNa_i_dk7_i = (
         3 * E4_i
-        + (
-            dE3_i_dx1_i * dx1_i_dk7_i
-            + dE3_i_dx2_i * dx2_i_dk7_i
-            + dE3_i_dx3_i * k1_i * k3_i
-        )
+        + (dE3_i_dx1_i * dx1_i_dk7_i + dE3_i_dx2_i * dx2_i_dk7_i + dE3_i_dx3_i * k1_i * k3_i)
         * k4pp_i
-        - (
-            dE2_i_dx1_i * dx1_i_dk7_i
-            + dE2_i_dx2_i * dx2_i_dk7_i
-            + dE2_i_dx3_i * k1_i * k3_i
-        )
+        - (dE2_i_dx1_i * dx1_i_dk7_i + dE2_i_dx2_i * dx2_i_dk7_i + dE2_i_dx3_i * k1_i * k3_i)
         * k3pp_i
         - 3
-        * (
-            dE1_i_dx1_i * dx1_i_dk7_i
-            + dE1_i_dx2_i * dx2_i_dk7_i
-            + dE1_i_dx3_i * k1_i * k3_i
-        )
+        * (dE1_i_dx1_i * dx1_i_dk7_i + dE1_i_dx2_i * dx2_i_dk7_i + dE1_i_dx3_i * k1_i * k3_i)
         * k8_i
         + 3
-        * (
-            dE4_i_dx1_i * dx1_i_dk7_i
-            + dE4_i_dx2_i * dx2_i_dk7_i
-            + dE4_i_dx3_i * k1_i * k3_i
-        )
+        * (dE4_i_dx1_i * dx1_i_dk7_i + dE4_i_dx2_i * dx2_i_dk7_i + dE4_i_dx3_i * k1_i * k3_i)
         * k7_i
     )
     dx3_i_dk8_i = (k2_i + k3_i) * k6_i
     dx4_i_dk8_i = (k4_i + k5_i) * k2_i + k3_i * k5_i
     dJncxNa_i_dk8_i = (
         -3 * E1_i
-        + (
-            dE3_i_dx3_i * dx3_i_dk8_i
-            + dE3_i_dx4_i * dx4_i_dk8_i
-            + dE3_i_dx2_i * k4_i * k6_i
-        )
+        + (dE3_i_dx3_i * dx3_i_dk8_i + dE3_i_dx4_i * dx4_i_dk8_i + dE3_i_dx2_i * k4_i * k6_i)
         * k4pp_i
-        - (
-            dE2_i_dx3_i * dx3_i_dk8_i
-            + dE2_i_dx4_i * dx4_i_dk8_i
-            + dE2_i_dx2_i * k4_i * k6_i
-        )
+        - (dE2_i_dx3_i * dx3_i_dk8_i + dE2_i_dx4_i * dx4_i_dk8_i + dE2_i_dx2_i * k4_i * k6_i)
         * k3pp_i
         - 3
-        * (
-            dE1_i_dx3_i * dx3_i_dk8_i
-            + dE1_i_dx4_i * dx4_i_dk8_i
-            + dE1_i_dx2_i * k4_i * k6_i
-        )
+        * (dE1_i_dx3_i * dx3_i_dk8_i + dE1_i_dx4_i * dx4_i_dk8_i + dE1_i_dx2_i * k4_i * k6_i)
         * k8_i
         + 3
-        * (
-            dE4_i_dx3_i * dx3_i_dk8_i
-            + dE4_i_dx4_i * dx4_i_dk8_i
-            + dE4_i_dx2_i * k4_i * k6_i
-        )
+        * (dE4_i_dx3_i * dx3_i_dk8_i + dE4_i_dx4_i * dx4_i_dk8_i + dE4_i_dx2_i * k4_i * k6_i)
         * k7_i
     )
     dx3_ss_dk3_ss = (k6_ss + k7_ss) * k1_ss + k6_ss * k8_ss
@@ -5150,74 +4717,42 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     )
     dKnai_dvfrt = Knai0 * delta * np.exp(delta * vfrt / 3) / 3
     dKnao_dvfrt = Knao0 * (1 / 3 - delta / 3) * np.exp((1 - delta) * vfrt / 3)
-    dPhiCaK_i_dvffrt = (-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) / (
-        -1 + np.exp(vfrt)
-    )
-    dPhiCaK_i_dvfrt = -(-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) * np.exp(
-        vfrt
-    ) * vffrt / ((-1 + np.exp(vfrt)) * (-1 + np.exp(vfrt))) + np.exp(
-        vfrt
-    ) * gamma_ki * ki * vffrt / (
-        -1 + np.exp(vfrt)
-    )
-    dPhiCaK_ss_dvffrt = (-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) / (
-        -1 + np.exp(vfrt)
-    )
-    dPhiCaK_ss_dvfrt = -(-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) * np.exp(
-        vfrt
-    ) * vffrt / ((-1 + np.exp(vfrt)) * (-1 + np.exp(vfrt))) + np.exp(
-        vfrt
-    ) * gamma_kss * kss * vffrt / (
-        -1 + np.exp(vfrt)
-    )
+    dPhiCaK_i_dvffrt = (-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) / (-1 + np.exp(vfrt))
+    dPhiCaK_i_dvfrt = -(-ko * gamma_ko + np.exp(vfrt) * gamma_ki * ki) * np.exp(vfrt) * vffrt / (
+        (-1 + np.exp(vfrt)) * (-1 + np.exp(vfrt))
+    ) + np.exp(vfrt) * gamma_ki * ki * vffrt / (-1 + np.exp(vfrt))
+    dPhiCaK_ss_dvffrt = (-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) / (-1 + np.exp(vfrt))
+    dPhiCaK_ss_dvfrt = -(-ko * gamma_ko + np.exp(vfrt) * gamma_kss * kss) * np.exp(vfrt) * vffrt / (
+        (-1 + np.exp(vfrt)) * (-1 + np.exp(vfrt))
+    ) + np.exp(vfrt) * gamma_kss * kss * vffrt / (-1 + np.exp(vfrt))
     dPhiCaL_i_dvffrt = (
-        4
-        * (-cao * gamma_cao + cai * np.exp(2 * vfrt) * gamma_cai)
-        / (-1 + np.exp(2 * vfrt))
+        4 * (-cao * gamma_cao + cai * np.exp(2 * vfrt) * gamma_cai) / (-1 + np.exp(2 * vfrt))
     )
-    dPhiCaL_i_dvfrt = -8 * (
-        -cao * gamma_cao + cai * np.exp(2 * vfrt) * gamma_cai
-    ) * np.exp(2 * vfrt) * vffrt / (
-        (-1 + np.exp(2 * vfrt)) * (-1 + np.exp(2 * vfrt))
-    ) + 8 * cai * np.exp(
+    dPhiCaL_i_dvfrt = -8 * (-cao * gamma_cao + cai * np.exp(2 * vfrt) * gamma_cai) * np.exp(
         2 * vfrt
-    ) * gamma_cai * vffrt / (
-        -1 + np.exp(2 * vfrt)
-    )
+    ) * vffrt / ((-1 + np.exp(2 * vfrt)) * (-1 + np.exp(2 * vfrt))) + 8 * cai * np.exp(
+        2 * vfrt
+    ) * gamma_cai * vffrt / (-1 + np.exp(2 * vfrt))
     dPhiCaL_ss_dvffrt = (
-        4
-        * (-cao * gamma_cao + cass * np.exp(2 * vfrt) * gamma_cass)
-        / (-1 + np.exp(2 * vfrt))
+        4 * (-cao * gamma_cao + cass * np.exp(2 * vfrt) * gamma_cass) / (-1 + np.exp(2 * vfrt))
     )
-    dPhiCaL_ss_dvfrt = -8 * (
-        -cao * gamma_cao + cass * np.exp(2 * vfrt) * gamma_cass
-    ) * np.exp(2 * vfrt) * vffrt / (
-        (-1 + np.exp(2 * vfrt)) * (-1 + np.exp(2 * vfrt))
-    ) + 8 * cass * np.exp(
+    dPhiCaL_ss_dvfrt = -8 * (-cao * gamma_cao + cass * np.exp(2 * vfrt) * gamma_cass) * np.exp(
         2 * vfrt
-    ) * gamma_cass * vffrt / (
-        -1 + np.exp(2 * vfrt)
-    )
-    dPhiCaNa_i_dvffrt = (-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai) / (
-        -1 + np.exp(vfrt)
-    )
+    ) * vffrt / ((-1 + np.exp(2 * vfrt)) * (-1 + np.exp(2 * vfrt))) + 8 * cass * np.exp(
+        2 * vfrt
+    ) * gamma_cass * vffrt / (-1 + np.exp(2 * vfrt))
+    dPhiCaNa_i_dvffrt = (-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai) / (-1 + np.exp(vfrt))
     dPhiCaNa_i_dvfrt = -(-nao * gamma_nao + np.exp(vfrt) * gamma_nai * nai) * np.exp(
         vfrt
     ) * vffrt / ((-1 + np.exp(vfrt)) * (-1 + np.exp(vfrt))) + np.exp(
         vfrt
-    ) * gamma_nai * nai * vffrt / (
-        -1 + np.exp(vfrt)
-    )
-    dPhiCaNa_ss_dvffrt = (-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass) / (
-        -1 + np.exp(vfrt)
-    )
+    ) * gamma_nai * nai * vffrt / (-1 + np.exp(vfrt))
+    dPhiCaNa_ss_dvffrt = (-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass) / (-1 + np.exp(vfrt))
     dPhiCaNa_ss_dvfrt = -(-nao * gamma_nao + np.exp(vfrt) * gamma_nass * nass) * np.exp(
         vfrt
     ) * vffrt / ((-1 + np.exp(vfrt)) * (-1 + np.exp(vfrt))) + np.exp(
         vfrt
-    ) * gamma_nass * nass * vffrt / (
-        -1 + np.exp(vfrt)
-    )
+    ) * gamma_nass * nass * vffrt / (-1 + np.exp(vfrt))
     da1_dKnai = -3 * k1p * (nai * nai * nai) / (
         (
             -1
@@ -5315,9 +4850,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dh2_i_dh1_i = -hna * nai / (kna3 * (h1_i * h1_i))
     dh2_i_dhna = nai / (kna3 * h1_i) - dh1_i_dhna * hna * nai / (kna3 * (h1_i * h1_i))
     dh2_ss_dh1_ss = -hna * nass / (kna3 * (h1_ss * h1_ss))
-    dh2_ss_dhna = nass / (kna3 * h1_ss) - dh1_ss_dhna * hna * nass / (
-        kna3 * (h1_ss * h1_ss)
-    )
+    dh2_ss_dhna = nass / (kna3 * h1_ss) - dh1_ss_dhna * hna * nass / (kna3 * (h1_ss * h1_ss))
     dh3_i_dh1_i = -1 / (h1_i * h1_i)
     dh3_ss_dh1_ss = -1 / (h1_ss * h1_ss)
     dh7_i_dhna = -nao / (kna3 * (hna * hna))
@@ -5402,11 +4935,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * k2_i
                     * k8_i
@@ -5427,11 +4956,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx1_i_dk4_i
                     + (
@@ -5461,11 +4986,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx2_i_dk4_i
                     + wna
@@ -5532,11 +5053,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * k2_i
                     * k8_i
@@ -5557,11 +5074,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx1_i_dk4_i
                     + (
@@ -5591,11 +5104,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx2_i_dk4_i
                     + wna
@@ -5665,11 +5174,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * k2_ss
                     * k8_ss
@@ -5690,11 +5195,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx1_ss_dk4_ss
                     + (
@@ -5724,11 +5225,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx2_ss_dk4_ss
                     + wna
@@ -5795,11 +5292,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * k2_ss
                     * k8_ss
@@ -5820,11 +5313,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx1_ss_dk4_ss
                     + (
@@ -5854,11 +5343,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx2_ss_dk4_ss
                     + wna
@@ -5897,18 +5382,12 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         - (dAiF_dv * di_dAiF - dAiF_dv * iS) * dIto_di
         - (dAiF_dv * dip_dAiF - dAiF_dv * iSp) * dIto_dip
         - (dK1ss_daK1 * daK1_dv + dK1ss_dbK1 * dbK1_dv) * dIK1_dK1ss
-        - (dPhiCaK_i_dvffrt * dvffrt_dv + dPhiCaK_i_dvfrt * dvfrt_dv)
-        * dICaK_i_dPhiCaK_i
-        - (dPhiCaK_ss_dvffrt * dvffrt_dv + dPhiCaK_ss_dvfrt * dvfrt_dv)
-        * dICaK_ss_dPhiCaK_ss
-        - (dPhiCaL_i_dvffrt * dvffrt_dv + dPhiCaL_i_dvfrt * dvfrt_dv)
-        * dICaL_i_dPhiCaL_i
-        - (dPhiCaL_ss_dvffrt * dvffrt_dv + dPhiCaL_ss_dvfrt * dvfrt_dv)
-        * dICaL_ss_dPhiCaL_ss
-        - (dPhiCaNa_i_dvffrt * dvffrt_dv + dPhiCaNa_i_dvfrt * dvfrt_dv)
-        * dICaNa_i_dPhiCaNa_i
-        - (dPhiCaNa_ss_dvffrt * dvffrt_dv + dPhiCaNa_ss_dvfrt * dvfrt_dv)
-        * dICaNa_ss_dPhiCaNa_ss
+        - (dPhiCaK_i_dvffrt * dvffrt_dv + dPhiCaK_i_dvfrt * dvfrt_dv) * dICaK_i_dPhiCaK_i
+        - (dPhiCaK_ss_dvffrt * dvffrt_dv + dPhiCaK_ss_dvfrt * dvfrt_dv) * dICaK_ss_dPhiCaK_ss
+        - (dPhiCaL_i_dvffrt * dvffrt_dv + dPhiCaL_i_dvfrt * dvfrt_dv) * dICaL_i_dPhiCaL_i
+        - (dPhiCaL_ss_dvffrt * dvffrt_dv + dPhiCaL_ss_dvfrt * dvfrt_dv) * dICaL_ss_dPhiCaL_ss
+        - (dPhiCaNa_i_dvffrt * dvffrt_dv + dPhiCaNa_i_dvfrt * dvfrt_dv) * dICaNa_i_dPhiCaNa_i
+        - (dPhiCaNa_ss_dvffrt * dvffrt_dv + dPhiCaNa_ss_dvfrt * dvfrt_dv) * dICaNa_ss_dPhiCaNa_ss
         - (
             (
                 (
@@ -5955,11 +5434,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * k2_i
                     * k8_i
@@ -5980,11 +5455,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx1_i_dk4_i
                     + (
@@ -6014,11 +5485,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx2_i_dk4_i
                     + wna
@@ -6085,11 +5552,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * k2_i
                     * k8_i
@@ -6110,11 +5573,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx1_i_dk4_i
                     + (
@@ -6144,11 +5603,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx2_i_dk4_i
                     + wna
@@ -6216,11 +5671,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * k2_i
                     * k8_i
@@ -6241,11 +5692,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx1_i_dk4_i
                     + (
@@ -6275,11 +5722,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx2_i_dk4_i
                     + wna
@@ -6347,11 +5790,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * k2_i
                     * k8_i
@@ -6372,11 +5811,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx1_i_dk4_i
                     + (
@@ -6406,11 +5841,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_i_dhna * dh2_i_dh1_i * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_i_dhca * dvfrt_dv
-                        + dh1_i_dhna
-                        * dh3_i_dh1_i
-                        * dhna_dvfrt
-                        * dk4p_i_dh3_i
-                        * dvfrt_dv
+                        + dh1_i_dhna * dh3_i_dh1_i * dhna_dvfrt * dk4p_i_dh3_i * dvfrt_dv
                     )
                     * dx2_i_dk4_i
                     + wna
@@ -6506,11 +5937,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * k2_ss
                     * k8_ss
@@ -6531,11 +5958,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx1_ss_dk4_ss
                     + (
@@ -6565,11 +5988,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx2_ss_dk4_ss
                     + wna
@@ -6636,11 +6055,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * k2_ss
                     * k8_ss
@@ -6661,11 +6076,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx1_ss_dk4_ss
                     + (
@@ -6695,11 +6106,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx2_ss_dk4_ss
                     + wna
@@ -6767,11 +6174,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * k2_ss
                     * k8_ss
@@ -6792,11 +6195,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx1_ss_dk4_ss
                     + (
@@ -6826,11 +6225,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx2_ss_dk4_ss
                     + wna
@@ -6898,11 +6293,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * k2_ss
                     * k8_ss
@@ -6923,11 +6314,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx1_ss_dk4_ss
                     + (
@@ -6957,11 +6344,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                             + dh1_ss_dhna * dh2_ss_dh1_ss * dhna_dvfrt * dvfrt_dv
                         )
                         + dhca_dvfrt * dk4p_ss_dhca * dvfrt_dv
-                        + dh1_ss_dhna
-                        * dh3_ss_dh1_ss
-                        * dhna_dvfrt
-                        * dk4p_ss_dh3_ss
-                        * dvfrt_dv
+                        + dh1_ss_dhna * dh3_ss_dh1_ss * dhna_dvfrt * dk4p_ss_dh3_ss * dvfrt_dv
                     )
                     * dx2_ss_dk4_ss
                     + wna
@@ -7170,11 +6553,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         + 3 * (dE1_dx1 * dx1_db3 + dE1_dx4 * dx4_db3 + b1 * b2 * dE1_dx3) * a3
     )
     dP_dnai = -eP / (
-        Knap
-        * (
-            (1 + H / Khp + nai / Knap + ki / Kxkur)
-            * (1 + H / Khp + nai / Knap + ki / Kxkur)
-        )
+        Knap * ((1 + H / Khp + nai / Knap + ki / Kxkur) * (1 + H / Khp + nai / Knap + ki / Kxkur))
     )
     dPhiCaNa_i_dgamma_nai = np.exp(vfrt) * nai * vffrt / (-1 + np.exp(vfrt))
     dgamma_nai_dIi = (
@@ -7248,8 +6627,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dx3_i_dk6_i = (k2_i + k3_i) * k8_i + k1_i * k3_i
     dnai_dt_linearized = dJdiffNa_dnai * vss / vmyo + (
         -dINab_dnai
-        - (0.0005 * dPhiCaNa_i_dgamma_nai * dgamma_nai_dIi + dPhiCaNa_i_dnai)
-        * dICaNa_i_dPhiCaNa_i
+        - (0.0005 * dPhiCaNa_i_dgamma_nai * dgamma_nai_dIi + dPhiCaNa_i_dnai) * dICaNa_i_dPhiCaNa_i
         - dENa_dnai * dINaL_dENa
         - dENa_dnai * dINa_dENa
         - 3
@@ -7563,20 +6941,16 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
             - 2
             * (
                 (db4_dnai * dx2_db4 + a2 * a3 * da1_dnai) * dE3_dx2
-                + (da1_dnai * dx1_da1 + db4_dnai * dx1_db4 + dP_dnai * db3_dP * dx1_db3)
-                * dE3_dx1
-                + (da1_dnai * dx4_da1 + b2 * b3 * db4_dnai + dP_dnai * db3_dP * dx4_db3)
-                * dE3_dx4
+                + (da1_dnai * dx1_da1 + db4_dnai * dx1_db4 + dP_dnai * db3_dP * dx1_db3) * dE3_dx1
+                + (da1_dnai * dx4_da1 + b2 * b3 * db4_dnai + dP_dnai * db3_dP * dx4_db3) * dE3_dx4
                 + b1 * b2 * dE3_dx3 * dP_dnai * db3_dP
             )
             * a1
             + 2
             * (
                 (db4_dnai * dx2_db4 + a2 * a3 * da1_dnai) * dE4_dx2
-                + (da1_dnai * dx1_da1 + db4_dnai * dx1_db4 + dP_dnai * db3_dP * dx1_db3)
-                * dE4_dx1
-                + (da1_dnai * dx4_da1 + b2 * b3 * db4_dnai + dP_dnai * db3_dP * dx4_db3)
-                * dE4_dx4
+                + (da1_dnai * dx1_da1 + db4_dnai * dx1_db4 + dP_dnai * db3_dP * dx1_db3) * dE4_dx1
+                + (da1_dnai * dx4_da1 + b2 * b3 * db4_dnai + dP_dnai * db3_dP * dx4_db3) * dE4_dx4
                 + b1 * b2 * dE4_dx3 * dP_dnai * db3_dP
             )
             * b1
@@ -7588,20 +6962,16 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
             -3
             * (
                 (db4_dnai * dx2_db4 + a2 * a3 * da1_dnai) * dE2_dx2
-                + (da1_dnai * dx1_da1 + db4_dnai * dx1_db4 + dP_dnai * db3_dP * dx1_db3)
-                * dE2_dx1
-                + (da1_dnai * dx4_da1 + b2 * b3 * db4_dnai + dP_dnai * db3_dP * dx4_db3)
-                * dE2_dx4
+                + (da1_dnai * dx1_da1 + db4_dnai * dx1_db4 + dP_dnai * db3_dP * dx1_db3) * dE2_dx1
+                + (da1_dnai * dx4_da1 + b2 * b3 * db4_dnai + dP_dnai * db3_dP * dx4_db3) * dE2_dx4
                 + b1 * b2 * dE2_dx3 * dP_dnai * db3_dP
             )
             * b3
             + 3
             * (
                 (db4_dnai * dx2_db4 + a2 * a3 * da1_dnai) * dE1_dx2
-                + (da1_dnai * dx1_da1 + db4_dnai * dx1_db4 + dP_dnai * db3_dP * dx1_db3)
-                * dE1_dx1
-                + (da1_dnai * dx4_da1 + b2 * b3 * db4_dnai + dP_dnai * db3_dP * dx4_db3)
-                * dE1_dx4
+                + (da1_dnai * dx1_da1 + db4_dnai * dx1_db4 + dP_dnai * db3_dP * dx1_db3) * dE1_dx1
+                + (da1_dnai * dx4_da1 + b2 * b3 * db4_dnai + dP_dnai * db3_dP * dx4_db3) * dE1_dx4
                 + b1 * b2 * dE1_dx3 * dP_dnai * db3_dP
             )
             * a3
@@ -7634,9 +7004,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         / (-1 + np.exp(vfrt))
     )
     dh1_ss_dnass = (1 + hna) / kna3
-    dh2_ss_dnass = hna / (kna3 * h1_ss) - dh1_ss_dnass * hna * nass / (
-        kna3 * (h1_ss * h1_ss)
-    )
+    dh2_ss_dnass = hna / (kna3 * h1_ss) - dh1_ss_dnass * hna * nass / (kna3 * (h1_ss * h1_ss))
     dh4_ss_dnass = (1 + nass / kna2) / kna1 + nass / (kna1 * kna2)
     dh5_ss_dh4_ss = -(nass * nass) / (kna1 * kna2 * (h4_ss * h4_ss))
     dh5_ss_dnass = 2 * nass / (kna1 * kna2 * h4_ss) - (nass * nass) * dh4_ss_dnass / (
@@ -7949,9 +7317,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
                 * k8_ss
             )
             * k7_ss
-            + wnaca
-            * (dh1_ss_dnass * dh2_ss_dh1_ss + dh2_ss_dnass)
-            * dJncxNa_ss_dk4pp_ss
+            + wnaca * (dh1_ss_dnass * dh2_ss_dh1_ss + dh2_ss_dnass) * dJncxNa_ss_dk4pp_ss
         )
         * dINaCa_ss_dJncxNa_ss
     ) * Acap / (F * vss)
@@ -7979,14 +7345,10 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dbK1_dEK = (
         -6.919349479611957e-18 * np.exp(0.0618 * v - 0.0618 * EK)
         - 0.8506978434250505 * np.exp(0.0674 * v - 0.0674 * EK)
-    ) / (
-        1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v)
-    ) - 0.016099950792318272 * (
+    ) / (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v)) - 0.016099950792318272 * (
         12.621629724407278 * np.exp(0.0674 * v - 0.0674 * EK)
         + 1.1196358381249121e-16 * np.exp(0.0618 * v - 0.0618 * EK)
-    ) * np.exp(
-        0.1629 * EK - 0.1629 * v
-    ) / (
+    ) * np.exp(0.1629 * EK - 0.1629 * v) / (
         (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v))
         * (1 + 0.09883333819716558 * np.exp(0.1629 * EK - 0.1629 * v))
     )
@@ -8006,11 +7368,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dIto_dEK = -((1 - fItop) * a * i + ap * fItop * ip) * Gto
     dJdiffK_dki = -1 / tauK
     dP_dki = -eP / (
-        Kxkur
-        * (
-            (1 + H / Khp + nai / Knap + ki / Kxkur)
-            * (1 + H / Khp + nai / Knap + ki / Kxkur)
-        )
+        Kxkur * ((1 + H / Khp + nai / Knap + ki / Kxkur) * (1 + H / Khp + nai / Knap + ki / Kxkur))
     )
     dPhiCaK_i_dgamma_ki = np.exp(vfrt) * ki * vffrt / (-1 + np.exp(vfrt))
     dgamma_ki_dIi = (
@@ -8072,10 +7430,8 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         )
     )
     dki_dt_linearized = dJdiffK_dki * vss / vmyo + (
-        -(0.0005 * dPhiCaK_i_dgamma_ki * dgamma_ki_dIi + dPhiCaK_i_dki)
-        * dICaK_i_dPhiCaK_i
-        - (dEK_dki * dK1ss_daK1 * daK1_dEK + dEK_dki * dK1ss_dbK1 * dbK1_dEK)
-        * dIK1_dK1ss
+        -(0.0005 * dPhiCaK_i_dgamma_ki * dgamma_ki_dIi + dPhiCaK_i_dki) * dICaK_i_dPhiCaK_i
+        - (dEK_dki * dK1ss_daK1 * daK1_dEK + dEK_dki * dK1ss_dbK1 * dbK1_dEK) * dIK1_dK1ss
         - dEK_dki * dIK1_dEK
         - dEK_dki * dIKb_dEK
         - dEK_dki * dIKr_dEK
@@ -8089,20 +7445,16 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
             - 2
             * (
                 (db4_dki * dx2_db4 + a2 * a3 * da1_dki) * dE3_dx2
-                + (da1_dki * dx1_da1 + db4_dki * dx1_db4 + dP_dki * db3_dP * dx1_db3)
-                * dE3_dx1
-                + (da1_dki * dx4_da1 + b2 * b3 * db4_dki + dP_dki * db3_dP * dx4_db3)
-                * dE3_dx4
+                + (da1_dki * dx1_da1 + db4_dki * dx1_db4 + dP_dki * db3_dP * dx1_db3) * dE3_dx1
+                + (da1_dki * dx4_da1 + b2 * b3 * db4_dki + dP_dki * db3_dP * dx4_db3) * dE3_dx4
                 + b1 * b2 * dE3_dx3 * dP_dki * db3_dP
             )
             * a1
             + 2
             * (
                 (db4_dki * dx2_db4 + a2 * a3 * da1_dki) * dE4_dx2
-                + (da1_dki * dx1_da1 + db4_dki * dx1_db4 + dP_dki * db3_dP * dx1_db3)
-                * dE4_dx1
-                + (da1_dki * dx4_da1 + b2 * b3 * db4_dki + dP_dki * db3_dP * dx4_db3)
-                * dE4_dx4
+                + (da1_dki * dx1_da1 + db4_dki * dx1_db4 + dP_dki * db3_dP * dx1_db3) * dE4_dx1
+                + (da1_dki * dx4_da1 + b2 * b3 * db4_dki + dP_dki * db3_dP * dx4_db3) * dE4_dx4
                 + b1 * b2 * dE4_dx3 * dP_dki * db3_dP
             )
             * b1
@@ -8114,20 +7466,16 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
             -3
             * (
                 (db4_dki * dx2_db4 + a2 * a3 * da1_dki) * dE2_dx2
-                + (da1_dki * dx1_da1 + db4_dki * dx1_db4 + dP_dki * db3_dP * dx1_db3)
-                * dE2_dx1
-                + (da1_dki * dx4_da1 + b2 * b3 * db4_dki + dP_dki * db3_dP * dx4_db3)
-                * dE2_dx4
+                + (da1_dki * dx1_da1 + db4_dki * dx1_db4 + dP_dki * db3_dP * dx1_db3) * dE2_dx1
+                + (da1_dki * dx4_da1 + b2 * b3 * db4_dki + dP_dki * db3_dP * dx4_db3) * dE2_dx4
                 + b1 * b2 * dE2_dx3 * dP_dki * db3_dP
             )
             * b3
             + 3
             * (
                 (db4_dki * dx2_db4 + a2 * a3 * da1_dki) * dE1_dx2
-                + (da1_dki * dx1_da1 + db4_dki * dx1_db4 + dP_dki * db3_dP * dx1_db3)
-                * dE1_dx1
-                + (da1_dki * dx4_da1 + b2 * b3 * db4_dki + dP_dki * db3_dP * dx4_db3)
-                * dE1_dx4
+                + (da1_dki * dx1_da1 + db4_dki * dx1_db4 + dP_dki * db3_dP * dx1_db3) * dE1_dx1
+                + (da1_dki * dx4_da1 + b2 * b3 * db4_dki + dP_dki * db3_dP * dx4_db3) * dE1_dx4
                 + b1 * b2 * dE1_dx3 * dP_dki * db3_dP
             )
             * a3
@@ -8188,9 +7536,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dclss_dt = -JdiffCl + Acap * IClCa_junc / (F * vss)
     dEClss_dclss = -R * T / (F * zcl * clss)
     dIClCa_junc_dEClss = -Fjunc * GClCa / (1 + KdClCa / cass)
-    dclss_dt_linearized = -1 / tauNa + Acap * dEClss_dclss * dIClCa_junc_dEClss / (
-        F * vss
-    )
+    dclss_dt_linearized = -1 / tauNa + Acap * dEClss_dclss * dIClCa_junc_dEClss / (F * vss)
     states[40] = (
         np.where(
             np.abs(dclss_dt_linearized) > 1e-08,
@@ -8237,16 +7583,11 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     dICab_dcai = (
         4
         * PCab
-        * (
-            np.exp(2 * vfrt) * gamma_cai
-            + 0.002 * cai * dgamma_cai_dIi * np.exp(2 * vfrt)
-        )
+        * (np.exp(2 * vfrt) * gamma_cai + 0.002 * cai * dgamma_cai_dIi * np.exp(2 * vfrt))
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
-    dICab_dgamma_cai = (
-        4 * PCab * cai * np.exp(2 * vfrt) * vffrt / (-1 + np.exp(2 * vfrt))
-    )
+    dICab_dgamma_cai = 4 * PCab * cai * np.exp(2 * vfrt) * vffrt / (-1 + np.exp(2 * vfrt))
     dINaCa_i_dallo_i = (1 - INaCa_fractionSS) * (zca * JncxCa_i + zna * JncxNa_i) * Gncx
     dIpCa_dcai = GpCa / (KmCap + cai) - GpCa * cai / ((KmCap + cai) * (KmCap + cai))
     dJdiff_dcai = -1 / tauCa
@@ -8259,10 +7600,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     )
     dPhiCaL_i_dcai = (
         4
-        * (
-            np.exp(2 * vfrt) * gamma_cai
-            + 0.002 * cai * dgamma_cai_dIi * np.exp(2 * vfrt)
-        )
+        * (np.exp(2 * vfrt) * gamma_cai + 0.002 * cai * dgamma_cai_dIi * np.exp(2 * vfrt))
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
@@ -8271,10 +7609,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         2
         * (KmCaAct * KmCaAct)
         / (
-            (
-                (1 + (KmCaAct * KmCaAct) / (cai * cai))
-                * (1 + (KmCaAct * KmCaAct) / (cai * cai))
-            )
+            ((1 + (KmCaAct * KmCaAct) / (cai * cai)) * (1 + (KmCaAct * KmCaAct) / (cai * cai)))
             * (cai * cai * cai)
         )
     )
@@ -8288,8 +7623,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         + (
             -dICab_dcai
             - dIpCa_dcai
-            - (0.002 * dPhiCaL_i_dgamma_cai * dgamma_cai_dIi + dPhiCaL_i_dcai)
-            * dICaL_i_dPhiCaL_i
+            - (0.002 * dPhiCaL_i_dgamma_cai * dgamma_cai_dIi + dPhiCaL_i_dcai) * dICaL_i_dPhiCaL_i
             + 2
             * (
                 (
@@ -8374,10 +7708,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         )
     )
     dCaMKb_dcass = (
-        CaMKo
-        * KmCaM
-        * (1 - CaMKt)
-        / (((1 + KmCaM / cass) * (1 + KmCaM / cass)) * (cass * cass))
+        CaMKo * KmCaM * (1 - CaMKt) / (((1 + KmCaM / cass) * (1 + KmCaM / cass)) * (cass * cass))
     )
     dICaL_ss_dfICaLp = ICaL_fractionSS * (
         ((1 - nca_ss) * fp + fcap * jca * nca_ss) * PCap * PhiCaL_ss * d
@@ -8397,33 +7728,21 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     )
     dPhiCaL_ss_dcass = (
         4
-        * (
-            np.exp(2 * vfrt) * gamma_cass
-            + 0.002 * cass * dgamma_cass_dIss * np.exp(2 * vfrt)
-        )
+        * (np.exp(2 * vfrt) * gamma_cass + 0.002 * cass * dgamma_cass_dIss * np.exp(2 * vfrt))
         * vffrt
         / (-1 + np.exp(2 * vfrt))
     )
-    dPhiCaL_ss_dgamma_cass = (
-        4 * cass * np.exp(2 * vfrt) * vffrt / (-1 + np.exp(2 * vfrt))
-    )
+    dPhiCaL_ss_dgamma_cass = 4 * cass * np.exp(2 * vfrt) * vffrt / (-1 + np.exp(2 * vfrt))
     dallo_ss_dcass = (
         2
         * (KmCaAct * KmCaAct)
         / (
-            (
-                (1 + (KmCaAct * KmCaAct) / (cass * cass))
-                * (1 + (KmCaAct * KmCaAct) / (cass * cass))
-            )
+            ((1 + (KmCaAct * KmCaAct) / (cass * cass)) * (1 + (KmCaAct * KmCaAct) / (cass * cass)))
             * (cass * cass * cass)
         )
     )
-    dfICaLp_dCaMKa = KmCaMK / (
-        ((1 + KmCaMK / CaMKa) * (1 + KmCaMK / CaMKa)) * (CaMKa * CaMKa)
-    )
-    dfJrelp_dCaMKa = KmCaMK / (
-        ((1 + KmCaMK / CaMKa) * (1 + KmCaMK / CaMKa)) * (CaMKa * CaMKa)
-    )
+    dfICaLp_dCaMKa = KmCaMK / (((1 + KmCaMK / CaMKa) * (1 + KmCaMK / CaMKa)) * (CaMKa * CaMKa))
+    dfJrelp_dCaMKa = KmCaMK / (((1 + KmCaMK / CaMKa) * (1 + KmCaMK / CaMKa)) * (CaMKa * CaMKa))
     dcass_dt_linearized = (
         -1 / tauCa
         + (

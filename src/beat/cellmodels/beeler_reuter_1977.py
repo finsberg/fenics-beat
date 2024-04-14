@@ -47,9 +47,7 @@ def init_parameter_values(**values):
     # E_Na=50, g_Na=0.04, g_Nac=3e-05, g_s=0.0009, IstimAmplitude=0.0,
     # IstimEnd=50000, IstimPeriod=1000, IstimPulseDuration=1,
     # IstimStart=1, C=0.01
-    init_values = np.array(
-        [50, 0.04, 3e-05, 0.0009, 0.0, 50000, 1000, 1, 1, 0.01], dtype=np.float_
-    )
+    init_values = np.array([50, 0.04, 3e-05, 0.0009, 0.0, 50000, 1000, 1, 1, 0.01], dtype=np.float_)
 
     # Parameter indices and limit checker
     param_ind = dict(
@@ -223,9 +221,7 @@ def rhs(states, t, parameters, values=None):
 
     # Expressions for the Sodium current j gate component
     alpha_j = (
-        1.8690473007222892e-10
-        * np.exp(-0.25 * V)
-        / (1 + 1.6788275299956603e-07 * np.exp(-0.2 * V))
+        1.8690473007222892e-10 * np.exp(-0.25 * V) / (1 + 1.6788275299956603e-07 * np.exp(-0.2 * V))
     )
     beta_j = 0.3 / (1 + 0.040762203978366204 * np.exp(-0.1 * V))
     values[2] = (1 - j) * alpha_j - beta_j * j
@@ -255,10 +251,7 @@ def rhs(states, t, parameters, values=None):
 
     # Expressions for the Time dependent outward current component
     i_x1 = (
-        0.0019727757115328517
-        * (-1 + 21.75840239619708 * np.exp(0.04 * V))
-        * np.exp(-0.04 * V)
-        * x1
+        0.0019727757115328517 * (-1 + 21.75840239619708 * np.exp(0.04 * V)) * np.exp(-0.04 * V) * x1
     )
 
     # Expressions for the Time dependent outward current x1 gate component
@@ -268,9 +261,7 @@ def rhs(states, t, parameters, values=None):
         / (1 + 17.41170806332765 * np.exp(0.05714285714285714 * V))
     )
     beta_x1 = (
-        0.0003916464405623223
-        * np.exp(-0.05998800239952009 * V)
-        / (1 + np.exp(-4 / 5 - V / 25))
+        0.0003916464405623223 * np.exp(-0.05998800239952009 * V) / (1 + np.exp(-4 / 5 - V / 25))
     )
     values[6] = (1 - x1) * alpha_x1 - beta_x1 * x1
 
@@ -336,9 +327,7 @@ def monitor(states, t, parameters, monitored=None):
 
     # Expressions for the Sodium current j gate component
     monitored[5] = (
-        1.8690473007222892e-10
-        * np.exp(-0.25 * V)
-        / (1 + 1.6788275299956603e-07 * np.exp(-0.2 * V))
+        1.8690473007222892e-10 * np.exp(-0.25 * V) / (1 + 1.6788275299956603e-07 * np.exp(-0.2 * V))
     )
     monitored[6] = 0.3 / (1 + 0.040762203978366204 * np.exp(-0.1 * V))
     monitored[20] = (1 - j) * monitored[5] - j * monitored[6]
@@ -368,10 +357,7 @@ def monitor(states, t, parameters, monitored=None):
 
     # Expressions for the Time dependent outward current component
     monitored[13] = (
-        0.0019727757115328517
-        * (-1 + 21.75840239619708 * np.exp(0.04 * V))
-        * np.exp(-0.04 * V)
-        * x1
+        0.0019727757115328517 * (-1 + 21.75840239619708 * np.exp(0.04 * V)) * np.exp(-0.04 * V) * x1
     )
 
     # Expressions for the Time dependent outward current x1 gate component
@@ -381,9 +367,7 @@ def monitor(states, t, parameters, monitored=None):
         / (1 + 17.41170806332765 * np.exp(0.05714285714285714 * V))
     )
     monitored[15] = (
-        0.0003916464405623223
-        * np.exp(-0.05998800239952009 * V)
-        / (1 + np.exp(-4 / 5 - V / 25))
+        0.0003916464405623223 * np.exp(-0.05998800239952009 * V) / (1 + np.exp(-4 / 5 - V / 25))
     )
     monitored[24] = (1 - x1) * monitored[14] - monitored[15] * x1
 
@@ -448,9 +432,7 @@ def forward_explicit_euler(states, t, dt, parameters):
 
     # Expressions for the Sodium current j gate component
     alpha_j = (
-        1.8690473007222892e-10
-        * np.exp(-0.25 * V)
-        / (1 + 1.6788275299956603e-07 * np.exp(-0.2 * V))
+        1.8690473007222892e-10 * np.exp(-0.25 * V) / (1 + 1.6788275299956603e-07 * np.exp(-0.2 * V))
     )
     beta_j = 0.3 / (1 + 0.040762203978366204 * np.exp(-0.1 * V))
     dj_dt = (1 - j) * alpha_j - beta_j * j
@@ -484,10 +466,7 @@ def forward_explicit_euler(states, t, dt, parameters):
 
     # Expressions for the Time dependent outward current component
     i_x1 = (
-        0.0019727757115328517
-        * (-1 + 21.75840239619708 * np.exp(0.04 * V))
-        * np.exp(-0.04 * V)
-        * x1
+        0.0019727757115328517 * (-1 + 21.75840239619708 * np.exp(0.04 * V)) * np.exp(-0.04 * V) * x1
     )
 
     # Expressions for the Time dependent outward current x1 gate component
@@ -497,9 +476,7 @@ def forward_explicit_euler(states, t, dt, parameters):
         / (1 + 17.41170806332765 * np.exp(0.05714285714285714 * V))
     )
     beta_x1 = (
-        0.0003916464405623223
-        * np.exp(-0.05998800239952009 * V)
-        / (1 + np.exp(-4 / 5 - V / 25))
+        0.0003916464405623223 * np.exp(-0.05998800239952009 * V) / (1 + np.exp(-4 / 5 - V / 25))
     )
     dx1_dt = (1 - x1) * alpha_x1 - beta_x1 * x1
     states[6] = dt * dx1_dt + x1
@@ -580,9 +557,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
 
     # Expressions for the Sodium current j gate component
     alpha_j = (
-        1.8690473007222892e-10
-        * np.exp(-0.25 * V)
-        / (1 + 1.6788275299956603e-07 * np.exp(-0.2 * V))
+        1.8690473007222892e-10 * np.exp(-0.25 * V) / (1 + 1.6788275299956603e-07 * np.exp(-0.2 * V))
     )
     beta_j = 0.3 / (1 + 0.040762203978366204 * np.exp(-0.1 * V))
     dj_dt = (1 - j) * alpha_j - beta_j * j
@@ -647,10 +622,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
 
     # Expressions for the Time dependent outward current component
     i_x1 = (
-        0.0019727757115328517
-        * (-1 + 21.75840239619708 * np.exp(0.04 * V))
-        * np.exp(-0.04 * V)
-        * x1
+        0.0019727757115328517 * (-1 + 21.75840239619708 * np.exp(0.04 * V)) * np.exp(-0.04 * V) * x1
     )
 
     # Expressions for the Time dependent outward current x1 gate component
@@ -660,9 +632,7 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         / (1 + 17.41170806332765 * np.exp(0.05714285714285714 * V))
     )
     beta_x1 = (
-        0.0003916464405623223
-        * np.exp(-0.05998800239952009 * V)
-        / (1 + np.exp(-4 / 5 - V / 25))
+        0.0003916464405623223 * np.exp(-0.05998800239952009 * V) / (1 + np.exp(-4 / 5 - V / 25))
     )
     dx1_dt = (1 - x1) * alpha_x1 - beta_x1 * x1
     dx1_dt_linearized = -alpha_x1 - beta_x1
@@ -698,16 +668,10 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
         / (8.331137487687693 * np.exp(0.04 * V) + 69.4078518387552 * np.exp(0.08 * V))
         + 0.0035
         * (-4 + 119.85640018958804 * np.exp(0.04 * V))
-        * (
-            -0.3332454995075077 * np.exp(0.04 * V)
-            - 5.552628147100417 * np.exp(0.08 * V)
-        )
+        * (-0.3332454995075077 * np.exp(0.04 * V) - 5.552628147100417 * np.exp(0.08 * V))
         / (
             (8.331137487687693 * np.exp(0.04 * V) + 69.4078518387552 * np.exp(0.08 * V))
-            * (
-                8.331137487687693 * np.exp(0.04 * V)
-                + 69.4078518387552 * np.exp(0.08 * V)
-            )
+            * (8.331137487687693 * np.exp(0.04 * V) + 69.4078518387552 * np.exp(0.08 * V))
         )
         - 5.5792665751831976e-05
         * (4.6000000000000005 + 0.2 * V)

@@ -163,9 +163,9 @@ def rhs(states, t, parameters, values=None):
     # Expressions for the fitzhughnagumo component
     v_amp = v_peak - v_rest
     v_th = v_rest + a * v_amp
-    I = -c_2 * (-v_rest + v) * s / v_amp + c_1 * (v_peak - v) * (-v_rest + v) * (
-        -v_th + v
-    ) / (v_amp * v_amp)
+    I = -c_2 * (-v_rest + v) * s / v_amp + c_1 * (v_peak - v) * (-v_rest + v) * (-v_th + v) / (
+        v_amp * v_amp
+    )
     i_Stim = (
         stim_amplitude
         * (1 - 1 / (1 + np.exp(5.0 * t - 5.0 * stim_start)))
@@ -209,9 +209,9 @@ def monitor(states, t, parameters, monitored=None):
     # Expressions for the fitzhughnagumo component
     monitored[0] = v_peak - v_rest
     monitored[1] = v_rest + a * monitored[0]
-    monitored[2] = -c_2 * (-v_rest + v) * s / monitored[0] + c_1 * (v_peak - v) * (
-        -v_rest + v
-    ) * (-monitored[1] + v) / (monitored[0] * monitored[0])
+    monitored[2] = -c_2 * (-v_rest + v) * s / monitored[0] + c_1 * (v_peak - v) * (-v_rest + v) * (
+        -monitored[1] + v
+    ) / (monitored[0] * monitored[0])
     monitored[3] = (
         stim_amplitude
         * (1 - 1 / (1 + np.exp(5.0 * t - 5.0 * stim_start)))
@@ -250,9 +250,9 @@ def forward_explicit_euler(states, t, dt, parameters):
     # Expressions for the fitzhughnagumo component
     v_amp = v_peak - v_rest
     v_th = v_rest + a * v_amp
-    I = -c_2 * (-v_rest + v) * s / v_amp + c_1 * (v_peak - v) * (-v_rest + v) * (
-        -v_th + v
-    ) / (v_amp * v_amp)
+    I = -c_2 * (-v_rest + v) * s / v_amp + c_1 * (v_peak - v) * (-v_rest + v) * (-v_th + v) / (
+        v_amp * v_amp
+    )
     i_Stim = (
         stim_amplitude
         * (1 - 1 / (1 + np.exp(5.0 * t - 5.0 * stim_start)))
@@ -293,9 +293,9 @@ def forward_generalized_rush_larsen(states, t, dt, parameters):
     # Expressions for the fitzhughnagumo component
     v_amp = v_peak - v_rest
     v_th = v_rest + a * v_amp
-    I = -c_2 * (-v_rest + v) * s / v_amp + c_1 * (v_peak - v) * (-v_rest + v) * (
-        -v_th + v
-    ) / (v_amp * v_amp)
+    I = -c_2 * (-v_rest + v) * s / v_amp + c_1 * (v_peak - v) * (-v_rest + v) * (-v_th + v) / (
+        v_amp * v_amp
+    )
     i_Stim = (
         stim_amplitude
         * (1 - 1 / (1 + np.exp(5.0 * t - 5.0 * stim_start)))
