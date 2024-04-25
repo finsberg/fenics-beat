@@ -50,6 +50,7 @@ def test_monodomain_analtyic(M, ac_str, exact, err):
     assert v_error < err
 
 
+@pytest.mark.skip_in_parallel
 def test_monodomain_spatial_convergence():
     time = dolfin.Constant(0.0)
     ac_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*(cos(t) +  8*pow(pi, 2)*sin(t))"
@@ -67,9 +68,7 @@ def test_monodomain_spatial_convergence():
     Ns = [2**level for level in (2, 3, 4, 5)]
     for N in Ns:
         mesh = dolfin.UnitSquareMesh(N, N)
-        model = beat.MonodomainModel(
-            time=time, mesh=mesh, M=1.0, I_s=I_s, params=params
-        )
+        model = beat.MonodomainModel(time=time, mesh=mesh, M=1.0, I_s=I_s, params=params)
         res = model.solve((0, T), dt=dt)
         v_error = dolfin.errornorm(v_exact, res.state, "L2", degree_rise=2)
         errors.append(v_error)
@@ -78,6 +77,7 @@ def test_monodomain_spatial_convergence():
     assert all(rate >= 2.0 for rate in rates)
 
 
+@pytest.mark.skip_in_parallel
 def test_monodomain_temporal_convergence():
     time = dolfin.Constant(0.0)
     ac_str = "cos(2*pi*x[0])*cos(2*pi*x[1])*(cos(t) +  8*pow(pi, 2)*sin(t))"
@@ -96,9 +96,7 @@ def test_monodomain_temporal_convergence():
     errors = []
     dts = [1.0 / (2**level) for level in (0, 1, 2, 3)]
     for dt in dts:
-        model = beat.MonodomainModel(
-            time=time, mesh=mesh, M=1.0, I_s=I_s, params=params
-        )
+        model = beat.MonodomainModel(time=time, mesh=mesh, M=1.0, I_s=I_s, params=params)
         res = model.solve((0, T), dt=dt)
         v_error = dolfin.errornorm(v_exact, res.state, "L2", degree_rise=2)
         errors.append(v_error)

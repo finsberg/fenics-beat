@@ -141,7 +141,7 @@ class DolfinODESolver(BaseDolfinODESolver):
 
     def to_dolfin(self) -> None:
         """Assign values from numpy array to dolfin function"""
-        self.v_ode.vector().set_local(self._values[self.v_index, :])
+        self.v_ode.vector()[:] = self._values[self.v_index, :]
 
     def from_dolfin(self) -> None:
         """Assign values from dolfin function to numpy array"""
@@ -165,7 +165,7 @@ class DolfinODESolver(BaseDolfinODESolver):
 
     @property
     def num_points(self) -> int:
-        return self.v_ode.vector().size()
+        return self.v_ode.vector().local_size()
 
     def step(self, t0: float, dt: float):
         self._ode.step(t0=t0, dt=dt)
@@ -188,9 +188,7 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
 
     def __post_init__(self):
         if self.v_ode.vector().size() != self.markers.vector().size():
-            raise RuntimeError(
-                "Marker and voltage need to be in the same function space"
-            )
+            raise RuntimeError("Marker and voltage need to be in the same function space")
 
         self._marker_values = tuple(self.init_states.keys())
         self._num_points = {}
@@ -220,8 +218,7 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
 
     def _initialize_full_values(self):
         self._all_states_equal_size = (
-            np.array(tuple(self.num_states.values()))
-            == tuple(self.num_states.values())[0]
+            np.array(tuple(self.num_states.values())) == tuple(self.num_states.values())[0]
         ).all()
         if self._all_states_equal_size:
             self._full_values = np.zeros(
@@ -233,7 +230,7 @@ class DolfinMultiODESolver(BaseDolfinODESolver):
         arr = self.v_ode.vector().get_local().copy()
         for marker in self._marker_values:
             arr[self._inds[marker]] = self._values[marker][self.v_index[marker], :]
-        self.v_ode.vector().set_local(arr)
+        self.v_ode.vector()[:] = arr
 
     def from_dolfin(self) -> None:
         """Assign values from dolifn function to numpy array"""

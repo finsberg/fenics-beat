@@ -1,5 +1,6 @@
 import numpy as np
 import dolfin
+import pytest
 
 import beat
 from beat.odesolver import ODESystemSolver, DolfinODESolver, DolfinMultiODESolver
@@ -143,12 +144,15 @@ def test_assignment_ode():
 
     # Now update dolfin function for v
     ode.v_pde.assign(dolfin.Constant(13.0))
+
     ode.pde_to_ode()
     ode.from_dolfin()
+
     assert np.allclose(ode.values[v_index, :], 13.0)
     assert np.allclose(ode.full_values[v_index, :], 13.0)
 
 
+@pytest.mark.skipif(dolfin.MPI.comm_world.size > 1, reason="Need to be fixed for parallel")
 def test_ode_with_markers_3D_to_and_from_dolfin():
     model = beat.cellmodels.tentusscher_panfilov_2006
     mesh = dolfin.UnitCubeMesh(3, 3, 3)

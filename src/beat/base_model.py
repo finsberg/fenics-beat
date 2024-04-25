@@ -56,24 +56,24 @@ class BaseModel(abc.ABC):
 
         logger.debug("Preassembling monodomain matrix (and initializing vector)")
         self._lhs_matrix = dolfin.assemble(self._lhs)
-        self._rhs_vector = dolfin.Vector(
-            self._mesh.mpi_comm(), self._lhs_matrix.size(0)
-        )
+        self._rhs_vector = dolfin.Vector(self._mesh.mpi_comm(), self._lhs_matrix.size(0))
         self._lhs_matrix.init_vector(self._rhs_vector, 0)
 
         # Create linear solver (based on parameter choices)
         self.linear_solver, self._update_solver = self._create_linear_solver()
 
     @abc.abstractmethod
-    def _setup_state_space(self) -> None:
-        ...
+    def _setup_state_space(self) -> None: ...
 
     def _create_linear_solver(self):
         "Helper function for creating linear solver based on parameters."
         solver_type = self.parameters["linear_solver_type"]
+        # solver_type = "iterative"
 
         if solver_type == "direct":
-            solver = dolfin.LUSolver(self._lhs_matrix, self.parameters["lu_type"])
+            solver = dolfin.LUSolver(
+                self._mesh.mpi_comm(), self._lhs_matrix, self.parameters["lu_type"]
+            )
             solver.parameters.update(self.parameters["lu_solver"])
             update_routine = self._update_lu_solver
 
@@ -86,12 +86,12 @@ class BaseModel(abc.ABC):
             prec = self.parameters["preconditioner"]
             if self.parameters["use_custom_preconditioner"]:
                 self._prec_matrix = dolfin.assemble(self._prec)
-                solver = dolfin.PETScKrylovSolver(alg, prec)
+                solver = dolfin.PETScKrylovSolver(self._mesh.mpi_comm(), alg, prec)
                 solver.parameters.update(self.parameters["krylov_solver"])
                 solver.set_operators(self._lhs_matrix, self._prec_matrix)
                 solver.ksp().setFromOptions()
             else:
-                solver = dolfin.PETScKrylovSolver(alg, prec)
+                solver = dolfin.PETScKrylovSolver(self._mesh.mpi_comm(), alg, prec)
                 solver.parameters.update(self.parameters["krylov_solver"])
                 solver.set_operator(self._lhs_matrix)
                 solver.ksp().setFromOptions()
@@ -105,12 +105,10 @@ class BaseModel(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def state(self) -> dolfin.Function:
-        ...
+    def state(self) -> dolfin.Function: ...
 
     @abc.abstractmethod
-    def assign_previous(self) -> None:
-        ...
+    def assign_previous(self) -> None: ...
 
     @staticmethod
     def default_parameters():
@@ -137,7 +135,7 @@ class BaseModel(abc.ABC):
             "family": "Lagrange",
             "default_timestep": 1.0,
             "linear_solver_type": "iterative",
-            "lu_type": "default",
+            "lu_type": "superlu_dist",
             "algorithm": "cg",
             "preconditioner": "petsc_amg",
             "krylov_solver": krylov_solver_params,
@@ -187,6 +185,13 @@ class BaseModel(abc.ABC):
 
         # Assemble right-hand-side
         dolfin.assemble(self._rhs, tensor=self._rhs_vector)
+
+        # exit()
+
+        # viewer_A = PETSc.Viewer().createBinary("sandbox/dolfin-A.dat", "w")
+        # viewer_b = PETSc.Viewer().createBinary("sandbox/dolfin-b.dat", "w")
+        # dolfin.as_backend_type(self._lhs_matrix).mat().view(viewer_A)
+        # dolfin.as_backend_type(self._rhs_vector).vec().view(viewer_b)
 
         # Solve problem
         self.linear_solver.solve(self.state.vector(), self._rhs_vector)

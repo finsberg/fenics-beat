@@ -7,29 +7,17 @@ jobs:
     # This code depends on the result of check-code
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/scientificcomputing/fenics-gmsh:2023-08-16
+      image: ghcr.io/scientificcomputing/fenics-gmsh:2024-02-19
 
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache
-        id: cache-primes
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/instant
-            ~/.cache/dijitso
-            ~/.cache/pip
-          key: cache_v1
-          restore-keys: |
-            cache_v1
-
       - name: Install package
         run: python3 -m pip install -e .[test]
 
       - name: Run tests
-        run: python3 -m pytest
+        run: python3 -m pytest --cov=beat --cov-report=html --cov-report=term-missing -v
 
       - name: Coverage report
         if: github.ref == 'refs/heads/main'
