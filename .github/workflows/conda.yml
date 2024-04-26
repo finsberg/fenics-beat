@@ -18,6 +18,10 @@ jobs:
         - name: Conda install fenics
           shell: bash -el {0}
           run: conda install -c conda-forge fenics
+
+        - name: Upgrade pip
+          run: python3 -m pip install --upgrade pip
+
         - name: Install package
           run: python3 -m pip install -e .[test]
 
