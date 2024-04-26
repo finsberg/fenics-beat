@@ -82,11 +82,12 @@ def expand_layer(
     V = markers.function_space()
     u = ufl.TrialFunction(V)
     v = ufl.TestFunction(V)
+    mesh = V.mesh()
     arr = markers.vector().get_local().copy()
     sol = dolfin.Function(V)
 
-    a = ufl.dot(ufl.grad(u), ufl.grad(v)) * ufl.dx
-    L = v * dolfin.Constant(0) * ufl.dx
+    a = ufl.dot(ufl.grad(u), ufl.grad(v)) * ufl.dx(domain=mesh)
+    L = v * dolfin.Constant(0) * ufl.dx(domain=mesh)
 
     solver = dolfin.PETScKrylovSolver()
     dolfin.PETScOptions.set("ksp_type", "cg")
