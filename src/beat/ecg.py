@@ -1,7 +1,12 @@
+from __future__ import annotations
 import dolfin
 from typing import NamedTuple
-import ufl_legacy as ufl
 import numpy as np
+
+try:
+    import ufl_legacy as ufl
+except ImportError:
+    import ufl
 
 
 def ecg_recovery(

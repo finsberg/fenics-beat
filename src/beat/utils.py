@@ -1,12 +1,16 @@
 from __future__ import annotations
 from typing import Any
 import logging
+from contextlib import contextmanager
 import dolfin
 import numpy.typing as npt
 import numpy as np
-import ufl_legacy as ufl
-from contextlib import contextmanager
 from mpi4py import MPI as pyMPI
+
+try:
+    import ufl_legacy as ufl
+except ImportError:
+    import ufl
 
 
 logger = logging.getLogger(__name__)
