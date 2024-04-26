@@ -1,0 +1,25 @@
+name: Test package in conda environment
+
+on:
+    pull_request:
+    push:
+      branches: [main]
+
+jobs:
+    test-conda:
+      name: Test with conda environment
+      runs-on: "ubuntu-latest"
+      steps:
+        - uses: actions/checkout@v4
+        - uses: conda-incubator/setup-miniconda@v3
+          with:
+            auto-update-conda: true
+            python-version: "3.10"
+        - name: Conda install fenics
+          shell: bash -el {0}
+          run: conda install -c conda-forge fenics
+        - name: Install package
+          run: python3 -m pip install -e .[test]
+
+        - name: Run tests
+          run: python3 -m pytest --cov=beat --cov-report=html --cov-report=term-missing -v
