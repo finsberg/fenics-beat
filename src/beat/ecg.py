@@ -1,3 +1,4 @@
+from __future__ import annotations
 import dolfin
 from typing import NamedTuple
 import numpy as np
