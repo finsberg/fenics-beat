@@ -17,7 +17,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import dolfin
-import ufl_legacy as ufl
+
+try:
+    import ufl_legacy as ufl
+except ImportError:
+    import ufl
 
 try:
     from tqdm import tqdm

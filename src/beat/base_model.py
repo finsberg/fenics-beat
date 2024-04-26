@@ -5,8 +5,13 @@ import logging
 from enum import Enum, auto
 
 import dolfin
-import ufl_legacy as ufl
-from ufl_legacy.core.expr import Expr
+
+try:
+    import ufl_legacy as ufl
+    from ufl_legacy.core.expr import Expr
+except ImportError:
+    import ufl
+    from ufl.core.expr import Expr
 
 
 logger = logging.getLogger(__name__)

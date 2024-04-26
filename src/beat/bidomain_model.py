@@ -1,8 +1,13 @@
 from __future__ import annotations
 import logging
-import ufl_legacy as ufl
-from ufl_legacy.core.expr import Expr
 import dolfin
+
+try:
+    import ufl_legacy as ufl
+    from ufl_legacy.core.expr import Expr
+except ImportError:
+    import ufl
+    from ufl.core.expr import Expr
 
 from .base_model import BaseModel, Stimulus
 
