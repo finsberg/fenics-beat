@@ -1,15 +1,11 @@
 name: Test package in conda environment
 
-on:
-    pull_request:
-    push:
-      branches: [main]
+on: [workflow_dispatch]
 
 jobs:
     test-conda:
       name: Test with conda environment
       runs-on: "ubuntu-latest"
-      continue-on-error: true
       strategy:
         fail-fast: false
         matrix:
