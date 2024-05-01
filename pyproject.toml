@@ -38,6 +38,7 @@ pypi = [
 demos = [
    "cardiac-geometries",
    "ldrb",
+   "pint",
 ]
 docs = [
    "jupyter-book",

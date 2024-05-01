@@ -32,9 +32,10 @@ class MonodomainModel(BaseModel):
         M: ufl.Coefficient | float,
         I_s: Stimulus | ufl.Coefficient | None = None,
         params=None,
+        C_m: float = 1.0,
     ) -> None:
         self._M = M
-
+        self.C_m = dolfin.Constant(C_m)
         super().__init__(mesh=mesh, time=time, params=params, I_s=I_s)
 
     def _setup_state_space(self) -> None:
@@ -94,7 +95,9 @@ class MonodomainModel(BaseModel):
         # breakpoint()
         G_stim = self._I_s.expr * w * self._I_s.dz
 
-        G = (Dt_v_k_n * w + k_n * theta_parabolic) * dolfin.dx(domain=self._mesh) - k_n * G_stim
+        G = (self.C_m * Dt_v_k_n * w + k_n * theta_parabolic) * dolfin.dx(
+            domain=self._mesh
+        ) - k_n * G_stim
 
         # Define preconditioner based on educated(?) guess by Marie
         if self.parameters["use_custom_preconditioner"]:

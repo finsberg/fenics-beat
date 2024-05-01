@@ -15,7 +15,7 @@ from pathlib import Path
 import cardiac_geometries
 import numpy as np
 import matplotlib.pyplot as plt
-
+import pint
 import dolfin
 
 try:
@@ -31,7 +31,7 @@ except ImportError:
 import beat
 import gotranx
 
-# import beat.cellmodels.torord_dyn_chloride as model
+ureg = pint.UnitRegistry()
 
 
 def get_data(datadir="data_endocardial_stimulation2"):
@@ -63,13 +63,10 @@ def get_data(datadir="data_endocardial_stimulation2"):
     return cardiac_geometries.geometry.Geometry.from_folder(datadir)
 
 
-def define_stimulus(mesh, chi, C_m, time, ffun, markers):
+def define_stimulus(mesh, chi, time, ffun, markers, mesh_unit="mm"):
     duration = 2.0  # ms
-    A = 5  # mu A/cm^3
-
-    factor = 1.0 / (chi * C_m)  # NB: cbcbeat convention
-    amplitude = factor * A  # mV/ms
-
+    A = 500.0 * ureg("uA/cm**2")
+    amplitude = amplitude = (A / chi).to(f"uA/{mesh_unit}").magnitude
     I_s = dolfin.Expression(
         "time >= start ? (time <= (duration + start) ? amplitude : 0.0) : 0.0",
         time=time,
@@ -89,12 +86,12 @@ def define_stimulus(mesh, chi, C_m, time, ffun, markers):
     return beat.base_model.Stimulus(dz=ds, expr=I_s)
 
 
-def define_conductivity_tensor(chi, C_m, f0, s0, n0):
+def define_conductivity_tensor(chi, f0, s0, n0):
     # Conductivities as defined by page 4339 of Niederer benchmark
-    sigma_il = 0.17  # mS / mm
-    sigma_it = 0.019  # mS / mm
-    sigma_el = 0.62  # mS / mm
-    sigma_et = 0.24  # mS / mm
+    sigma_il = 0.17 * ureg("mS/mm")
+    sigma_it = 0.019 * ureg("mS/mm")
+    sigma_el = 0.62 * ureg("mS/mm")
+    sigma_et = 0.24 * ureg("mS/mm")
 
     # Compute monodomain approximation by taking harmonic mean in each
     # direction of intracellular and extracellular part
@@ -104,9 +101,9 @@ def define_conductivity_tensor(chi, C_m, f0, s0, n0):
     sigma_l = harmonic_mean(sigma_il, sigma_el)
     sigma_t = harmonic_mean(sigma_it, sigma_et)
 
-    # Scale conducitivites by 1/(C_m * chi)
-    s_l = sigma_l / (C_m * chi)  # mm^2 / ms
-    s_t = sigma_t / (C_m * chi)  # mm^2 / ms
+    # Scale conducitivites
+    s_l = (sigma_l / chi).to("uA/mV").magnitude
+    s_t = (sigma_t / chi).to("uA/mV").magnitude
 
     # Define conductivity tensor
     A = dolfin.as_matrix(
@@ -227,7 +224,7 @@ def main():
     model = {}
     exec(code, model)
     data = get_data(datadir=datadir)
-
+    mesh_unit = "mm"
     V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 
     markers = dolfin.Function(V)
@@ -270,27 +267,35 @@ def main():
     }
 
     # Surface to volume ratio
-    chi = 140.0  # mm^{-1}
+    chi = 140.0 * ureg("mm**-1")
     # Membrane capacitance
-    C_m = 0.01  # mu F / mm^2
+    C_m = 0.01 * ureg("uF/mm**2")
 
     time = dolfin.Constant(0.0)
     I_s = define_stimulus(
         mesh=data.mesh,
         chi=chi,
-        C_m=C_m,
+        mesh_unit=mesh_unit,
         time=time,
         ffun=data.ffun,
         markers=data.markers,
     )
 
-    M = define_conductivity_tensor(chi, C_m, f0=data.f0, s0=data.s0, n0=data.n0)
+    M = define_conductivity_tensor(chi=chi, f0=data.f0, s0=data.s0, n0=data.n0)
 
     params = {"preconditioner": "sor", "use_custom_preconditioner": False}
-    pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, params=params)
+    pde = beat.MonodomainModel(
+        time=time,
+        C_m=C_m.to(f"uF/{mesh_unit}**2").magnitude,
+        mesh=data.mesh,
+        M=M,
+        I_s=I_s,
+        params=params,
+    )
 
     ode = beat.odesolver.DolfinMultiODESolver(
-        pde.state,
+        v_ode=dolfin.Function(V),
+        v_pde=pde.state,
         markers=markers,
         num_states={i: len(s) for i, s in init_states.items()},
         fun=fun,
