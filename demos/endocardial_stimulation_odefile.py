@@ -228,13 +228,12 @@ def main():
     V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 
     markers = dolfin.Function(V)
-    arr = beat.utils.expand_layer(
+    arr = beat.utils.expand_layer_biv(
         markers=markers,
         mfun=data.ffun,
-        endo_markers=[data.markers["ENDO_LV"][0], data.markers["ENDO_RV"][0]],
-        epi_markers=[data.markers["EPI"][0]],
-        endo_marker=1,
-        epi_marker=2,
+        endo_lv_marker=data.markers["ENDO_LV"][0],
+        endo_rv_marker=data.markers["ENDO_RV"][0],
+        epi_marker=data.markers["EPI"][0],
         endo_size=0.3,
         epi_size=0.3,
     )
