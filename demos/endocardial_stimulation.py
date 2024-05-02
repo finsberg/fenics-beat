@@ -227,11 +227,10 @@ def main():
 
     V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 
-    markers = dolfin.Function(V)
     markers_path = datadir / "markers.xdmf"
     if not markers_path.is_file():
-        arr = beat.utils.expand_layer_biv(
-            markers=markers,
+        markers = beat.utils.expand_layer_biv(
+            V=V,
             mfun=data.ffun,
             endo_lv_marker=data.markers["ENDO_LV"][0],
             endo_rv_marker=data.markers["ENDO_RV"][0],
@@ -239,12 +238,12 @@ def main():
             endo_size=0.3,
             epi_size=0.3,
         )
-        markers.vector().set_local(arr)
 
         with dolfin.XDMFFile(markers_path.as_posix()) as xdmf:
             xdmf.write_checkpoint(
                 markers, "markers", 0.0, dolfin.XDMFFile.Encoding.HDF5, False
             )
+    markers = dolfin.Function(V)
 
     with dolfin.XDMFFile(markers_path.as_posix()) as xdmf:
         xdmf.read_checkpoint(markers, "markers", 0)

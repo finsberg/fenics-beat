@@ -227,9 +227,8 @@ def main():
     mesh_unit = "mm"
     V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 
-    markers = dolfin.Function(V)
-    arr = beat.utils.expand_layer_biv(
-        markers=markers,
+    markers = beat.utils.expand_layer_biv(
+        V=V,
         mfun=data.ffun,
         endo_lv_marker=data.markers["ENDO_LV"][0],
         endo_rv_marker=data.markers["ENDO_RV"][0],
@@ -237,8 +236,6 @@ def main():
         endo_size=0.3,
         epi_size=0.3,
     )
-
-    markers.vector().set_local(arr)
 
     with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
         xdmf.write(markers)
