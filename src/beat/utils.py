@@ -3,7 +3,6 @@ from typing import Any
 import logging
 from contextlib import contextmanager
 import dolfin
-import numpy.typing as npt
 import numpy as np
 from mpi4py import MPI as pyMPI
 
@@ -38,20 +37,20 @@ def peval(f, *x):
 
 
 def expand_layer(
-    markers: dolfin.Function,
+    V: dolfin.FunctionSpace,
     mfun: dolfin.MeshFunction,
     endo_marker: int,
     epi_marker: int,
     endo_size: float,
     epi_size: float,
-) -> npt.NDArray:
+) -> dolfin.Function:
     """Expand the endo and epi markers to the rest of the mesh
     with a given size
 
     Parameters
     ----------
     markers : dolfin.Function
-        Function where the markers are stored
+        Function space where the markers should be stored
     mfun : dolfin.MeshFunction
         Mesh function where the markers are stored
     endo_marker : int
@@ -65,16 +64,18 @@ def expand_layer(
 
     Returns
     -------
-    npt.NDArray
-        Array with the markers with the value 1
+    dolfin.Function
+        Function with the markers with the value 1
         on the endocardium, 2 on the epicardium
         and 0 on the mid layer
     """
     # Find the rest of the laplace solutions
-    V = markers.function_space()
+
     u = ufl.TrialFunction(V)
     v = ufl.TestFunction(V)
     mesh = V.mesh()
+
+    markers = dolfin.Function(V)
     arr = markers.vector().get_local().copy()
     sol = dolfin.Function(V)
 
@@ -119,25 +120,27 @@ def expand_layer(
     sol_arr = np.min(sol_arrs, axis=0)
     arr[sol_arr < endo_size] = 1
     arr[sol_arr > 1 - epi_size] = 2
-    return arr
+    markers.vector().set_local(arr)
+
+    return markers
 
 
 def expand_layer_biv(
-    markers: dolfin.Function,
+    V: dolfin.FunctionSpace,
     mfun: dolfin.MeshFunction,
     endo_lv_marker: int,
     endo_rv_marker: int,
     epi_marker: int,
     endo_size: float,
     epi_size: float,
-) -> npt.NDArray:
+) -> dolfin.Function:
     """Expand the endo and epi markers to the rest of the mesh
     with a given size. Used for BiV geometries.
 
     Parameters
     ----------
-    markers : dolfin.Function
-        Function where the markers are stored
+    markers : dolfin.FunctionSpace
+        Function space where the markers should be stored
     mfun : dolfin.MeshFunction
         Mesh function where the markers are stored
     endo_lv_marker : int
@@ -153,15 +156,17 @@ def expand_layer_biv(
 
     Returns
     -------
-    npt.NDArray
-        Array with the markers with the value 1
+    dolfin.Function
+        Function with the markers with the value 1
         on the endocardium, 2 on the epicardium
         and 0 on the mid layer
+
     """
-    # Find the rest of the laplace solutions
-    V = markers.function_space()
+
     u = ufl.TrialFunction(V)
     v = ufl.TestFunction(V)
+
+    markers = dolfin.Function(V)
     arr = markers.vector().get_local().copy()
     sol = dolfin.Function(V)
 
@@ -224,7 +229,9 @@ def expand_layer_biv(
     sol_arr = np.min(sol_arrs, axis=0)
     arr[sol_arr < endo_size] = 1
     arr[sol_arr > 1 - epi_size] = 2
-    return arr
+
+    markers.vector().set_local(arr)
+    return markers
 
 
 @contextmanager
