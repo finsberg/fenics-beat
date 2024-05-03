@@ -230,6 +230,8 @@ def expand_layer_biv(
     arr[sol_arr < endo_size] = 1
     arr[sol_arr > 1 - epi_size] = 2
 
+    mfun.array()[:] = mfun_original
+
     markers.vector().set_local(arr)
     return markers
 
