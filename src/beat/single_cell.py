@@ -134,10 +134,10 @@ def get_steady_state(
         )
         y, track_values = solve_with_save(**kwargs)
         np.save(outdir / f"tracked_values_{hash_input}.npy", track_values)
-        fig, ax = plt.subplots(N, 2, sharex=True, sharey=True)
+        fig, ax = plt.subplots(N, 2, sharex="col", sharey="row")
         for i in range(N):
-            ax[0, i].plot(np.arange(0, BCL * nbeats, save_every_ms), track_values[:, i])
-            ax[1, i].plot(
+            ax[i, 0].plot(np.arange(0, BCL * nbeats, save_every_ms), track_values[:, i])
+            ax[i, 1].plot(
                 times[::save_freq][-round(BCL // save_every_ms) :],
                 track_values[-round(BCL // save_every_ms) :, i],
             )
