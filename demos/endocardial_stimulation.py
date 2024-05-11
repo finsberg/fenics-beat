@@ -1,5 +1,5 @@
-# # Endocardial stimulation (multiple cell models)
-# In this demo we stimulate a Bi-ventricular geometry at the endocardium and compute a pseudo-ecg
+# # Endocardial stimulation
+# In this demo we show how to load an ODE file and use it to simulate endocardial stimulation.
 #
 # ```{figure} ../docs/_static/torso_electrodes.png
 # ---
@@ -15,7 +15,7 @@ from pathlib import Path
 import cardiac_geometries
 import numpy as np
 import matplotlib.pyplot as plt
-
+import pint
 import dolfin
 
 try:
@@ -29,15 +29,12 @@ except ImportError:
     tqdm = lambda x: x
 
 import beat
+import gotranx
 
-import beat.cellmodels.tentusscher_panfilov_2006 as model
-
-# import beat.cellmodels.torord_dyn_chloride as model
-
-model_name = model.__name__.split(".")[-1]
+ureg = pint.UnitRegistry()
 
 
-def get_data(datadir="data_endocardial_stimulation"):
+def get_data(datadir="data_endocardial_stimulation2"):
     datadir = Path(datadir)
     msh_file = datadir / "biv_ellipsoid.msh"
     if not msh_file.is_file():
@@ -66,13 +63,10 @@ def get_data(datadir="data_endocardial_stimulation"):
     return cardiac_geometries.geometry.Geometry.from_folder(datadir)
 
 
-def define_stimulus(mesh, chi, C_m, time, ffun, markers):
+def define_stimulus(mesh, chi, time, ffun, markers, mesh_unit="mm"):
     duration = 2.0  # ms
-    A = 5  # mu A/cm^3
-
-    factor = 1.0 / (chi * C_m)  # NB: cbcbeat convention
-    amplitude = factor * A  # mV/ms
-
+    A = 500.0 * ureg("uA/cm**2")
+    amplitude = amplitude = (A / chi).to(f"uA/{mesh_unit}").magnitude
     I_s = dolfin.Expression(
         "time >= start ? (time <= (duration + start) ? amplitude : 0.0) : 0.0",
         time=time,
@@ -92,12 +86,12 @@ def define_stimulus(mesh, chi, C_m, time, ffun, markers):
     return beat.base_model.Stimulus(dz=ds, expr=I_s)
 
 
-def define_conductivity_tensor(chi, C_m, f0, s0, n0):
+def define_conductivity_tensor(chi, f0, s0, n0):
     # Conductivities as defined by page 4339 of Niederer benchmark
-    sigma_il = 0.17  # mS / mm
-    sigma_it = 0.019  # mS / mm
-    sigma_el = 0.62  # mS / mm
-    sigma_et = 0.24  # mS / mm
+    sigma_il = 0.17 * ureg("mS/mm")
+    sigma_it = 0.019 * ureg("mS/mm")
+    sigma_el = 0.62 * ureg("mS/mm")
+    sigma_et = 0.24 * ureg("mS/mm")
 
     # Compute monodomain approximation by taking harmonic mean in each
     # direction of intracellular and extracellular part
@@ -107,9 +101,9 @@ def define_conductivity_tensor(chi, C_m, f0, s0, n0):
     sigma_l = harmonic_mean(sigma_il, sigma_el)
     sigma_t = harmonic_mean(sigma_it, sigma_et)
 
-    # Scale conducitivites by 1/(C_m * chi)
-    s_l = sigma_l / (C_m * chi)  # mm^2 / ms
-    s_t = sigma_t / (C_m * chi)  # mm^2 / ms
+    # Scale conducitivites
+    s_l = (sigma_l / chi).to("uA/mV").magnitude
+    s_t = (sigma_t / chi).to("uA/mV").magnitude
 
     # Define conductivity tensor
     A = dolfin.as_matrix(
@@ -152,8 +146,8 @@ def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
 
 
 def compute_ecg_recovery():
-    datadir = Path("data_endocardial_stimulation")
-    xdmffile = datadir / f"state_{model_name}.xdmf"
+    datadir = Path("data_endocardial_stimulation2")
+    xdmffile = datadir / "state.xdmf"
     data = get_data(datadir=datadir)
 
     # https://litfl.com/ecg-lead-positioning/
@@ -172,7 +166,7 @@ def compute_ecg_recovery():
         V6=(10.0, -6.0, 2.0),
     )
 
-    fname = datadir / f"extracellular_potential_{model_name}.npy"
+    fname = datadir / "extracellular_potential.npy"
     if not fname.is_file():
         phie = defaultdict(list)
         time = []
@@ -193,7 +187,7 @@ def compute_ecg_recovery():
         axi = ax.flatten()[i]
         axi.plot(time, values)
         axi.set_title(name)
-    fig.savefig(datadir / f"extracellular_potential_{model_name}.png")
+    fig.savefig(datadir / "extracellular_potential.png")
 
     ecg = beat.ecg.Leads12(**{k: np.array(v) for k, v in phie.items()})
     fig, ax = plt.subplots(3, 4, sharex=True, figsize=(12, 8))
@@ -217,83 +211,83 @@ def compute_ecg_recovery():
         axi = ax.flatten()[i]
         axi.plot(time, y)
         axi.set_title(name)
-    fig.savefig(datadir / f"ecg_12_leads_{model_name}.png")
-    # breakpoint()
+    fig.savefig(datadir / "ecg_12_leads.png")
 
 
 def main():
-    datadir = Path("data_endocardial_stimulation")
+    here = Path.cwd()
+    datadir = here / "data_endocardial_stimulation"
+    ode = gotranx.load_ode(here / "ORdmm_Land.ode")
+    code = gotranx.cli.gotran2py.get_code(
+        ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
+    )
+    model = {}
+    exec(code, model)
     data = get_data(datadir=datadir)
-
+    mesh_unit = "mm"
     V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 
-    markers_path = datadir / "markers.xdmf"
-    if not markers_path.is_file():
-        markers = beat.utils.expand_layer_biv(
-            V=V,
-            mfun=data.ffun,
-            endo_lv_marker=data.markers["ENDO_LV"][0],
-            endo_rv_marker=data.markers["ENDO_RV"][0],
-            epi_marker=data.markers["EPI"][0],
-            endo_size=0.3,
-            epi_size=0.3,
-        )
+    markers = beat.utils.expand_layer_biv(
+        V=V,
+        mfun=data.ffun,
+        endo_lv_marker=data.markers["ENDO_LV"][0],
+        endo_rv_marker=data.markers["ENDO_RV"][0],
+        epi_marker=data.markers["EPI"][0],
+        endo_size=0.3,
+        epi_size=0.3,
+    )
 
-        with dolfin.XDMFFile(markers_path.as_posix()) as xdmf:
-            xdmf.write_checkpoint(
-                markers, "markers", 0.0, dolfin.XDMFFile.Encoding.HDF5, False
-            )
-    markers = dolfin.Function(V)
-
-    with dolfin.XDMFFile(markers_path.as_posix()) as xdmf:
-        xdmf.read_checkpoint(markers, "markers", 0)
+    with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
+        xdmf.write(markers)
 
     init_states = {
-        0: model.mid.init_state_values(),
-        1: model.endo.init_state_values(),
-        2: model.epi.init_state_values(),
+        0: model["init_state_values"](),
+        1: model["init_state_values"](),
+        2: model["init_state_values"](),
     }
+    # endo = 0, epi = 1, M = 2
     parameters = {
-        0: model.mid.init_parameter_values(),
-        1: model.endo.init_parameter_values(),
-        2: model.epi.init_parameter_values(),
+        0: model["init_parameter_values"](amp=0.0, celltype=2),
+        1: model["init_parameter_values"](amp=0.0, celltype=0),
+        2: model["init_parameter_values"](amp=0.0, celltype=1),
     }
     fun = {
-        0: model.mid.forward_generalized_rush_larsen,
-        1: model.endo.forward_generalized_rush_larsen,
-        2: model.epi.forward_generalized_rush_larsen,
+        0: model["forward_generalized_rush_larsen"],
+        1: model["forward_generalized_rush_larsen"],
+        2: model["forward_generalized_rush_larsen"],
     }
-    if model_name == "tentusscher_panfilov_2006":
-        v_index = {
-            0: model.mid.state_indices("V"),
-            1: model.endo.state_indices("V"),
-            2: model.epi.state_indices("V"),
-        }
-    elif model_name == "torord_dyn_chloride":
-        v_index = {
-            0: model.mid.state_indices("v"),
-            1: model.endo.state_indices("v"),
-            2: model.epi.state_indices("v"),
-        }
+    v_index = {
+        0: model["state_index"]("v"),
+        1: model["state_index"]("v"),
+        2: model["state_index"]("v"),
+    }
+
     # Surface to volume ratio
-    chi = 140.0  # mm^{-1}
+    chi = 140.0 * ureg("mm**-1")
     # Membrane capacitance
-    C_m = 0.01  # mu F / mm^2
+    C_m = 0.01 * ureg("uF/mm**2")
 
     time = dolfin.Constant(0.0)
     I_s = define_stimulus(
         mesh=data.mesh,
         chi=chi,
-        C_m=C_m,
+        mesh_unit=mesh_unit,
         time=time,
         ffun=data.ffun,
         markers=data.markers,
     )
 
-    M = define_conductivity_tensor(chi, C_m, f0=data.f0, s0=data.s0, n0=data.n0)
+    M = define_conductivity_tensor(chi=chi, f0=data.f0, s0=data.s0, n0=data.n0)
 
     params = {"preconditioner": "sor", "use_custom_preconditioner": False}
-    pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, params=params)
+    pde = beat.MonodomainModel(
+        time=time,
+        C_m=C_m.to(f"uF/{mesh_unit}**2").magnitude,
+        mesh=data.mesh,
+        M=M,
+        I_s=I_s,
+        params=params,
+    )
 
     ode = beat.odesolver.DolfinMultiODESolver(
         v_ode=dolfin.Function(V),
@@ -313,7 +307,7 @@ def main():
     dt = 0.05
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
-    fname = (datadir / f"state_{model_name}.xdmf").as_posix()
+    fname = (datadir / "state.xdmf").as_posix()
     i = 0
     while t < T + 1e-12:
         if i % 20 == 0:

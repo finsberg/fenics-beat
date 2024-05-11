@@ -260,10 +260,12 @@ def run_model(
     g_et=0.236,
     **kwargs,
 ):
+    print("Running model")
     # Load the model
     model_path = Path("ORdmm_Land.py")
     if not model_path.is_file():
-        here = Path(__file__).parent
+        print("Generate code for cell model")
+        here = Path.cwd()
         ode = gotranx.load_ode(here / "ORdmm_Land.ode")
         code = gotranx.cli.gotran2py.get_code(
             ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
@@ -283,6 +285,8 @@ def run_model(
     with dolfin.XDMFFile((resultsdir / "markers.xdmf").as_posix()) as xdmf:
         xdmf.write(markers)
 
+    print("Get steady states")
+    nbeats = 2  # Should be set to at least 200
     init_states = {
         0: beat.single_cell.get_steady_state(
             fun=model["forward_generalized_rush_larsen"],
@@ -290,7 +294,7 @@ def run_model(
             parameters=model["init_parameter_values"](celltype=2),
             outdir=resultsdir / "mid",
             BCL=1000,
-            nbeats=200,
+            nbeats=nbeats,
             track_indices=[model["state_index"]("v"), model["state_index"]("cai")],
             dt=0.05,
         ),
@@ -300,6 +304,7 @@ def run_model(
             parameters=model["init_parameter_values"](celltype=0),
             outdir=resultsdir / "endo",
             BCL=1000,
+            nbeats=nbeats,
             track_indices=[
                 model["state_index"]("v"),
                 model["state_index"]("cai"),
@@ -313,6 +318,7 @@ def run_model(
             parameters=model["init_parameter_values"](celltype=1),
             outdir=resultsdir / "epi",
             BCL=1000,
+            nbeats=nbeats,
             track_indices=[model["state_index"]("v"), model["state_index"]("cai")],
             dt=0.05,
         ),
@@ -436,40 +442,24 @@ def get_microstructure(
     return f0, s0, n0
 
 
-def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("results_folder", type=Path, help="Results folder")
-    parser.add_argument(
-        "-s", "--save-every-ms", type=int, default=1, help="Save every ms"
-    )
-    parser.add_argument("-d", "--dimension", type=int, default=2, help="Dimension")
-    parser.add_argument("--transverse", action="store_true", help="Transverse")
-    parser.add_argument(
-        "-T", "--end-time", type=float, default=15.0, help="End time (ms)"
-    )
-    parser.add_argument("--dt", type=float, default=0.05, help="Time step (ms)")
-    parser.add_argument(
-        "--overwrite", action="store_true", help="Overwrite existing results"
-    )
-    parser.add_argument(
-        "--stim_amp", type=float, default=5000.0, help="Stimulus amplitude"
-    )
-    parser.add_argument(
-        "--mesh-unit",
-        type=str,
-        default="cm",
-        help="Mesh unit",
-    )
-
-    args = parser.parse_args(argv)
+def main() -> int:
+    results_folder = Path("results-slab")
+    save_every_ms = 1.0
+    dimension = 2
+    transverse = False
+    end_time = 20.0
+    dt = 0.05
+    overwrite = False
+    stim_amp = 5000.0
+    mesh_unit = "cm"
 
     # Load mesh
-    mesh_unit = args.mesh_unit
+    mesh_unit = mesh_unit
 
     dx = 0.05 * ureg("cm").to(mesh_unit).magnitude
     L = 1.0 * ureg("cm").to(mesh_unit).magnitude
-    mesh = setup_geometry(Lx=L, Ly=dx, Lz=dx, dx=dx / 5, dim=args.dimension)
-    if not args.results_folder.is_dir() or args.overwrite:
+    mesh = setup_geometry(Lx=L, Ly=dx, Lz=dx, dx=dx / 5, dim=dimension)
+    if not results_folder.is_dir() or overwrite:
         ffun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
         ffun.set_all(0)
         stim_domain = dolfin.CompiledSubDomain("x[0] <= DOLFIN_EPS")
@@ -493,7 +483,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         g_it = 0.04258
         g_et = 0.236
 
-        f0, s0, n0 = get_microstructure(args.dimension, args.transverse)
+        f0, s0, n0 = get_microstructure(dimension, transverse)
 
         markers = {"ENDO": (marker, 2)}
 
@@ -505,7 +495,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             s0=s0,
             n0=n0,
         )
-        save_freq = round(1 / args.dt)
+        save_freq = round(save_every_ms / dt)
         run_model(
             data=data,
             markers=cfun_func,
@@ -514,17 +504,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             g_el=g_el,
             g_et=g_et,
             save_freq=save_freq,
-            resultsdir=args.results_folder,
-            end_time=args.end_time,
-            dt=args.dt,
-            stim_amp=args.stim_amp,
+            resultsdir=results_folder,
+            end_time=end_time,
+            dt=dt,
+            stim_amp=stim_amp,
             mesh_unit=mesh_unit,
         )
     else:
-        print(f"Results folder {args.results_folder} exists")
+        print(f"Results folder {results_folder} exists")
 
-    compute_conduction_velocity(mesh, args.results_folder, L, dx, mesh_unit)
-    # compute_ecg_recovery(mesh, args.results_folder, L, dx)
+    compute_conduction_velocity(mesh, results_folder, L, dx, mesh_unit)
+    compute_ecg_recovery(mesh, results_folder, L, dx)
     return 0
 
 
