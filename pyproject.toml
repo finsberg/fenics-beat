@@ -24,6 +24,8 @@ Tracker = "https://github.com/finsberg/fenics-beat/issues"
 test = [
     "pytest",
     "pytest-cov",
+    "gotranx",
+    "numba"
 ]
 dev = [
     "pdbpp",
@@ -39,6 +41,8 @@ demos = [
    "cardiac-geometries",
    "ldrb",
    "pint",
+   "gotranx",
+   "numba",
 ]
 docs = [
    "jupyter-book",
