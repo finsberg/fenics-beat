@@ -151,28 +151,12 @@ class BaseModel(abc.ABC):
     def variational_forms(self, k_n: Expr | float) -> tuple[ufl.Form, ufl.Form]:
         """Create the variational forms corresponding to the given
         discretization of the given system of equations.
-
-        *Arguments*
-          k_n (:py:class:`ufl.Expr` or float)
-            The time step
-
-        *Returns*
-          (G, prec) (:py:class:`tuple` of :py:class:`ufl.Form`)
-
         """
         ...
 
     def step(self, interval):
         """
         Solve on the given time step (t0, t1).
-
-        *Arguments*
-          interval (:py:class:`tuple`)
-            The time interval (t0, t1) for the step
-
-        *Invariants*
-          Assuming that v_ is in the correct state for t0, gives
-          self.v in correct state at t1.
         """
 
         # timer = dolfin.Timer("PDE Step")
