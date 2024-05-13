@@ -161,6 +161,8 @@ def main(dx=0.5, dt=0.05, T=200.0):
         v_index=model.state_indices("V"),
     )
 
+    T = 3
+    # T = 100  # Change to 100 to reproduce Niederer benchmark
     t = 0.0
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode, theta=0.0)
     output_dir = Path("output-niederer-benchmark")
