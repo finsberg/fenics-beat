@@ -2,8 +2,7 @@
 # In this demo we will show how to compute conduction velocity and ECG for a Slab geometry.
 #
 
-import argparse
-from typing import Sequence, NamedTuple
+from typing import NamedTuple
 from pathlib import Path
 import beat.single_cell
 import dolfin
@@ -12,12 +11,14 @@ import numpy as np
 import pint
 import gotranx
 import beat
-
+import pyvista
+import beat.viz
 
 try:
     import ufl_legacy as ufl
 except ImportError:
     import ufl
+
 
 ureg = pint.UnitRegistry()
 
@@ -157,73 +158,6 @@ def setup_geometry(dx, Lx, Ly, Lz=0.0, dim=2):
             int(np.rint((Lz / dx))),
         )
     return mesh
-
-
-def compute_conduction_velocity(
-    mesh, results_folder, L, dx, mesh_unit: str, threshold=0.0
-):
-    x0 = L * 0.25
-    x1 = L * 0.75
-    if mesh.geometry().dim() == 2:
-        p1 = (x0, dx * 0.5)
-        p2 = (x1, dx * 0.5)
-    else:
-        p1 = (x0, dx * 0.5, dx * 0.5)  # type: ignore
-        p2 = (x1, dx * 0.5, dx * 0.5)  # type: ignore
-
-    V = dolfin.FunctionSpace(mesh, "CG", 1)
-    v = dolfin.Function(V)
-
-    fname = (results_folder / "V.xdmf").as_posix()
-    times = load_timesteps_from_xdmf(fname)
-
-    t1 = np.inf
-    t2 = np.inf
-
-    for i, t in times.items():
-        with dolfin.XDMFFile(mesh.mpi_comm(), fname) as xdmf:
-            xdmf.read_checkpoint(v, "V", i)
-            print(f"Read {t=:.2f}, {v(p1) =}, {v(p2) = }")
-
-        if v(p1) > threshold:
-            t1 = min(t, t1)
-        if v(p2) > threshold:
-            t2 = min(t, t2)
-            break
-
-    cv = (x1 - x0) / (t2 - t1) * ureg(f"{mesh_unit}/ms")
-    msg = (
-        f"Conduction velocity = {cv.magnitude:.3f} mm/ms or "  #
-        f" {cv.to('m/s').magnitude:.3f} m/s or "  #
-        f" {cv.to('cm/s').magnitude:.3f} cm/s"  #
-    )
-    print(msg)
-
-
-def compute_ecg_recovery(mesh, results_folder, L, dx):
-    x0 = L * 2.0
-    if mesh.geometry().dim() == 2:
-        p = (x0, dx * 0.5)
-    else:
-        p = (x0, dx * 0.5, dx * 0.5)
-
-    V = dolfin.FunctionSpace(mesh, "CG", 1)
-    v = dolfin.Function(V)
-
-    fname = (results_folder / "V.xdmf").as_posix()
-    times = load_timesteps_from_xdmf(fname)
-
-    phie = []
-    for i, t in times.items():
-        with dolfin.XDMFFile(mesh.mpi_comm(), fname) as xdmf:
-            xdmf.read_checkpoint(v, "V", i)
-            print(f"Read {t=:.2f}")
-            phie.append(beat.ecg.ecg_recovery(v=v, mesh=mesh, sigma_b=1.0, point=p))
-
-    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
-    ax.plot(times.values(), phie)
-    ax.set_title("ECG recovery")
-    fig.savefig(results_folder / "ecg_recovery.png")
 
 
 def load_timesteps_from_xdmf(xdmffile):
@@ -442,81 +376,183 @@ def get_microstructure(
     return f0, s0, n0
 
 
-def main() -> int:
-    results_folder = Path("results-slab")
-    save_every_ms = 1.0
-    dimension = 2
-    transverse = False
-    end_time = 20.0
-    dt = 0.05
-    overwrite = False
-    stim_amp = 5000.0
-    mesh_unit = "cm"
+results_folder = Path("results-slab")
+save_every_ms = 1.0
+dimension = 2
+transverse = False
+end_time = 20.0
+dt = 0.05
+overwrite = False
+stim_amp = 5000.0
+mesh_unit = "cm"
 
-    # Load mesh
-    mesh_unit = mesh_unit
+# Load mesh
+mesh_unit = mesh_unit
 
-    dx = 0.05 * ureg("cm").to(mesh_unit).magnitude
-    L = 1.0 * ureg("cm").to(mesh_unit).magnitude
-    mesh = setup_geometry(Lx=L, Ly=dx, Lz=dx, dx=dx / 5, dim=dimension)
-    if not results_folder.is_dir() or overwrite:
-        ffun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
-        ffun.set_all(0)
-        stim_domain = dolfin.CompiledSubDomain("x[0] <= DOLFIN_EPS")
-        marker = 1
-        stim_domain.mark(ffun, marker)
+dx = 0.05 * ureg("cm").to(mesh_unit).magnitude
+L = 1.0 * ureg("cm").to(mesh_unit).magnitude
+mesh = setup_geometry(Lx=L, Ly=dx, Lz=dx, dx=dx / 5, dim=dimension)
 
-        cfun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim())
-        cfun.set_all(0)
-        endo = dolfin.CompiledSubDomain("x[0] < L / 3", L=L)
-        epi = dolfin.CompiledSubDomain("x[0] > 2 * L / 3", L=L)
-        endo.mark(cfun, 1)
-        epi.mark(cfun, 2)
-        V = dolfin.FunctionSpace(mesh, "CG", 1)
-        cfun_DG = dolfin.Function(dolfin.FunctionSpace(mesh, "DG", 0))
-        cfun_DG.vector()[:] = cfun.array()
-        cfun_func = dolfin.Function(V)
-        cfun_func.interpolate(cfun_DG)
+ffun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
+ffun.set_all(0)
+stim_domain = dolfin.CompiledSubDomain("x[0] <= DOLFIN_EPS")
+marker = 1
+stim_domain.mark(ffun, marker)
 
-        g_il = 0.16069
-        g_el = 0.625
-        g_it = 0.04258
-        g_et = 0.236
-
-        f0, s0, n0 = get_microstructure(dimension, transverse)
-
-        markers = {"ENDO": (marker, 2)}
-
-        data = Geometry(
-            mesh=mesh,
-            ffun=ffun,
-            markers=markers,
-            f0=f0,
-            s0=s0,
-            n0=n0,
-        )
-        save_freq = round(save_every_ms / dt)
-        run_model(
-            data=data,
-            markers=cfun_func,
-            g_il=g_il,
-            g_it=g_it,
-            g_el=g_el,
-            g_et=g_et,
-            save_freq=save_freq,
-            resultsdir=results_folder,
-            end_time=end_time,
-            dt=dt,
-            stim_amp=stim_amp,
-            mesh_unit=mesh_unit,
-        )
-    else:
-        print(f"Results folder {results_folder} exists")
-
-    compute_conduction_velocity(mesh, results_folder, L, dx, mesh_unit)
-    compute_ecg_recovery(mesh, results_folder, L, dx)
-    return 0
+cfun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim())
+cfun.set_all(0)
+endo = dolfin.CompiledSubDomain("x[0] < L / 3", L=L)
+epi = dolfin.CompiledSubDomain("x[0] > 2 * L / 3", L=L)
+endo.mark(cfun, 1)
+epi.mark(cfun, 2)
+V = dolfin.FunctionSpace(mesh, "CG", 1)
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+pyvista.start_xvfb()
+plotter_markers = pyvista.Plotter()
+topology, cell_types, x = beat.viz.create_vtk_structures(V)
+grid = pyvista.UnstructuredGrid(topology, cell_types, x)
+grid["markers"] = cfun.array()
+plotter_markers.add_mesh(grid, show_edges=True)
+if mesh.geometric_dimension() == 2:
+    plotter_markers.view_xy()
+
+if not pyvista.OFF_SCREEN:
+    plotter_markers.show()
+else:
+    figure_as_array = plotter_markers.screenshot("markers.png")
+
+#
+# Interpolate meshfunction to a CG 1 function
+#
+cfun_DG = dolfin.Function(dolfin.FunctionSpace(mesh, "DG", 0))
+cfun_DG.vector()[:] = cfun.array()
+cfun_func = dolfin.Function(V)
+cfun_func.interpolate(cfun_DG)
+
+g_il = 0.16069
+g_el = 0.625
+g_it = 0.04258
+g_et = 0.236
+
+f0, s0, n0 = get_microstructure(dimension, transverse)
+
+markers = {"ENDO": (marker, 2)}
+
+data = Geometry(
+    mesh=mesh,
+    ffun=ffun,
+    markers=markers,
+    f0=f0,
+    s0=s0,
+    n0=n0,
+)
+save_freq = round(save_every_ms / dt)
+run_model(
+    data=data,
+    markers=cfun_func,
+    g_il=g_il,
+    g_it=g_it,
+    g_el=g_el,
+    g_et=g_et,
+    save_freq=save_freq,
+    resultsdir=results_folder,
+    end_time=end_time,
+    dt=dt,
+    stim_amp=stim_amp,
+    mesh_unit=mesh_unit,
+)
+
+# ## Compute conduction velocity
+
+threshold = 0.0
+x0 = L * 0.25
+x1 = L * 0.75
+if mesh.geometry().dim() == 2:
+    p1 = (x0, dx * 0.5)
+    p2 = (x1, dx * 0.5)
+else:
+    p1 = (x0, dx * 0.5, dx * 0.5)  # type: ignore
+    p2 = (x1, dx * 0.5, dx * 0.5)  # type: ignore
+
+V = dolfin.FunctionSpace(mesh, "CG", 1)
+v = dolfin.Function(V)
+
+
+plotter_voltage = pyvista.Plotter()
+
+plotter_voltage.open_gif("voltage_slab_time.gif", fps=4)
+grid = pyvista.UnstructuredGrid(topology, cell_types, x)
+grid.point_data["V"] = v.vector().get_local()
+viridis = plt.get_cmap("viridis")
+sargs = dict(
+    title_font_size=25,
+    label_font_size=20,
+    fmt="%.2e",
+    color="black",
+    position_x=0.1,
+    position_y=0.8,
+    width=0.8,
+    height=0.1,
+)
+
+plotter_voltage.add_mesh(
+    grid,
+    show_edges=True,
+    lighting=False,
+    cmap=viridis,
+    scalar_bar_args=sargs,
+    clim=[-90.0, 40.0],
+)
+
+
+fname = (results_folder / "V.xdmf").as_posix()
+times = load_timesteps_from_xdmf(fname)
+
+t1 = np.inf
+t2 = np.inf
+
+for i, t in times.items():
+    with dolfin.XDMFFile(mesh.mpi_comm(), fname) as xdmf:
+        xdmf.read_checkpoint(v, "V", i)
+        print(f"Read {t=:.2f}, {v(p1) =}, {v(p2) = }")
+
+    if pyvista is not None:
+        grid.point_data["V"] = v.vector().get_local()
+        plotter_voltage.write_frame()
+
+    if v(p1) > threshold:
+        t1 = min(t, t1)
+    if v(p2) > threshold:
+        t2 = min(t, t2)
+
+cv = (x1 - x0) / (t2 - t1) * ureg(f"{mesh_unit}/ms")
+msg = (
+    f"Conduction velocity = {cv.magnitude:.3f} mm/ms or "  #
+    f" {cv.to('m/s').magnitude:.3f} m/s or "  #
+    f" {cv.to('cm/s').magnitude:.3f} cm/s"  #
+)
+print(msg)
+plotter_voltage.close()
+
+
+x0 = L * 2.0
+if mesh.geometry().dim() == 2:
+    p = (x0, dx * 0.5)
+else:
+    p = (x0, dx * 0.5, dx * 0.5)  # type: ignore
+
+V = dolfin.FunctionSpace(mesh, "CG", 1)
+v = dolfin.Function(V)
+
+phie = []
+for i, t in times.items():
+    with dolfin.XDMFFile(mesh.mpi_comm(), fname) as xdmf:
+        xdmf.read_checkpoint(v, "V", i)
+        print(f"Read {t=:.2f}")
+        phie.append(beat.ecg.ecg_recovery(v=v, mesh=mesh, sigma_b=1.0, point=p))
+
+fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+ax.plot(times.values(), phie)
+ax.set_title("ECG recovery")
+fig.savefig(results_folder / "ecg_recovery.png")

@@ -44,6 +44,10 @@ demos = [
    "gotranx",
    "numba",
 ]
+pyvista = [
+    "pyvista[trame]",
+]
+
 docs = [
    "jupyter-book",
    "jupytext",
@@ -58,9 +62,12 @@ all = [
 ]
 
 
-testpaths = [
-    "tests"
+[tool.setuptools]
+license-files = [
+    "LICENSE",
+    "licenses/LICENSE_dolfin_pyvista_adapter",
 ]
+
 
 [tool.pytest.ini_options]
 markers = [

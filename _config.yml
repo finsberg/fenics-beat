@@ -32,6 +32,7 @@ sphinx:
 
   config:
     html_last_updated_fmt: "%b %d, %Y"
+    suppress_warnings: ["mystnb.unknown_mime_type"]
     nb_custom_formats:  # https://jupyterbook.org/en/stable/file-types/jupytext.html#file-types-custom
         .py:
             - jupytext.reads
