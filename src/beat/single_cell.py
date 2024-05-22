@@ -38,7 +38,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def solve_with_save(fun, nbeats, times, y, p, dt, save_freq, track_values, track_indices):
     k = 0
     for _ in range(nbeats):
