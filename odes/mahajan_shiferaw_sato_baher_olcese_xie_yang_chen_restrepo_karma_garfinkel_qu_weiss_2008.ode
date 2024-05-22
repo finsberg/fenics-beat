@@ -1,0 +1,338 @@
+states("Irel",
+Ca_JSR=ScalarParam( 9.75054636972659949e1, unit="uM", description=""),
+xir=ScalarParam( 6.67925726399999989e-3, unit="mol/m**3/s", description="")
+)
+
+states("Ca",
+Ca_NSR=ScalarParam( 1.04450004990522999e2, unit="uM", description=""),
+Ca_dyad=ScalarParam( 1.71657313068500006, unit="uM", description=""),
+Ca_i=ScalarParam( 2.56752008084000005e-1, unit="uM", description=""),
+Ca_submem=ScalarParam( 2.26941113355000001e-1, unit="uM", description=""),
+tropi=ScalarParam( 2.21716898949530012e1, unit="uM", description=""),
+trops=ScalarParam( 1.98647019498539983e1, unit="uM", description="")
+)
+
+states("Na",
+Na_i=ScalarParam( 1.14417123116139994e1, unit="mM", description="")
+)
+
+states("cell",
+V=ScalarParam(-8.71698161694060047e1, unit="mV", description="")
+)
+
+states("ICaL",
+c1=ScalarParam( 1.82112520000000017e-5, unit="1", description=""),
+c2=ScalarParam( 9.79322592773000045e-1, unit="1", description=""),
+xi1ba=ScalarParam( 3.36165960000000017e-5, unit="1", description=""),
+xi1ca=ScalarParam( 1.20815348200000003e-3, unit="1", description=""),
+xi2ba=ScalarParam( 1.52425946880000007e-2, unit="1", description=""),
+xi2ca=ScalarParam( 4.17300846599999962e-3, unit="1", description="")
+)
+
+states("INa",
+xh=ScalarParam( 9.90691306716000031e-1, unit="1", description=""),
+xj=ScalarParam( 9.93888937282999985e-1, unit="1", description=""),
+xm=ScalarParam( 1.07545335699999996e-3, unit="1", description="")
+)
+
+states("IKr",
+xr=ScalarParam( 7.07423933100000037e-3, unit="1", description="")
+)
+
+states("IKs",
+xs1=ScalarParam( 4.82675871310000032e-2, unit="1", description=""),
+xs2=ScalarParam( 1.05468807033000003e-1, unit="1", description="")
+)
+
+states("Ito",
+xtof=ScalarParam( 3.64359259399999998e-3, unit="1", description=""),
+xtos=ScalarParam( 3.64776906000000012e-3, unit="1", description=""),
+ytof=ScalarParam( 9.93331326441999951e-1, unit="1", description=""),
+ytos=ScalarParam( 1.74403618112000003e-1, unit="1", description="")
+)
+
+parameters("Environment",
+Ca_o=ScalarParam(1.8, unit="mM", description=""),
+F=ScalarParam(96.4853415, unit="C/mmol", description=""),
+K_o=ScalarParam(5.4, unit="mM", description=""),
+Na_o=ScalarParam(136.0, unit="mM", description=""),
+R=ScalarParam(8.314472, unit="J/mol/K", description=""),
+T=ScalarParam(308.0, unit="K", description="")
+)
+
+parameters("reversal_potentials",
+K_i=ScalarParam(140.0, unit="mM", description=""),
+prNaK=ScalarParam(0.01833, unit="1", description="")
+)
+
+parameters("Irel",
+av=ScalarParam(11.3, unit="mS/uF", description=""),
+ax=ScalarParam(0.3576, unit="1/mV", description=""),
+ay=ScalarParam(0.05, unit="1/mV", description=""),
+cstar=ScalarParam(90.0, unit="uM", description=""),
+gbarsr=ScalarParam(26841.8, unit="1", description=""),
+gdyad=ScalarParam(9000.0, unit="mol/m/s/A (0.1)", description=""),
+gryr=ScalarParam(2.58079, unit="mS/uF", description=""),
+taua=ScalarParam(100.0, unit="ms", description=""),
+taur=ScalarParam(30.0, unit="ms", description="")
+)
+
+parameters("Ca",
+bcal=ScalarParam(24.0, unit="uM", description=""),
+bmem=ScalarParam(15.0, unit="uM", description=""),
+bsar=ScalarParam(42.0, unit="uM", description=""),
+btrop=ScalarParam(70.0, unit="uM", description=""),
+kmem=ScalarParam(0.3, unit="uM", description=""),
+ksar=ScalarParam(13.0, unit="uM", description=""),
+srkd=ScalarParam(0.6, unit="uM", description=""),
+srmax=ScalarParam(47.0, unit="uM", description=""),
+taud=ScalarParam(4.0, unit="ms", description=""),
+taups=ScalarParam(0.5, unit="ms", description=""),
+xkcal=ScalarParam(7.0, unit="uM", description=""),
+xkoff=ScalarParam(0.0196, unit="mS/uF", description=""),
+xkon=ScalarParam(0.0327, unit="m**3/s/mol (1e+06)", description="")
+)
+
+parameters("ICaL",
+cat=ScalarParam(3.0, unit="uM", description=""),
+cpt=ScalarParam(6.09365, unit="uM", description=""),
+gca=ScalarParam(182.0, unit="mol/m/s/A (0.1)", description=""),
+k1t=ScalarParam(0.00413, unit="mS/uF", description=""),
+k2=ScalarParam(0.000103615, unit="mS/uF", description=""),
+k2t=ScalarParam(0.00224, unit="mS/uF", description=""),
+pca=ScalarParam(0.00054, unit="cm/s", description=""),
+r1=ScalarParam(0.3, unit="mS/uF", description=""),
+r2=ScalarParam(3.0, unit="mS/uF", description=""),
+s1t=ScalarParam(0.00195, unit="mS/uF", description=""),
+s6=ScalarParam(8.0, unit="mV", description=""),
+sx=ScalarParam(3.0, unit="mV", description=""),
+sy=ScalarParam(4.0, unit="mV", description=""),
+syr=ScalarParam(11.32, unit="mV", description=""),
+tau3=ScalarParam(3.0, unit="ms", description=""),
+taupo=ScalarParam(1.0, unit="ms", description=""),
+tca=ScalarParam(78.0329, unit="ms", description=""),
+vth=ScalarParam(0.0, unit="mV", description=""),
+vx=ScalarParam(-40.0, unit="mV", description=""),
+vy=ScalarParam(-40.0, unit="mV", description=""),
+vyr=ScalarParam(-40.0, unit="mV", description="")
+)
+
+parameters("Ileak_Iup_Ixfer",
+cup=ScalarParam(0.5, unit="uM", description=""),
+gleak=ScalarParam(2.069e-05, unit="mS/uF", description=""),
+kj=ScalarParam(50.0, unit="uM", description=""),
+vup=ScalarParam(0.4, unit="mol/m**3/s", description="")
+)
+
+parameters("INaCa",
+gNaCa=ScalarParam(0.84, unit="mol/m**3/s", description=""),
+xkdna=ScalarParam(0.3, unit="uM", description=""),
+xmcai=ScalarParam(0.0036, unit="mM", description=""),
+xmcao=ScalarParam(1.3, unit="mM", description=""),
+xmnai=ScalarParam(12.3, unit="mM", description=""),
+xmnao=ScalarParam(87.5, unit="mM", description="")
+)
+
+parameters("INaK",
+gNaK=ScalarParam(1.5, unit="A/F", description=""),
+xkmko=ScalarParam(1.5, unit="mM", description=""),
+xkmnai=ScalarParam(12.0, unit="mM", description="")
+)
+
+parameters("IK1",
+gkix=ScalarParam(0.3, unit="mS/uF", description="")
+)
+
+parameters("IKr",
+gkr=ScalarParam(0.0125, unit="mS/uF", description="")
+)
+
+parameters("IKs",
+gks=ScalarParam(0.1386, unit="mS/uF", description="")
+)
+
+parameters("INa",
+gna=ScalarParam(12.0, unit="mS/uF", description="")
+)
+
+parameters("Ito",
+gtof=ScalarParam(0.11, unit="mS/uF", description=""),
+gtos=ScalarParam(0.04, unit="mS/uF", description="")
+)
+
+parameters("cell",
+stim_amplitude=ScalarParam(-15.0, unit="A/F", description=""),
+stim_duration=ScalarParam(3.0, unit="ms", description=""),
+stim_offset=ScalarParam(0.0, unit="ms", description=""),
+stim_period=ScalarParam(400.0, unit="ms", description=""),
+wca=ScalarParam(8.0, unit="g*m**5/s**3/A/mol (1000)", description="")
+)
+
+expressions("Environment")
+FonRT = F/((R*T)) # 1/mV
+
+expressions("cell")
+Itotal = -(i_Stim + (xiNaK + (xica + (xiNaCa + (xito + (xiks + (xikr + (xik1 + xina)))))))) # A/F
+i_Stim = Conditional(And(Le(past, -stim_offset + time), Ge(past, -stim_duration - stim_offset + time)), stim_amplitude, 0.0) # A/F
+past = stim_period*floor(time/stim_period) # ms
+dV_dt = Itotal # mV
+
+expressions("ICaL")
+Pr = 1.0 - 1.0/(exp((-(V - vy))/sy) + 1.0)
+Ps = 1.0/(exp((-(V - vyr))/syr) + 1.0)
+alpha = poinf/taupo # mS/uF
+beta_ = (1.0 - poinf)/taupo # mS/uF
+fca = 1.0/((cat/Ca_dyad)**3.0 + 1.0)
+jca = rxa*(gca*po) # mol/m**3/s
+k1 = 0.024168*fca # mS/uF
+k3 = (1.0 - poi)/tau3 # mS/uF
+k3t = k3 # mS/uF
+k4 = (k5*((k1*((alpha*k3)/beta_))/k2))/k6 # mS/uF
+k4t = (k5t*((k1t*((alpha*k3t)/beta_))/k2t))/k6t # mS/uF
+k5 = (1.0 - Ps)/tauca # mS/uF
+k5t = (1.0 - Ps)/tauba # mS/uF
+k6 = (Ps*fca)/tauca # mS/uF
+k6t = Ps/tauba # mS/uF
+po = -c2 + (-c1 + (-xi2ba + (-xi1ba + (-xi2ca + (1.0 - xi1ca)))))
+poi = 1.0/(exp((-(V - vx))/sx) + 1.0)
+poinf = 1.0/(exp((-(V - vth))/s6) + 1.0)
+recov = 4954.0*exp(V/15.6) + 10.0 # ms
+rxa = Conditional(And(Gt(za, -0.001), Lt(za, 0.001)), F*pca*(-0.682*Ca_o + 2.0*csm*exp(za)), -4.0*F*FonRT*V*pca*(0.341*Ca_o - csm*exp(za))/(exp(za) - 1.0)) # mA/cm**2
+s1 = 0.0182688*fca # mS/uF
+s2 = (k2*((r1*s1)/r2))/k1 # mS/uF
+s2t = (k2t*((r1*s1t)/r2))/k1t # mS/uF
+tau_ca = tca/((Ca_dyad/cpt)**4.0 + 1.0) + 0.1 # ms
+tauba = Pr*(recov - 1*450.0) + 450.0 # ms
+tauca = Pr*(recov - tau_ca) + tau_ca # ms
+xica = jca*(2.0*wca) # A/F
+za = FonRT*(V*2.0)
+dc1_dt = -c1*(k1 + (k1t + (beta_ + r1))) + (po*r2 + (k2t*xi1ba + (alpha*c2 + k2*xi1ca)))
+dc2_dt = -c2*(alpha + (k6 + k6t)) + (k5t*xi2ba + (beta_*c1 + k5*xi2ca))
+dxi1ba_dt = -xi1ba*(s2t + (k2t + k3t)) + (po*s1t + (c1*k1t + k4t*xi2ba))
+dxi1ca_dt = -xi1ca*(s2 + (k2 + k3)) + (po*s1 + (c1*k1 + k4*xi2ca))
+dxi2ba_dt = -xi2ba*(k4t + k5t) + (c2*k6t + k3t*xi1ba)
+dxi2ca_dt = -xi2ca*(k4 + k5) + (c2*k6 + k3*xi1ca)
+
+expressions("Irel")
+Qr = (Ca_NSR*Qr0)/cstar # mol/m**3/s
+Qr0 = Conditional(And(Gt(Ca_JSR, 50.0), Lt(Ca_JSR, cstar)), 1.0*Ca_JSR - 50.0, Conditional(Ge(Ca_JSR, cstar), Ca_JSR*av + bv, 0.0)) # mol/m**3/s
+bv = cstar*(1.0 - av) - 1*50.0 # mol/m**3/s
+sparkV = exp((-ay)*(V + 30.0))/(exp((-ay)*(V + 30.0)) + 1.0)
+spark_rate = sparkV*((po*(gryr/1.0))*Abs(rxa)) # mS/uF
+xicap = (gdyad*po)*Abs(rxa) # mol/m**3/s
+xirp = (((gbarsr*((Qr*po)*Abs(rxa)))/1.0)*exp((-ax)*(V + 30.0)))/(exp((-ax)*(V + 30.0)) + 1.0) # mol/m**3/s
+xiryr = xicap + xirp # mol/m**3/s
+dCa_JSR_dt = (-Ca_JSR + Ca_NSR)/taua # uM
+dxir_dt = Qr*spark_rate - xir*(1.0 - dCa_JSR*taur/Ca_NSR)/taur # mol/m**3/s
+
+expressions("INa")
+ah = Conditional(Lt(V, -1*40.0), 1.04951082542696e-6*exp(-0.147058823529412*V), 0.0) # mS/uF
+aj = Conditional(Lt(V, -1*40.0), -(V + 37.78)*(127140.0*exp(0.28831*V) + 3.474e-5)*exp(-0.04391*V)/(50262745825.954*exp(0.311*V) + 1.0), 0.0) # mS/uF
+am = Conditional(Or(Gt(V, -47.129), Lt(V, -47.131)), (0.32*V + 15.0816)*exp(0.1*V)/(1.0*exp(0.1*V) - 0.00897780373069724), 3.2) # mS/uF
+bh = Conditional(Lt(V, -1*40.0), 3.56*exp(0.079*V) + 310000.0*exp(0.35*V), 1.0*exp(0.0900900900900901*V)/(0.13*exp(0.0900900900900901*V) + 0.0497581410839387)) # mS/uF
+bj = Conditional(Lt(V, -1*40.0), 0.1212*exp(0.12728*V)/(1.0*exp(0.1378*V) + 0.00396086833990426), 0.3*exp(0.0999997465*V)/(1.0*exp(0.1*V) + 0.0407622039783662)) # mS/uF
+bm = 0.08*exp((-V)/11.0) # mS/uF
+xina = (xm*(xm*(xm*(xj*(gna*xh)))))*(V - ena) # A/F
+dxh_dt = ah*(1.0 - xh) - bh*xh
+dxj_dt = aj*(1.0 - xj) - bj*xj
+dxm_dt = am*(1.0 - xm) - bm*xm
+
+expressions("IK1")
+aki = 1.02/(exp(0.2385*((V - ek) - 1*59.215)) + 1.0) # mS/uF
+bki = (0.49124*exp(0.08032*((V - ek) + 5.476)) + 1.0*exp(0.06175*((V - ek) - 1*594.31)))/(exp((-1*0.5143)*((V - ek) + 4.753)) + 1.0) # mS/uF
+xik1 = (xkin*(gkix*sqrt(K_o/5.4)))*(V - ek) # A/F
+xkin = aki/(aki + bki)
+
+expressions("INaCa")
+aloss = 1.0/((xkdna/Ca_submem)**3.0 + 1.0)
+jNaCa = (zw3*(aloss*gNaCa))/((zw4*zw8)) # mol/m**3/s
+xiNaCa = jNaCa*wca # A/F
+yz1 = Na_i**3.0*xmcao + csm*xmnao**3.0 # mM**4
+yz2 = (Ca_o*xmnai**3.0)*(csm/xmcai + 1.0) # mM**4
+yz3 = (Na_o**3.0*xmcai)*((Na_i/xmnai)**3.0 + 1.0) # mM**4
+yz4 = Ca_o*Na_i**3.0 + Na_o**3.0*csm # mM**4
+zw3 = (Ca_o*Na_i**3.0)*exp(FonRT*(V*0.35)) - Na_o**3.0*csm*exp(FonRT*(V*(0.35 - 1*1.0))) # mM**4
+zw4 = 0.2*exp(FonRT*(V*(0.35 - 1*1.0))) + 1.0
+zw8 = yz4 + (yz3 + (yz1 + yz2)) # mM**4
+
+expressions("Ca")
+bpxi = (bcal*xkcal)/(((Ca_i + xkcal)*(Ca_i + xkcal)))
+bpxs = (bcal*xkcal)/(((Ca_submem + xkcal)*(Ca_submem + xkcal)))
+csm = Ca_submem/1000.0 # mM
+dCa_JSR = -jleak + (jup - xir) # mol/m**3/s
+dciib = 1.0/(sarpxi + (mempxi + (spxi + (bpxi + 1.0))))
+dcsib = 1.0/(sarpxs + (mempxs + (spxs + (bpxs + 1.0))))
+jd = (-Ca_i + Ca_submem)/taud # mol/m**3/s
+mempxi = (bmem*kmem)/(((Ca_i + kmem)*(Ca_i + kmem)))
+mempxs = (bmem*kmem)/(((Ca_submem + kmem)*(Ca_submem + kmem)))
+sarpxi = (bsar*ksar)/(((Ca_i + ksar)*(Ca_i + ksar)))
+sarpxs = (bsar*ksar)/(((Ca_submem + ksar)*(Ca_submem + ksar)))
+spxi = (srkd*srmax)/(((Ca_i + srkd)*(Ca_i + srkd)))
+spxs = (srkd*srmax)/(((Ca_submem + srkd)*(Ca_submem + srkd)))
+xbi = -tropi*xkoff + (Ca_i*xkon)*(btrop - tropi) # mol/m**3/s
+xbs = -trops*xkoff + (Ca_submem*xkon)*(btrop - trops) # mol/m**3/s
+dCa_NSR_dt = dCa_JSR # uM
+dCa_dyad_dt = xiryr - (Ca_dyad - Ca_submem)/taups # uM
+dCa_i_dt = dciib*(-xbi + (jleak + (jd - jup))) # uM
+dCa_submem_dt = dcsib*(-xbs + 50.0*(jNaCa + (-jca + (-jd + xir)))) # uM
+dtropi_dt = xbi # uM
+dtrops_dt = xbs # uM
+
+expressions("reversal_potentials")
+ek = (1.0/FonRT)*log(K_o/K_i) # mV
+eks = (1.0/FonRT)*log((K_o + Na_o*prNaK)/(K_i + Na_i*prNaK)) # mV
+ena = (1.0/FonRT)*log(Na_o/Na_i) # mV
+
+expressions("INaK")
+fNaK = 1.0/((0.0365*sigma)*exp(FonRT*(-V)) + (0.1245*exp(FonRT*((-1*0.1)*V)) + 1.0))
+sigma = (exp(Na_o/67.3) - 1*1.0)/7.0
+xiNaK = (K_o*((Na_i*(fNaK*gNaK))/(Na_i + xkmnai)))/(K_o + xkmko) # A/F
+
+expressions("IKs")
+gksx = 1.0 + 0.8/((0.5/Ca_i)**3.0 + 1.0)
+tauxs1 = Conditional(And(Gt(V, -30.0145560407569), Lt(V, -29.9854439592431)), 417.94625266108, 1.0/(0.000131*(V + 30.0)/(exp(0.0687*(V + 30.0)) - 1.0) + 7.19e-5*(V + 30.0)/(1.0 - 0.0117959385197516*exp(-0.148*V)))) # ms
+tauxs2 = 4.0*tauxs1 # ms
+xiks = (xs2*(xs1*(gks*gksx)))*(V - eks) # A/F
+xs1ss = 1.0/(exp((-(V - 1*1.5))/16.7) + 1.0)
+xs2ss = xs1ss
+dxs1_dt = (-xs1 + xs1ss)/tauxs1
+dxs2_dt = (-xs2 + xs2ss)/tauxs2
+
+expressions("Ileak_Iup_Ixfer")
+jleak = ((Ca_NSR*(Ca_NSR*gleak))/(Ca_NSR*Ca_NSR + kj*kj))*(Ca_NSR*16.667 - Ca_i) # mol/m**3/s
+jup = (Ca_i*(Ca_i*vup))/(Ca_i*Ca_i + cup*cup) # mol/m**3/s
+
+expressions("IKr")
+rg = 1.0/(exp((V + 33.0)/22.4) + 1.0)
+taukr = 1.0/(xkrv1 + xkrv2) # ms
+xikr = (rg*(xr*(gkr*sqrt(K_o/5.4))))*(V - ek) # A/F
+xkrinf = 1.0/(exp((-(V + 50.0))/7.5) + 1.0)
+xkrv1 = Conditional(Or(Ge(V, -6.999), Le(V, -7.001)), (0.00138*V + 0.00966)*exp(0.123*V)/(1.0*exp(0.123*V) - 0.422739131745963), 0.011219512195122) # mS/uF
+xkrv2 = Conditional(Or(Gt(V, -9.999), Lt(V, -10.001)), (0.00061*V + 0.0061)/(4.26311451516882*exp(0.145*V) - 1.0), 0.00420689655172414) # mS/uF
+dxr_dt = (xkrinf - xr)/taukr
+
+expressions("Ito")
+rs_inf = 1.0/(exp(rt2) + 1.0)
+rt1 = (-(V + 3.0))/15.0
+rt2 = (V + 33.5)/10.0
+rt3 = (V + 60.0)/10.0
+rt4 = (V*((-V)/30.0))/30.0
+rt5 = (V + 33.5)/10.0
+txf = 3.5*exp(rt4) + 1.5 # ms
+txs = 0.5 + 9.0/(1.0 + exp(-rt1)) # ms
+tyf = 20.0 + 20.0/(exp(rt5) + 1.0) # ms
+tys = 30.0 + 3000.0/(exp(rt3) + 1.0) # ms
+xito = xitof + xitos # A/F
+xitof = (ytof*(gtof*xtof))*(V - ek) # A/F
+xitos = ((gtos*xtos)*(0.5*rs_inf + ytos))*(V - ek) # A/F
+xtof_inf = xtos_inf
+xtos_inf = 1.0/(exp(rt1) + 1.0)
+ytof_inf = ytos_inf
+ytos_inf = 1.0/(exp(rt2) + 1.0)
+dxtof_dt = (-xtof + xtof_inf)/txf
+dxtos_dt = (-xtos + xtos_inf)/txs
+dytof_dt = (-ytof + ytof_inf)/tyf
+dytos_dt = (-ytos + ytos_inf)/tys
+
+expressions("Na")
+dNa_i_dt = (-(3.0*xiNaCa + (3.0*xiNaK + xina)))/((wca*1000.0)) # mM
