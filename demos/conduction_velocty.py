@@ -235,7 +235,7 @@ def run_model(
     model_path = Path("ORdmm_Land.py")
     if not model_path.is_file():
         here = Path(__file__).parent
-        ode = gotranx.load_ode(here / "ORdmm_Land.ode")
+        ode = gotranx.load_ode(here / ".." / "odes" / "ORdmm_Land.ode")
         code = gotranx.cli.gotran2py.get_code(
             ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
         )
