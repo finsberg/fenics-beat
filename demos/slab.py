@@ -200,7 +200,7 @@ def run_model(
     if not model_path.is_file():
         print("Generate code for cell model")
         here = Path.cwd()
-        ode = gotranx.load_ode(here / "ORdmm_Land.ode")
+        ode = gotranx.load_ode(here / ".." / "odes" / "ORdmm_Land.ode")
         code = gotranx.cli.gotran2py.get_code(
             ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
         )
