@@ -217,7 +217,7 @@ def compute_ecg_recovery():
 def main():
     here = Path.cwd()
     datadir = here / "data_endocardial_stimulation"
-    ode = gotranx.load_ode(here / "ORdmm_Land.ode")
+    ode = gotranx.load_ode(here / ".." / "odes" / "ORdmm_Land.ode")
     code = gotranx.cli.gotran2py.get_code(
         ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
     )

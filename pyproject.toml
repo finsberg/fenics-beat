@@ -25,7 +25,8 @@ test = [
     "pytest",
     "pytest-cov",
     "gotranx",
-    "numba"
+    "numba",
+    "fenics-beat[demos]",
 ]
 dev = [
     "pdbpp",
