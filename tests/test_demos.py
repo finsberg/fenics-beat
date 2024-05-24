@@ -69,6 +69,7 @@ def test_monodomain_demos(demo, tmpdir_demo):
 
     with chdir(tmpdir_demo):
         with (
+            patch("pyvista"),
             patch("beat.monodomain_solver.MonodomainSplittingSolver.step"),
             patch("ap_features.apd") as apd,
             patch("beat.single_cell.solve_with_save") as solve_with_save,

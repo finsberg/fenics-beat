@@ -179,6 +179,7 @@ def post_process(mesh, dx, outdir):
     xdmffile = (outdir / "V.xdmf").as_posix()
 
     cellnr = [0, 25, 50, 75, 100, 125, 150, 175, 200]
+    cellnr = np.arange(0, 200, 10)
     times = load_timesteps_from_xdmf(xdmffile)
     t = np.array(list(times.values()))
 
@@ -188,17 +189,26 @@ def post_process(mesh, dx, outdir):
     tp1 = np.inf
     tp2 = np.inf
 
-    traces = np.zeros((len(times), len(cellnr)))
-    with dolfin.XDMFFile(mesh.mpi_comm(), xdmffile) as xdmf:
-        for i, ti in enumerate(times):
-            xdmf.read_checkpoint(V, "V", ti)
-            for j, cell in enumerate(cellnr):
-                traces[i, j] = V(cell * dx)
+    if not (outdir / "traces.npy").is_file():
+        traces = np.zeros((len(times), len(cellnr)))
+        with dolfin.XDMFFile(mesh.mpi_comm(), xdmffile) as xdmf:
+            for i, ti in enumerate(times):
+                xdmf.read_checkpoint(V, "V", ti)
+                for j, cell in enumerate(cellnr):
+                    traces[i, j] = V(cell * dx)
 
-            if V(p1) > 0.0 and tp1 == np.inf:
-                tp1 = ti * ureg("ms")
-            if V(p2) > 0.0 and tp2 == np.inf:
-                tp2 = ti * ureg("ms")
+                if V(p1) > 0.0 and tp1 == np.inf:
+                    tp1 = ti * ureg("ms")
+                if V(p2) > 0.0 and tp2 == np.inf:
+                    tp2 = ti * ureg("ms")
+
+        np.save(outdir / "traces.npy", traces)
+        np.save(outdir / "times.npy", t)
+        (outdir / "cv.text").write_text(f"{tp1.magnitude} {tp2.magnitude}")
+
+    traces = np.load(outdir / "traces.npy")
+    t = np.load(outdir / "times.npy")
+    tp1, tp2 = np.loadtxt(outdir / "cv.text")
 
     if not np.isclose(tp1, tp2):
         cv = dp / (tp2 - tp1)
@@ -212,9 +222,11 @@ def post_process(mesh, dx, outdir):
     for i, cell_index in enumerate(cellnr):
         ax.plot(t, -cell_index / 3 * np.ones_like(t) + traces[:, i])
     ax.set_xlabel("Time (ms)")
+    ax.set_yticks([-150, -120, -85])
+    ax.set_yticklabels([200, 100, 1])
+    fig.text(x=0.03, y=0.17, s="Cell number", rotation=90)
 
-    ax.set_ylim(-200, 50)
-    fig.tight_layout()
+    ax.set_ylim(-150, 50)
     fig.savefig(outdir / "V_3d.png")
 
 
@@ -224,5 +236,5 @@ dx = 0.015
 num_cells = 200
 L = num_cells * dx
 mesh = dolfin.IntervalMesh(num_cells, 0, L)
-run(mesh, L, outdir, dx, model, traveling_wave=False, end_time=500.0)
+# run(mesh, L, outdir, dx, model, traveling_wave=False, end_time=500.0)
 post_process(mesh, dx, outdir)
