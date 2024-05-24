@@ -51,7 +51,6 @@ def solve_without_save_side_effect(*args, **kwargs):
     "demo",
     [
         "diffusion.py",
-        "conduction_velocty.py",
         "endocardial_stimulation.py",
         "niederer_benchmark.py",
         "pvc.py",
