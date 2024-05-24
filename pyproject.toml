@@ -45,7 +45,8 @@ demos = [
    "gotranx",
    "ap_features",
    "numba",
-   "pyvista[trame]",
+   "jupyter",
+   "pyvista[all]>=0.43.0"
 ]
 docs = [
    "jupyter-book",
