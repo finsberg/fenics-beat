@@ -480,8 +480,6 @@ v = dolfin.Function(V)
 
 
 plotter_voltage = pyvista.Plotter()
-
-plotter_voltage.open_gif("voltage_slab_time.gif", fps=4)
 grid = pyvista.UnstructuredGrid(topology, cell_types, x)
 grid.point_data["V"] = v.vector().get_local()
 viridis = plt.get_cmap("viridis")
@@ -496,6 +494,7 @@ sargs = dict(
     height=0.1,
 )
 
+# +
 plotter_voltage.add_mesh(
     grid,
     show_edges=True,
@@ -504,27 +503,30 @@ plotter_voltage.add_mesh(
     scalar_bar_args=sargs,
     clim=[-90.0, 40.0],
 )
-
-
 fname = (results_folder / "V.xdmf").as_posix()
 times = load_timesteps_from_xdmf(fname)
-
 t1 = np.inf
 t2 = np.inf
-
+gif_file = Path("voltage_slab_time.gif")
+gif_file.unlink(missing_ok=True)
+plotter_voltage.open_gif(gif_file.as_posix())
 for i, t in times.items():
     with dolfin.XDMFFile(mesh.mpi_comm(), fname) as xdmf:
         xdmf.read_checkpoint(v, "V", i)
         print(f"Read {t=:.2f}, {v(p1) =}, {v(p2) = }")
 
-    if pyvista is not None:
-        grid.point_data["V"] = v.vector().get_local()
-        plotter_voltage.write_frame()
+    grid.point_data["V"] = v.vector().get_local()
+    plotter_voltage.write_frame()
 
     if v(p1) > threshold:
         t1 = min(t, t1)
     if v(p2) > threshold:
         t2 = min(t, t2)
+
+plotter_voltage.close()
+# -
+
+# ![volt](voltage_slab_time.gif "volt")
 
 cv = (x1 - x0) / (t2 - t1) * ureg(f"{mesh_unit}/ms")
 msg = (
