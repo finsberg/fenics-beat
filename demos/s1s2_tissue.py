@@ -111,6 +111,7 @@ def run_model(
     g_el=0.625,
     g_it=0.04258,
     g_et=0.236,
+    end_time: float = np.inf,
     **kwargs,
 ):
     print("Running model")
@@ -266,6 +267,8 @@ def run_model(
                 t += dt
 
                 time.assign(ti)
+                if t > end_time:
+                    return
 
 
 def get_microstructure(
@@ -328,4 +331,5 @@ run_model(
     dt=dt,
     stim_amp=stim_amp,
     mesh_unit=mesh_unit,
+    end_time=end_time,
 )

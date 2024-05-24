@@ -136,6 +136,7 @@ def run_model(
     g_el=0.625,
     g_it=0.04258,
     g_et=0.236,
+    end_time: float = 5000.0,
     **kwargs,
 ):
     print("Running model")
@@ -249,7 +250,6 @@ def run_model(
 
     t = 0.0
     save_freq = int(1.0 / dt)
-    end_time = 5000.0
     i = 0
     while t < end_time + 1e-12:
         # Make sure to save at the same time steps that is used by Ambit
@@ -322,4 +322,5 @@ run_model(
     dt=dt,
     stim_amp=stim_amp,
     mesh_unit=mesh_unit,
+    end_time=end_time,
 )

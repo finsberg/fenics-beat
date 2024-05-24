@@ -43,6 +43,7 @@ demos = [
    "ldrb",
    "pint",
    "gotranx",
+   "ap_features",
    "numba",
 ]
 pyvista = [

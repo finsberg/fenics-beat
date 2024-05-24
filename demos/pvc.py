@@ -39,12 +39,12 @@ import tentusscher_panfilov_2006_epi_cell
 model = tentusscher_panfilov_2006_epi_cell.__dict__
 
 
-def run(mesh, L, outdir, dx, model, traveling_wave=False):
+def run(mesh, L, outdir, dx, model, traveling_wave=False, end_time=500.0):
 
     D = 0.0005 * ureg("cm**2 / ms")
     Cm = 1.0 * ureg("uF/cm**2")
 
-    parameters = model["init_parameter_values"](stim_start=100.0, stim_period=5000.0)
+    parameters = model["init_parameter_values"](stim_start=100.0, stim_period=1000.0)
 
     dt = 0.01
     nbeats = 50
@@ -67,11 +67,12 @@ def run(mesh, L, outdir, dx, model, traveling_wave=False):
         )
 
         I_s_expr = dolfin.Expression(
-            "time >= start ? (time <= (duration + start) ? amplitude : 0.0) : 0.0",
+            "std::fmod(time,PCL) >= start ? (std::fmod(time,PCL) <= (duration + start) ? amplitude : 0.0) : 0.0",
             time=time,
             start=100.0,
             duration=2.0,
             amplitude=1.0,
+            PCL=1000.0,
             degree=0,
         )
         subdomain_data = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
@@ -147,7 +148,6 @@ def run(mesh, L, outdir, dx, model, traveling_wave=False):
 
     t = 0.0
     save_freq = int(1.0 / dt)
-    end_time = 5000.0
     i = 0
     while t < end_time + 1e-12:
         # Make sure to save at the same time steps that is used by Ambit
@@ -224,5 +224,5 @@ dx = 0.015
 num_cells = 200
 L = num_cells * dx
 mesh = dolfin.IntervalMesh(num_cells, 0, L)
-run(mesh, L, outdir, dx, model, traveling_wave=True)
+run(mesh, L, outdir, dx, model, traveling_wave=False, end_time=500.0)
 post_process(mesh, dx, outdir)
