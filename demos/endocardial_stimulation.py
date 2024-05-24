@@ -5,18 +5,18 @@
 # ---
 # name: torso_electrodes
 # ---
+# Electrode positions
 
-# Displacement ($u$), active tension ($T_a$), voltage ($V$) and calcium ($Ca$)
-# visualized for a specific time point in Paraview.
-# ```
-#
+# +
 from collections import defaultdict
 from pathlib import Path
 import cardiac_geometries
 import numpy as np
+from typing import Any
 import matplotlib.pyplot as plt
 import pint
 import dolfin
+import pyvista
 
 try:
     import ufl_legacy as ufl
@@ -29,12 +29,15 @@ except ImportError:
     tqdm = lambda x: x
 
 import beat
+import beat.viz
 import gotranx
+
+# -
 
 ureg = pint.UnitRegistry()
 
 
-def get_data(datadir="data_endocardial_stimulation2"):
+def get_data(datadir="data_endocardial_stimulation"):
     datadir = Path(datadir)
     msh_file = datadir / "biv_ellipsoid.msh"
     if not msh_file.is_file():
@@ -146,7 +149,7 @@ def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
 
 
 def compute_ecg_recovery():
-    datadir = Path("data_endocardial_stimulation2")
+    datadir = Path("data_endocardial_stimulation")
     xdmffile = datadir / "state.xdmf"
     data = get_data(datadir=datadir)
 
@@ -214,118 +217,137 @@ def compute_ecg_recovery():
     fig.savefig(datadir / "ecg_12_leads.png")
 
 
-def main():
-    here = Path.cwd()
-    datadir = here / "data_endocardial_stimulation"
-    ode = gotranx.load_ode(here / ".." / "odes" / "ORdmm_Land.ode")
-    code = gotranx.cli.gotran2py.get_code(
-        ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
-    )
-    model = {}
-    exec(code, model)
-    data = get_data(datadir=datadir)
-    mesh_unit = "mm"
-    V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
+here = Path.cwd()
+datadir = here / "data_endocardial_stimulation"
+ode = gotranx.load_ode(here / ".." / "odes" / "ORdmm_Land.ode")
+code = gotranx.cli.gotran2py.get_code(
+    ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
+)
+model: dict[str, Any] = {}
+exec(code, model)
+data = get_data(datadir=datadir)
 
-    markers = beat.utils.expand_layer_biv(
-        V=V,
-        mfun=data.ffun,
-        endo_lv_marker=data.markers["ENDO_LV"][0],
-        endo_rv_marker=data.markers["ENDO_RV"][0],
-        epi_marker=data.markers["EPI"][0],
-        endo_size=0.3,
-        epi_size=0.3,
-    )
+# +
+mesh_unit = "mm"
+V = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 
-    with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
-        xdmf.write(markers)
+markers = beat.utils.expand_layer_biv(
+    V=V,
+    mfun=data.ffun,
+    endo_lv_marker=data.markers["ENDO_LV"][0],
+    endo_rv_marker=data.markers["ENDO_RV"][0],
+    epi_marker=data.markers["EPI"][0],
+    endo_size=0.3,
+    epi_size=0.3,
+)
 
-    init_states = {
-        0: model["init_state_values"](),
-        1: model["init_state_values"](),
-        2: model["init_state_values"](),
-    }
-    # endo = 0, epi = 1, M = 2
-    parameters = {
-        0: model["init_parameter_values"](amp=0.0, celltype=2),
-        1: model["init_parameter_values"](amp=0.0, celltype=0),
-        2: model["init_parameter_values"](amp=0.0, celltype=1),
-    }
-    fun = {
-        0: model["forward_generalized_rush_larsen"],
-        1: model["forward_generalized_rush_larsen"],
-        2: model["forward_generalized_rush_larsen"],
-    }
-    v_index = {
-        0: model["state_index"]("v"),
-        1: model["state_index"]("v"),
-        2: model["state_index"]("v"),
-    }
+with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
+    xdmf.write(markers)
 
-    # Surface to volume ratio
-    chi = 140.0 * ureg("mm**-1")
-    # Membrane capacitance
-    C_m = 0.01 * ureg("uF/mm**2")
+pyvista.start_xvfb()
+plotter_markers = pyvista.Plotter()
+topology, cell_types, x = beat.viz.create_vtk_structures(V)
+grid = pyvista.UnstructuredGrid(topology, cell_types, x)
+grid["markers"] = markers.vector().get_local()
+plotter_markers.add_mesh(grid, show_edges=True)
 
-    time = dolfin.Constant(0.0)
-    I_s = define_stimulus(
-        mesh=data.mesh,
-        chi=chi,
-        mesh_unit=mesh_unit,
-        time=time,
-        ffun=data.ffun,
-        markers=data.markers,
-    )
+if not pyvista.OFF_SCREEN:
+    plotter_markers.show()
+else:
+    figure_as_array = plotter_markers.screenshot("biv-geometry.png")
 
-    M = define_conductivity_tensor(chi=chi, f0=data.f0, s0=data.s0, n0=data.n0)
+# +
+init_states = {
+    0: model["init_state_values"](),
+    1: model["init_state_values"](),
+    2: model["init_state_values"](),
+}
+# endo = 0, epi = 1, M = 2
+parameters = {
+    0: model["init_parameter_values"](amp=0.0, celltype=2),
+    1: model["init_parameter_values"](amp=0.0, celltype=0),
+    2: model["init_parameter_values"](amp=0.0, celltype=1),
+}
+fun = {
+    0: model["forward_generalized_rush_larsen"],
+    1: model["forward_generalized_rush_larsen"],
+    2: model["forward_generalized_rush_larsen"],
+}
+v_index = {
+    0: model["state_index"]("v"),
+    1: model["state_index"]("v"),
+    2: model["state_index"]("v"),
+}
 
-    params = {"preconditioner": "sor", "use_custom_preconditioner": False}
-    pde = beat.MonodomainModel(
-        time=time,
-        C_m=C_m.to(f"uF/{mesh_unit}**2").magnitude,
-        mesh=data.mesh,
-        M=M,
-        I_s=I_s,
-        params=params,
-    )
+# Surface to volume ratio
+chi = 140.0 * ureg("mm**-1")
+# Membrane capacitance
+C_m = 0.01 * ureg("uF/mm**2")
 
-    ode = beat.odesolver.DolfinMultiODESolver(
-        v_ode=dolfin.Function(V),
-        v_pde=pde.state,
-        markers=markers,
-        num_states={i: len(s) for i, s in init_states.items()},
-        fun=fun,
-        init_states=init_states,
-        parameters=parameters,
-        v_index=v_index,
-    )
+time = dolfin.Constant(0.0)
+I_s = define_stimulus(
+    mesh=data.mesh,
+    chi=chi,
+    mesh_unit=mesh_unit,
+    time=time,
+    ffun=data.ffun,
+    markers=data.markers,
+)
 
-    T = 1
-    # Change to 500 to simulate the full cardiac cycle
-    # T = 500
-    t = 0.0
-    dt = 0.05
-    solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
+M = define_conductivity_tensor(chi=chi, f0=data.f0, s0=data.s0, n0=data.n0)
 
-    fname = (datadir / "state.xdmf").as_posix()
-    i = 0
-    while t < T + 1e-12:
-        if i % 20 == 0:
-            v = solver.pde.state.vector().get_local()
-            print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
-            with dolfin.XDMFFile(dolfin.MPI.comm_world, fname) as xdmf:
-                xdmf.write_checkpoint(
-                    solver.pde.state,
-                    "V",
-                    float(t),
-                    dolfin.XDMFFile.Encoding.HDF5,
-                    True,
-                )
-        solver.step((t, t + dt))
-        i += 1
-        t += dt
+params = {"preconditioner": "sor", "use_custom_preconditioner": False}
+pde = beat.MonodomainModel(
+    time=time,
+    C_m=C_m.to(f"uF/{mesh_unit}**2").magnitude,
+    mesh=data.mesh,
+    M=M,
+    I_s=I_s,
+    params=params,
+)
 
+ode = beat.odesolver.DolfinMultiODESolver(
+    v_ode=dolfin.Function(V),
+    v_pde=pde.state,
+    markers=markers,
+    num_states={i: len(s) for i, s in init_states.items()},
+    fun=fun,
+    init_states=init_states,
+    parameters=parameters,
+    v_index=v_index,
+)
 
-if __name__ == "__main__":
-    main()
-    compute_ecg_recovery()
+# +
+T = 1
+# Change to 500 to simulate the full cardiac cycle
+# T = 500
+t = 0.0
+dt = 0.05
+solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
+
+fname = (datadir / "state.xdmf").as_posix()
+i = 0
+while t < T + 1e-12:
+    if i % 20 == 0:
+        v = solver.pde.state.vector().get_local()
+        print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
+        with dolfin.XDMFFile(dolfin.MPI.comm_world, fname) as xdmf:
+            xdmf.write_checkpoint(
+                solver.pde.state,
+                "V",
+                float(t),
+                dolfin.XDMFFile.Encoding.HDF5,
+                True,
+            )
+    solver.step((t, t + dt))
+    i += 1
+    t += dt
+# -
+
+compute_ecg_recovery()
+
+# ```{figure} ../docs/_static/ecg_12_leads.png
+# ---
+# name: ecg_12_leads
+# ---
+# Precomputed 12-lead ECG

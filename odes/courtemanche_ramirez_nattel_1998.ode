@@ -1,0 +1,342 @@
+states("intracellular_ion_concentrations",
+Ca_i=ScalarParam(0.0001013, unit="mM", description=""),
+Ca_rel=ScalarParam(1.488, unit="mM", description=""),
+Ca_up=ScalarParam(1.488, unit="mM", description=""),
+K_i=ScalarParam(139, unit="mM", description=""),
+Na_i=ScalarParam(11.17, unit="mM", description="")
+)
+
+states("membrane",
+V=ScalarParam(-81.18, unit="mV", description="")
+)
+
+states("L_type_Ca_channel_d_gate",
+d=ScalarParam(0.0001367, unit="1", description="")
+)
+
+states("L_type_Ca_channel_f_gate",
+f=ScalarParam(0.9996, unit="1", description="")
+)
+
+states("L_type_Ca_channel_f_Ca_gate",
+f_Ca=ScalarParam(0.7755, unit="1", description="")
+)
+
+states("fast_sodium_current_h_gate",
+h=ScalarParam(0.9649, unit="1", description="")
+)
+
+states("fast_sodium_current_j_gate",
+j=ScalarParam(0.9775, unit="1", description="")
+)
+
+states("fast_sodium_current_m_gate",
+m=ScalarParam(0.002908, unit="1", description="")
+)
+
+states("transient_outward_K_current_oa_gate",
+oa=ScalarParam(0.03043, unit="1", description="")
+)
+
+states("transient_outward_K_current_oi_gate",
+oi=ScalarParam(0.9992, unit="1", description="")
+)
+
+states("Ca_release_current_from_JSR_u_gate",
+u=ScalarParam(2.35e-112, unit="1", description="")
+)
+
+states("ultrarapid_delayed_rectifier_K_current_ua_gate",
+ua=ScalarParam(0.004966, unit="1", description="")
+)
+
+states("ultrarapid_delayed_rectifier_K_current_ui_gate",
+ui=ScalarParam(0.9986, unit="1", description="")
+)
+
+states("Ca_release_current_from_JSR_v_gate",
+v=ScalarParam(1, unit="1", description="")
+)
+
+states("Ca_release_current_from_JSR_w_gate",
+w=ScalarParam(0.9992, unit="1", description="")
+)
+
+states("rapid_delayed_rectifier_K_current_xr_gate",
+xr=ScalarParam(3.296e-5, unit="1", description="")
+)
+
+states("slow_delayed_rectifier_K_current_xs_gate",
+xs=ScalarParam(0.01869, unit="1", description="")
+)
+
+parameters("Ca_buffers",
+CMDN_max=ScalarParam(0.05, unit="mM", description=""),
+CSQN_max=ScalarParam(10.0, unit="mM", description=""),
+Km_CMDN=ScalarParam(0.00238, unit="mM", description=""),
+Km_CSQN=ScalarParam(0.8, unit="mM", description=""),
+Km_TRPN=ScalarParam(0.0005, unit="mM", description=""),
+TRPN_max=ScalarParam(0.07, unit="mM", description="")
+)
+
+parameters("standard_ionic_concentrations",
+Ca_o=ScalarParam(1.8, unit="mM", description=""),
+K_o=ScalarParam(5.4, unit="mM", description=""),
+Na_o=ScalarParam(140.0, unit="mM", description="")
+)
+
+parameters("Ca_leak_current_by_the_NSR",
+Ca_up_max=ScalarParam(15.0, unit="mM", description="")
+)
+
+parameters("membrane",
+Cm=ScalarParam(100.0, unit="pF", description=""),
+F=ScalarParam(96.4867, unit="C/mmol", description=""),
+R=ScalarParam(8.3143, unit="J/mol/K", description=""),
+T=ScalarParam(310.0, unit="K", description=""),
+stim_amplitude=ScalarParam(-2000.0, unit="pA", description=""),
+stim_duration=ScalarParam(2.0, unit="ms", description=""),
+stim_end=ScalarParam(50000.0, unit="ms", description=""),
+stim_period=ScalarParam(1000.0, unit="ms", description=""),
+stim_start=ScalarParam(50.0, unit="ms", description="")
+)
+
+parameters("Na_Ca_exchanger_current",
+I_NaCa_max=ScalarParam(1600.0, unit="A/F", description=""),
+K_mCa=ScalarParam(1.38, unit="mM", description=""),
+K_mNa=ScalarParam(87.5, unit="mM", description=""),
+K_sat=ScalarParam(0.1, unit="1", description=""),
+gamma_=ScalarParam(0.35, unit="1", description="")
+)
+
+parameters("Ca_uptake_current_by_the_NSR",
+I_up_max=ScalarParam(0.005, unit="mM/ms", description=""),
+K_up=ScalarParam(0.00092, unit="mM", description="")
+)
+
+parameters("transient_outward_K_current",
+K_Q10=ScalarParam(3.0, unit="1", description=""),
+g_to=ScalarParam(0.1652, unit="mS/uF", description="")
+)
+
+parameters("Ca_release_current_from_JSR",
+K_rel=ScalarParam(30.0, unit="mS/uF", description="")
+)
+
+parameters("sodium_potassium_pump",
+Km_K_o=ScalarParam(1.5, unit="mM", description=""),
+Km_Na_i=ScalarParam(10.0, unit="mM", description=""),
+i_NaK_max=ScalarParam(0.59933874, unit="A/F", description="")
+)
+
+parameters("intracellular_ion_concentrations",
+V_cell=ScalarParam(20100.0, unit="um**3", description="")
+)
+
+parameters("background_currents",
+g_B_Ca=ScalarParam(0.001131, unit="mS/uF", description=""),
+g_B_K=ScalarParam(0.0, unit="mS/uF", description=""),
+g_B_Na=ScalarParam(0.0006744375, unit="mS/uF", description="")
+)
+
+parameters("L_type_Ca_channel",
+g_Ca_L=ScalarParam(0.12375, unit="mS/uF", description="")
+)
+
+parameters("time_independent_potassium_current",
+g_K1=ScalarParam(0.09, unit="mS/uF", description="")
+)
+
+parameters("rapid_delayed_rectifier_K_current",
+g_Kr=ScalarParam(0.029411765, unit="mS/uF", description="")
+)
+
+parameters("slow_delayed_rectifier_K_current",
+g_Ks=ScalarParam(0.12941176, unit="mS/uF", description="")
+)
+
+parameters("fast_sodium_current",
+g_Na=ScalarParam(7.8, unit="mS/uF", description="")
+)
+
+parameters("sarcolemmal_calcium_pump_current",
+i_CaP_max=ScalarParam(0.275, unit="A/F", description="")
+)
+
+parameters("L_type_Ca_channel_f_Ca_gate",
+tau_f_Ca=ScalarParam(2.0, unit="ms", description="")
+)
+
+parameters("transfer_current_from_NSR_to_JSR",
+tau_tr=ScalarParam(180.0, unit="ms", description="")
+)
+
+parameters("Ca_release_current_from_JSR_u_gate",
+tau_u=ScalarParam(8.0, unit="ms", description="")
+)
+
+expressions("intracellular_ion_concentrations")
+B1 = (2.0*i_NaCa - (i_B_Ca + (i_CaP + i_Ca_L)))/((F*(2.0*V_i))) + (V_rel*i_rel + V_up*(-i_up + i_up_leak))/V_i # mM/ms
+B2 = (CMDN_max*Km_CMDN)/((Ca_i + Km_CMDN)**2.0) + ((Km_TRPN*TRPN_max)/((Ca_i + Km_TRPN)**2.0) + 1.0)
+V_i = V_cell*0.68 # um**3
+V_rel = 0.0048*V_cell # um**3
+V_up = 0.0552*V_cell # um**3
+dCa_i_dt = B1/B2 # mM
+dCa_rel_dt = (-i_rel + i_tr)/((CSQN_max*Km_CSQN)/((Ca_rel + Km_CSQN)**2.0) + 1.0)**1.0 # mM
+dCa_up_dt = i_up - (i_up_leak + (V_rel*i_tr)/V_up) # mM
+dK_i_dt = (2.0*i_NaK - (i_B_K + (i_Ks + (i_Kr + (i_Kur + (i_K1 + i_to))))))/((F*V_i)) # mM
+dNa_i_dt = ((-1*3.0)*i_NaK - (i_Na + (i_B_Na + 3.0*i_NaCa)))/((F*V_i)) # mM
+
+expressions("Ca_buffers")
+Ca_CMDN = (CMDN_max*Ca_i)/(Ca_i + Km_CMDN) # mM
+Ca_CSQN = (CSQN_max*Ca_rel)/(Ca_rel + Km_CSQN) # mM
+Ca_TRPN = (Ca_i*TRPN_max)/(Ca_i + Km_TRPN) # mM
+
+expressions("background_currents")
+E_Ca = ((R*T)/((2.0*F)))*log(Ca_o/Ca_i) # mV
+i_B_Ca = (Cm*g_B_Ca)*(-E_Ca + V) # pA
+i_B_K = (Cm*g_B_K)*(-E_K + V) # pA
+i_B_Na = (Cm*g_B_Na)*(-E_Na + V) # pA
+
+expressions("time_independent_potassium_current")
+E_K = ((R*T)/F)*log(K_o/K_i) # mV
+i_K1 = ((Cm*g_K1)*(-E_K + V))/(exp(0.07*(V + 80.0)) + 1.0) # pA
+
+expressions("fast_sodium_current")
+E_Na = ((R*T)/F)*log(Na_o/Na_i) # mV
+i_Na = (j*(h*(m**3.0*(Cm*g_Na))))*(-E_Na + V) # pA
+
+expressions("Ca_release_current_from_JSR")
+Fn = 1000.0*((1.0e-15*V_rel)*i_rel - 1.0e-15/((2.0*F))*(0.5*i_Ca_L - 0.2*i_NaCa))
+i_rel = (w*(v*(K_rel*u**2.0)))*(-Ca_i + Ca_rel) # mM/ms
+
+expressions("fast_sodium_current_h_gate")
+alpha_h = Conditional(Lt(V, -1*40.0), 1.04951082542696e-6*exp(-0.147058823529412*V), 0.0) # mS/uF
+beta_h = Conditional(Lt(V, -1*40.0), 3.56*exp(0.079*V) + 310000.0*exp(0.35*V), 1.0*exp(0.0900900900900901*V)/(0.13*exp(0.0900900900900901*V) + 0.0497581410839387)) # mS/uF
+h_inf = alpha_h/(alpha_h + beta_h)
+tau_h = 1.0/(alpha_h + beta_h) # ms
+dh_dt = (-h + h_inf)/tau_h
+
+expressions("fast_sodium_current_j_gate")
+alpha_j = Conditional(Lt(V, -1*40.0), -(V + 37.78)*(127140.0*exp(0.28831*V) + 3.474e-5)*exp(-0.04391*V)/(50262745825.954*exp(0.311*V) + 1.0), 0.0) # mS/uF
+beta_j = Conditional(Lt(V, -1*40.0), 0.1212*exp(0.12728*V)/(1.0*exp(0.1378*V) + 0.00396086833990426), 0.3*exp(0.0999997465*V)/(1.0*exp(0.1*V) + 0.0407622039783662)) # mS/uF
+j_inf = alpha_j/(alpha_j + beta_j)
+tau_j = 1.0/(alpha_j + beta_j) # ms
+dj_dt = (-j + j_inf)/tau_j
+
+expressions("fast_sodium_current_m_gate")
+alpha_m = Conditional(Eq(V, -47.13), 3.2, (0.32*V + 15.0816)*exp(0.1*V)/(1.0*exp(0.1*V) - 0.00897780373069724)) # mS/uF
+beta_m = 0.08*exp((-V)/11.0) # mS/uF
+m_inf = alpha_m/(alpha_m + beta_m)
+tau_m = 1.0/(alpha_m + beta_m) # ms
+dm_dt = (-m + m_inf)/tau_m
+
+expressions("transient_outward_K_current_oa_gate")
+alpha_oa = 0.65/(exp((V - (-1)*10.0)/((-1*8.5))) + exp(((V - (-1)*10.0) - 1*40.0)/((-1*59.0))))**1.0 # mS/uF
+beta_oa = 0.65/(exp(((V - (-1)*10.0) + 72.0)/17.0) + 2.5)**1.0 # mS/uF
+oa_infinity = (exp(((V - (-1)*10.0) + 10.47)/((-1*17.54))) + 1.0)**(-1*1.0)
+tau_oa = 1/(K_Q10*(alpha_oa + beta_oa)**1.0) # ms
+doa_dt = (-oa + oa_infinity)/tau_oa
+
+expressions("transient_outward_K_current_oi_gate")
+alpha_oi = (1.0*exp(((V - (-1)*10.0) + 103.7)/10.95) + 18.53)**(-1*1.0) # mS/uF
+beta_oi = (1.0*exp(((V - (-1)*10.0) - 1*8.74)/((-1*7.44))) + 35.56)**(-1*1.0) # mS/uF
+oi_infinity = (exp(((V - (-1)*10.0) + 33.1)/5.3) + 1.0)**(-1*1.0)
+tau_oi = 1/(K_Q10*(alpha_oi + beta_oi)**1.0) # ms
+doi_dt = (-oi + oi_infinity)/tau_oi
+
+expressions("ultrarapid_delayed_rectifier_K_current_ua_gate")
+alpha_ua = 0.65/(exp((V - (-1)*10.0)/((-1*8.5))) + exp(((V - (-1)*10.0) - 1*40.0)/((-1*59.0))))**1.0 # mS/uF
+beta_ua = 0.65/(exp(((V - (-1)*10.0) + 72.0)/17.0) + 2.5)**1.0 # mS/uF
+tau_ua = 1/(K_Q10*(alpha_ua + beta_ua)**1.0) # ms
+ua_infinity = (exp(((V - (-1)*10.0) + 20.3)/((-1*9.6))) + 1.0)**(-1*1.0)
+dua_dt = (-ua + ua_infinity)/tau_ua
+
+expressions("ultrarapid_delayed_rectifier_K_current_ui_gate")
+alpha_ui = (1.0*exp(((V - (-1)*10.0) - 1*195.0)/((-1*28.0))) + 21.0)**(-1*1.0) # mS/uF
+beta_ui = 1.0/exp(((V - (-1)*10.0) - 1*168.0)/((-1*16.0))) # mS/uF
+tau_ui = 1/(K_Q10*(alpha_ui + beta_ui)**1.0) # ms
+ui_infinity = (exp(((V - (-1)*10.0) - 1*109.45)/27.48) + 1.0)**(-1*1.0)
+dui_dt = (-ui + ui_infinity)/tau_ui
+
+expressions("rapid_delayed_rectifier_K_current_xr_gate")
+alpha_xr = Conditional(And(Gt(V, -14.1000000001), Lt(V, -14.0999999999)), 0.0015, (0.0003*V + 0.00423)*exp(0.2*V)/(1.0*exp(0.2*V) - 0.0596059427089393)) # mS/uF
+beta_xr = Conditional(And(Gt(V, 3.3327999999), Lt(V, 3.3328000001)), 0.00037836118, (7.3898e-5*V - 0.0002462872544)/(0.521801810981684*exp(0.195171458125964*V) - 1.0)) # mS/uF
+tau_xr = (alpha_xr + beta_xr)**(-1*1.0) # ms
+xr_infinity = (exp((V + 14.1)/((-1*6.5))) + 1.0)**(-1*1.0)
+dxr_dt = (-xr + xr_infinity)/tau_xr
+
+expressions("slow_delayed_rectifier_K_current_xs_gate")
+alpha_xs = Conditional(And(Ge(V, 19.8999999999), Le(V, 19.9000000001)), 0.00068, (4.0e-5*V - 0.000796)*exp(0.0588235294117647*V)/(1.0*exp(0.0588235294117647*V) - 3.22388848586336)) # mS/uF
+beta_xs = Conditional(And(Ge(V, 19.8999999999), Le(V, 19.9000000001)), 0.000315, (3.5e-5*V - 0.0006965)/(0.109578826597426*exp(0.111111111111111*V) - 1.0)) # mS/uF
+tau_xs = 0.5/(alpha_xs + beta_xs)**1.0 # ms
+xs_infinity = (exp((V - 1*19.9)/((-1*12.7))) + 1.0)**(-1*0.5)
+dxs_dt = (-xs + xs_infinity)/tau_xs
+
+expressions("L_type_Ca_channel_d_gate")
+d_infinity = (exp((V + 10.0)/((-1*8.0))) + 1.0)**(-1*1.0)
+tau_d = Conditional(And(Gt(V, -10.0000000001), Lt(V, -9.9999999999)), 4.579*exp(0.16025641025641*V)/(1.0*exp(0.16025641025641*V) + 0.201379497744924), (28.5714285714286*exp(0.16025641025641*V) - 5.75369993556925)/((V + 10.0)*(1.0*exp(0.16025641025641*V) + 0.201379497744924))) # ms
+dd_dt = (-d + d_infinity)/tau_d
+
+expressions("L_type_Ca_channel_f_Ca_gate")
+f_Ca_infinity = (Ca_i/0.00035 + 1.0)**(-1*1.0)
+df_Ca_dt = (-f_Ca + f_Ca_infinity)/tau_f_Ca
+
+expressions("sodium_potassium_pump")
+f_NaK = ((0.0365*sigma)*exp(((-F)*V)/((R*T))) + (0.1245*exp((V*((-1*0.1)*F))/((R*T))) + 1.0))**(-1*1.0)
+i_NaK = (K_o*(((f_NaK*(Cm*i_NaK_max))*1.0)/((Km_Na_i/Na_i)**1.5 + 1.0)))/(K_o + Km_K_o) # pA
+sigma = (1.0/7.0)*(exp(Na_o/67.3) - 1*1.0)
+
+expressions("L_type_Ca_channel_f_gate")
+f_infinity = exp((-(V + 28.0))/6.9)/(exp((-(V + 28.0))/6.9) + 1.0)
+tau_f = 9.0/(0.0197*exp((-0.0337**2.0)*(V + 10.0)**2.0) + 0.02)**1.0 # ms
+df_dt = (-f + f_infinity)/tau_f
+
+expressions("ultrarapid_delayed_rectifier_K_current")
+g_Kur = 0.005 + 0.05/(exp((V - 1*15.0)/((-1*13.0))) + 1.0) # mS/uF
+i_Kur = (ui*(ua**3.0*(Cm*g_Kur)))*(-E_K + V) # pA
+
+expressions("sarcolemmal_calcium_pump_current")
+i_CaP = (Ca_i*(Cm*i_CaP_max))/(Ca_i + 0.0005) # pA
+
+expressions("L_type_Ca_channel")
+i_Ca_L = (f_Ca*(f*(d*(Cm*g_Ca_L))))*(V - 1*65.0) # pA
+
+expressions("rapid_delayed_rectifier_K_current")
+i_Kr = ((xr*(Cm*g_Kr))*(-E_K + V))/(exp((V + 15.0)/22.4) + 1.0) # pA
+
+expressions("slow_delayed_rectifier_K_current")
+i_Ks = (xs**2.0*(Cm*g_Ks))*(-E_K + V) # pA
+
+expressions("Na_Ca_exchanger_current")
+i_NaCa = ((Cm*I_NaCa_max)*(-Ca_i*Na_o**3.0*exp((V*(F*(gamma_ - 1*1.0)))/((R*T))) + Ca_o*(Na_i**3.0*exp((V*(F*gamma_))/((R*T))))))/((((Ca_o + K_mCa)*(K_mNa**3.0 + Na_o**3.0))*(K_sat*exp((F*(V*(gamma_ - 1*1.0)))/((R*T))) + 1.0))) # pA
+
+expressions("membrane")
+i_st = Conditional(And(Ge(stim_end, time), Le(stim_start, time), Ge(stim_duration, -stim_period*floor(-(stim_start - time)/stim_period) - stim_start + time)), stim_amplitude, 0.0) # pA
+dV_dt = (-(i_st + (i_Ca_L + (i_NaCa + (i_CaP + (i_NaK + (i_B_Ca + (i_B_Na + (i_Ks + (i_Kr + (i_Kur + (i_to + (i_K1 + i_Na)))))))))))))/Cm # mV
+
+expressions("transient_outward_K_current")
+i_to = (oi*(oa**3.0*(Cm*g_to)))*(-E_K + V) # pA
+
+expressions("transfer_current_from_NSR_to_JSR")
+i_tr = (-Ca_rel + Ca_up)/tau_tr # mM/ms
+
+expressions("Ca_uptake_current_by_the_NSR")
+i_up = I_up_max/(1.0 + K_up/Ca_i) # mM/ms
+
+expressions("Ca_leak_current_by_the_NSR")
+i_up_leak = (Ca_up*I_up_max)/Ca_up_max # mM/ms
+
+expressions("Ca_release_current_from_JSR_v_gate")
+tau_v = 1.91 + 2.09/(exp((-(Fn - 1*3.4175e-13))/1.367e-15) + 1.0)**1.0 # ms
+v_infinity = 1.0 - 1/(exp((-(Fn - 1*6.835e-14))/1.367e-15) + 1.0)**1.0
+dv_dt = (-v + v_infinity)/tau_v
+
+expressions("Ca_release_current_from_JSR_w_gate")
+tau_w = Conditional(And(Gt(V, 7.8999999999), Lt(V, 7.9000000001)), 0.923076923076923, (6.0*exp(0.2*V) - 29.1297348674246)/((V - 7.9)*(1.0*exp(0.2*V) + 1.45648674337123))) # ms
+w_infinity = 1.0 - 1/(exp((-(V - 1*40.0))/17.0) + 1.0)**1.0
+dw_dt = (-w + w_infinity)/tau_w
+
+expressions("Ca_release_current_from_JSR_u_gate")
+u_infinity = (exp((-(Fn - 1*3.4175e-13))/1.367e-15) + 1.0)**(-1*1.0)
+du_dt = (-u + u_infinity)/tau_u

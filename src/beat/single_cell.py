@@ -50,6 +50,7 @@ def solve_with_save(fun, nbeats, times, y, p, dt, save_freq, track_values, track
                     track_values[k, i] = y[index]
                     i += 1
                 k += 1
+
             y[:] = fun(states=y, t=t, parameters=p, dt=dt)
             j += 1
     return y, track_values
@@ -120,10 +121,13 @@ def get_steady_state(
         "p": parameters,
         "dt": dt,
     }
+
     if track_indices is not None:
+        save_freq = int(np.ceil(save_every_ms / dt))
+        M = int(np.ceil(len(times) / save_freq) * nbeats)
         N = len(track_indices)
-        save_freq = round(save_every_ms / dt)
-        track_values = np.zeros((nbeats * len(times) // save_freq, N))
+        track_values = np.zeros((M, N))
+
         indices = np.array(track_indices).astype(np.int32)
         kwargs.update(
             {
@@ -136,13 +140,14 @@ def get_steady_state(
         np.save(outdir / f"tracked_values_{hash_input}.npy", track_values)
         fig, ax = plt.subplots(N, 2, sharex="col", sharey="row")
         for i in range(N):
-            ax[i, 0].plot(np.arange(0, BCL * nbeats, save_every_ms), track_values[:, i])
+            ax[i, 0].plot(np.linspace(0, BCL * nbeats, M), track_values[:, i])
             ax[i, 1].plot(
-                times[::save_freq][-round(BCL // save_every_ms) :],
-                track_values[-round(BCL // save_every_ms) :, i],
+                times[::save_freq][-int(np.ceil(BCL // save_every_ms)) :],
+                track_values[-int(np.ceil(BCL // save_every_ms)) :, i],
             )
         fig.tight_layout()
         fig.savefig(outdir / f"tracked_values_{hash_input}.png")
+        plt.close()
     else:
         y = solve_without_save(**kwargs)
 

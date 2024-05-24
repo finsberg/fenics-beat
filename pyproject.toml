@@ -43,15 +43,15 @@ demos = [
    "ldrb",
    "pint",
    "gotranx",
+   "ap_features",
    "numba",
+   "jupyter",
+   "pyvista[all]>=0.43.0"
 ]
-pyvista = [
-    "pyvista[trame]",
-]
-
 docs = [
    "jupyter-book",
    "jupytext",
+   "jupyterlab_myst",
    "fenics-beat[demos]"
 ]
 all = [
