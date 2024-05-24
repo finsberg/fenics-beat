@@ -45,11 +45,8 @@ demos = [
    "gotranx",
    "ap_features",
    "numba",
+   "pyvista[trame]",
 ]
-pyvista = [
-    "pyvista[trame]",
-]
-
 docs = [
    "jupyter-book",
    "jupytext",
