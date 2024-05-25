@@ -11,19 +11,18 @@
 from pathlib import Path
 import json
 
+import beat.conductivities
 import dolfin
 import numpy as np
 import numpy.typing as npt
 import pyvista
-import pint
+import ufl_legacy as ufl
 import gotranx
 import matplotlib.pyplot as plt
 
 
 import beat
 import beat.viz
-
-ureg = pint.UnitRegistry()
 
 
 def setup_initial_conditions() -> npt.NDArray:
@@ -64,72 +63,41 @@ def setup_geometry(Lx, Ly, Lz, dx):
     return mesh
 
 
-def define_stimulus(mesh, chi, C_m, time, mesh_unit):
-    S1_marker = 1
-    # L = 1.5
-    L = 1.5 * ureg("mm").to(mesh_unit).magnitude
-    S1_subdomain = dolfin.CompiledSubDomain(
-        "x[0] <= L + DOLFIN_EPS && x[1] <= L + DOLFIN_EPS && x[2] <= L + DOLFIN_EPS",
-        L=L,
-    )
-    S1_markers = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim())
-    S1_subdomain.mark(S1_markers, S1_marker)
+# def define_conductivity_tensor(chi, C_m, mesh_unit):
+#     # Conductivities as defined by page 4339 of Niederer benchmark
+#     sigma_il = 0.17 * beat.units.ureg("S/m")
+#     sigma_it = 0.019 * beat.units.ureg("S/m")
+#     sigma_el = 0.62 * beat.units.ureg("S/m")
+#     sigma_et = 0.24 * beat.units.ureg("S/m")
 
-    # Define stimulation (NB: region of interest carried by the mesh
-    # and assumptions in cbcbeat)
-    duration = 2.0
-    A = 50000.0 * ureg("uA / cm**3")
+#     # Compute monodomain approximation by taking harmonic mean in each
+#     # direction of intracellular and extracellular part
+#     def harmonic_mean(a, b):
+#         return a * b / (a + b)
 
-    amplitude = (A / (chi * C_m)).to("mV / ms").magnitude
+#     sigma_l = harmonic_mean(sigma_il, sigma_el)
+#     sigma_t = harmonic_mean(sigma_it, sigma_et)
 
-    I_s = dolfin.Expression(
-        "time >= start ? (time <= (duration + start) ? amplitude : 0.0) : 0.0",
-        time=time,
-        start=0.0,
-        duration=duration,
-        amplitude=amplitude,
-        degree=0,
-    )
+#     # Scale conducitivites by 1/(C_m * chi)
+#     s_l = (sigma_l / (C_m * chi)).to(f"{mesh_unit}**2/ms").magnitude
+#     s_t = (sigma_t / (C_m * chi)).to(f"{mesh_unit}**2/ms").magnitude
 
-    dx = dolfin.Measure("dx", domain=mesh, subdomain_data=S1_markers)(S1_marker)
-    return beat.base_model.Stimulus(dz=dx, expr=I_s)
+#     # Define conductivity tensor
+#     M = dolfin.as_tensor(((s_l, 0, 0), (0, s_t, 0), (0, 0, s_t)))
 
-
-def define_conductivity_tensor(chi, C_m, mesh_unit):
-    # Conductivities as defined by page 4339 of Niederer benchmark
-    sigma_il = 0.17 * ureg("S/m")
-    sigma_it = 0.019 * ureg("S/m")
-    sigma_el = 0.62 * ureg("S/m")
-    sigma_et = 0.24 * ureg("S/m")
-
-    # Compute monodomain approximation by taking harmonic mean in each
-    # direction of intracellular and extracellular part
-    def harmonic_mean(a, b):
-        return a * b / (a + b)
-
-    sigma_l = harmonic_mean(sigma_il, sigma_el)
-    sigma_t = harmonic_mean(sigma_it, sigma_et)
-
-    # Scale conducitivites by 1/(C_m * chi)
-    s_l = (sigma_l / (C_m * chi)).to(f"{mesh_unit}**2/ms").magnitude
-    s_t = (sigma_t / (C_m * chi)).to(f"{mesh_unit}**2/ms").magnitude
-
-    # Define conductivity tensor
-    M = dolfin.as_tensor(((s_l, 0, 0), (0, s_t, 0), (0, 0, s_t)))
-
-    return M
+#     return M
 
 
 # +
-dx=0.5
-dt=0.05
-T=200.0
+dx = 0.5
+dt = 0.05
+T = 200.0
 
 here = Path.cwd()
 
 model_path = Path("tentusscher_panfilov_2006_epi_cell.py")
 if not model_path.is_file():
-    here = Path(__file__).parent
+    here = Path.cwd()
     ode = gotranx.load_ode(
         here
         / ".."
@@ -150,10 +118,10 @@ parameters = model.init_parameter_values(stim_amplitude=0.0)
 
 mesh_unit = "mm"
 
-Lx = 20.0 * ureg("mm").to(mesh_unit).magnitude
-Ly = 7 * ureg("mm").to(mesh_unit).magnitude
-Lz = 3 * ureg("mm").to(mesh_unit).magnitude
-dx_mm = dx * ureg("mm").to(mesh_unit).magnitude
+Lx = 20.0 * beat.units.ureg("mm").to(mesh_unit).magnitude
+Ly = 7 * beat.units.ureg("mm").to(mesh_unit).magnitude
+Lz = 3 * beat.units.ureg("mm").to(mesh_unit).magnitude
+dx_mm = dx * beat.units.ureg("mm").to(mesh_unit).magnitude
 
 mesh = setup_geometry(
     Lx=Lx,
@@ -172,22 +140,54 @@ plotter.add_mesh(grid, show_edges=True)
 if not pyvista.OFF_SCREEN:
     plotter.show()
 else:
-    figure_as_array = plotter.screenshot("niederer-benchmark-geomeetry.png")
+    figure_as_array = plotter.screenshot("niederer-benchmark-geometry.png")
 
 # +
 # Surface to volume ratio
-chi = 1400 * ureg("cm**-1")
+chi = 1400 * beat.units.ureg("cm**-1")
 # # Membrane capacitance
-C_m = 1.0 * ureg("uF/cm**2")
+C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
 time = dolfin.Constant(0.0)
-I_s = define_stimulus(mesh=mesh, chi=chi, C_m=C_m, time=time, mesh_unit=mesh_unit)
+L = 1.5 * beat.units.ureg("mm").to(mesh_unit).magnitude
+S1_marker = 1
+S1_subdomain = dolfin.CompiledSubDomain(
+    "x[0] <= L + DOLFIN_EPS && x[1] <= L + DOLFIN_EPS && x[2] <= L + DOLFIN_EPS",
+    L=L,
+)
+S1_markers = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim())
+S1_subdomain.mark(S1_markers, S1_marker)
 
-M = define_conductivity_tensor(chi, C_m, mesh_unit=mesh_unit)
+I_s = beat.stimulation.define_stimulus(
+    mesh=mesh,
+    chi=chi,
+    time=time,
+    subdomain_data=S1_markers,
+    marker=S1_marker,
+    mesh_unit=mesh_unit,
+    amplitude=50_000.0,
+)
+
+
+M = beat.conductivities.define_conductivity_tensor(
+    chi,
+    f0=ufl.as_vector([1, 0, 0]),
+    g_il=0.17,
+    g_it=0.019,
+    g_el=0.62,
+    g_et=0.24,
+)
 
 params = {"preconditioner": "sor", "use_custom_preconditioner": False}
 
-pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, params=params)
+pde = beat.MonodomainModel(
+    time=time,
+    mesh=mesh,
+    M=M,
+    I_s=I_s,
+    params=params,
+    C_m=C_m.to(f"uF/{mesh_unit}**2").magnitude,
+)
 ode = beat.odesolver.DolfinODESolver(
     v_ode=dolfin.Function(ode_space),
     v_pde=pde.state,
@@ -200,7 +200,7 @@ ode = beat.odesolver.DolfinODESolver(
 
 # +
 solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode, theta=0.0)
-output_dir = Path("output-niederer-benchmark")
+output_dir = Path("results-niederer-benchmark")
 output_dir.mkdir(exist_ok=True)
 filename = output_dir / f"results-{dt}-{dx}.xdmf"
 filename.unlink(missing_ok=True)
@@ -252,7 +252,7 @@ gif_file = Path("niederer_benchmark.gif")
 gif_file.unlink(missing_ok=True)
 plotter_voltage.open_gif(gif_file.as_posix())
 
-T = 10
+T = 15
 # T = 100  # Change to 100 to reproduce Niederer benchmark
 t = 0.0
 while t < T + 1e-12 and any(at < 0.0 for at in activation_times.values()):

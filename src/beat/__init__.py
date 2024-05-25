@@ -7,10 +7,17 @@ from . import (
     odesolver,
     ecg,
     utils,
+    units,
+    stimulation,
+    postprocess,
+    conductivities,
+    geometry,
+    single_cell,
 )
 
 from .monodomain_model import MonodomainModel
 from .bidomain_model import BidomainModel
+from .geometry import Geometry
 from .monodomain_solver import MonodomainSplittingSolver
 
 
@@ -26,4 +33,11 @@ __all__ = [
     "MonodomainSplittingSolver",
     "ecg",
     "utils",
+    "units",
+    "stimulation",
+    "postprocess",
+    "conductivities",
+    "geometry",
+    "Geometry",
+    "single_cell",
 ]

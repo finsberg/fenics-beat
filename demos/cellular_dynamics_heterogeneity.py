@@ -6,22 +6,12 @@ from typing import NamedTuple
 from pathlib import Path
 import beat.single_cell
 import dolfin
-import matplotlib.pyplot as plt
 import numpy as np
-import pint
+
 import gotranx
 import beat
 import pyvista
 import beat.viz
-from beat.single_cell import get_steady_state
-
-try:
-    import ufl_legacy as ufl
-except ImportError:
-    import ufl
-
-
-ureg = pint.UnitRegistry()
 
 
 class Geometry(NamedTuple):
@@ -30,75 +20,6 @@ class Geometry(NamedTuple):
     markers: dict[str, tuple[int, int]]
     f0: dolfin.Constant
     s0: dolfin.Constant
-
-
-def default_conductivities(name="Niederer") -> dict[str, float]:
-    if name == "Niederer":
-        return {
-            "g_il": 0.17,
-            "g_it": 0.019,
-            "g_el": 0.62,
-            "g_et": 0.24,
-        }
-    elif name == "Bishop":
-        return {
-            "g_il": 0.34,
-            "g_it": 0.060,
-            "g_el": 0.12,
-            "g_et": 0.08,
-        }
-    elif name == "Potse":
-        return {
-            "g_il": 3.0,
-            "g_it": 0.3,
-            "g_el": 3.0,
-            "g_et": 1.2,
-        }
-    else:
-        raise ValueError(f"Unknown conductivity tensor {name}")
-
-
-def define_conductivity_tensor(
-    chi,
-    f0,
-    s0,
-    g_il=0.17,
-    g_it=0.019,
-    g_el=0.62,
-    g_et=0.24,
-):
-    # Conductivities as defined by page 4339 of Niederer benchmark
-    sigma_il = g_il * ureg("S/m")
-    sigma_it = g_it * ureg("S/m")
-    sigma_el = g_el * ureg("S/m")
-    sigma_et = g_et * ureg("S/m")
-
-    # Compute monodomain approximation by taking harmonic mean in each
-    # direction of intracellular and extracellular part
-    def harmonic_mean(a, b):
-        return a * b / (a + b)
-
-    sigma_l = harmonic_mean(sigma_il, sigma_el)
-    sigma_t = harmonic_mean(sigma_it, sigma_et)
-
-    # Scale conducitivites by 1/(chi)
-    s_l = (sigma_l / chi).to("uA/mV").magnitude
-    s_t = (sigma_t / chi).to("uA/mV").magnitude
-
-    # Define conductivity tensor
-
-    A = dolfin.as_matrix(
-        [
-            [f0[0], s0[0]],
-            [f0[1], s0[1]],
-        ],
-    )
-
-    M_star = ufl.diag(dolfin.as_vector([s_l, s_t]))
-
-    M = A * M_star * A.T
-
-    return M
 
 
 def setup_geometry(dx, Lx, Ly):
@@ -112,25 +33,6 @@ def setup_geometry(dx, Lx, Ly):
     )
 
     return mesh
-
-
-def load_timesteps_from_xdmf(xdmffile):
-    import xml.etree.ElementTree as ET
-
-    times = {}
-    i = 0
-    tree = ET.parse(xdmffile)
-    for elem in tree.iter():
-        if elem.tag == "Time":
-            times[i] = float(elem.get("Value"))
-            i += 1
-
-    return times
-
-
-def delete_old_file(file: str):
-    Path(file).unlink(missing_ok=True)
-    Path(file).with_suffix(".h5").unlink(missing_ok=True)
 
 
 def run_model(
@@ -169,10 +71,10 @@ def run_model(
     model = mahajan.__dict__
 
     # Surface to volume ratio
-    chi = 1400.0 * ureg("cm**-1")
+    chi = 1400.0 * beat.units.ureg("cm**-1")
 
     # Membrane capacitance
-    C_m = 1.0 * ureg("uF/cm**2")
+    C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
     with dolfin.XDMFFile((resultsdir / "markers.xdmf").as_posix()) as xdmf:
         xdmf.write(markers)
@@ -209,10 +111,9 @@ def run_model(
     g_Kr_func.vector()[:] *= g_Kr_value
     parameters_ode[g_Kr_index, :] = g_Kr_func.vector().get_local()
 
-    M = define_conductivity_tensor(
+    M = beat.conductivities.define_conductivity_tensor(
         chi=chi,
         f0=data.f0,
-        s0=data.s0,
         g_il=g_il,
         g_it=g_it,
         g_el=g_el,
@@ -231,7 +132,7 @@ def run_model(
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
     fname = (resultsdir / "V.xdmf").as_posix()
-    delete_old_file(fname)
+    beat.postprocess.delete_old_file(fname)
 
     def save(t):
         v = solver.pde.state.vector().get_local()
@@ -263,7 +164,7 @@ def run_model(
 
 
 def get_microstructure(
-    dim: int, transverse: bool = False
+    transverse: bool = False,
 ) -> tuple[dolfin.Constant, dolfin.Constant]:
 
     if transverse:
@@ -289,8 +190,8 @@ mesh_unit = "cm"
 # Load mesh
 mesh_unit = mesh_unit
 
-dx = 0.05 * ureg("cm").to(mesh_unit).magnitude
-L = 1.0 * ureg("cm").to(mesh_unit).magnitude
+dx = 0.05 * beat.units.ureg("cm").to(mesh_unit).magnitude
+L = 1.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
 mesh = setup_geometry(Lx=L, Ly=L, dx=dx)
 
 ffun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
@@ -345,7 +246,7 @@ g_el = 0.625
 g_it = 0.04258
 g_et = 0.236
 
-f0, s0 = get_microstructure(dimension, transverse)
+f0, s0 = get_microstructure(transverse)
 
 markers = {"ENDO": (marker, 2)}
 

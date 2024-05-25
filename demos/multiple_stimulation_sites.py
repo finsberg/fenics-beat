@@ -1,26 +1,16 @@
 # # Multiple stimulation sites
 #
 
-from typing import NamedTuple
 from pathlib import Path
-import beat.single_cell
+
 import dolfin
 import matplotlib.pyplot as plt
 import numpy as np
-import pint
+
 import gotranx
 import beat
 import pyvista
 import beat.viz
-from beat.single_cell import get_steady_state
-
-try:
-    import ufl_legacy as ufl
-except ImportError:
-    import ufl
-
-
-ureg = pint.UnitRegistry()
 
 
 class StimulationProtocol(dolfin.UserExpression):
@@ -45,55 +35,6 @@ class StimulationProtocol(dolfin.UserExpression):
             value[0] = 0.0
 
 
-class Geometry(NamedTuple):
-    mesh: dolfin.Mesh
-    f0: dolfin.Constant
-    s0: dolfin.Constant
-
-
-def define_conductivity_tensor(
-    chi,
-    f0,
-    s0,
-    g_il=0.17,
-    g_it=0.019,
-    g_el=0.62,
-    g_et=0.24,
-):
-    # Conductivities as defined by page 4339 of Niederer benchmark
-    sigma_il = g_il * ureg("S/m")
-    sigma_it = g_it * ureg("S/m")
-    sigma_el = g_el * ureg("S/m")
-    sigma_et = g_et * ureg("S/m")
-
-    # Compute monodomain approximation by taking harmonic mean in each
-    # direction of intracellular and extracellular part
-    def harmonic_mean(a, b):
-        return a * b / (a + b)
-
-    sigma_l = harmonic_mean(sigma_il, sigma_el)
-    sigma_t = harmonic_mean(sigma_it, sigma_et)
-
-    # Scale conducitivites by 1/(chi)
-    s_l = (sigma_l / chi).to("uA/mV").magnitude
-    s_t = (sigma_t / chi).to("uA/mV").magnitude
-
-    # Define conductivity tensor
-
-    A = dolfin.as_matrix(
-        [
-            [f0[0], s0[0]],
-            [f0[1], s0[1]],
-        ],
-    )
-
-    M_star = ufl.diag(dolfin.as_vector([s_l, s_t]))
-
-    M = A * M_star * A.T
-
-    return M
-
-
 def setup_geometry(dx, Lx, Ly):
 
     mesh = dolfin.RectangleMesh(
@@ -107,27 +48,8 @@ def setup_geometry(dx, Lx, Ly):
     return mesh
 
 
-def load_timesteps_from_xdmf(xdmffile):
-    import xml.etree.ElementTree as ET
-
-    times = {}
-    i = 0
-    tree = ET.parse(xdmffile)
-    for elem in tree.iter():
-        if elem.tag == "Time":
-            times[i] = float(elem.get("Value"))
-            i += 1
-
-    return times
-
-
-def delete_old_file(file: str):
-    Path(file).unlink(missing_ok=True)
-    Path(file).with_suffix(".h5").unlink(missing_ok=True)
-
-
 def run_model(
-    data: Geometry,
+    data: beat.Geometry,
     resultsdir: Path,
     num_beats: int = 5,
     dt: float = 0.05,
@@ -157,10 +79,10 @@ def run_model(
     model = courtemanche_ramirez_nattel_1998.__dict__
 
     # Surface to volume ratio
-    chi = 1400.0 * ureg("cm**-1")
+    chi = 1400.0 * beat.units.ureg("cm**-1")
 
     # Membrane capacitance
-    C_m = 1.0 * ureg("uF/cm**2")
+    C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
     fun = model["forward_generalized_rush_larsen"]
 
@@ -175,10 +97,9 @@ def run_model(
     parameters_ode = np.zeros((len(parameters), V_ode.dim()))
     parameters_ode.T[:] = parameters
 
-    M = define_conductivity_tensor(
+    M = beat.conductivities.define_conductivity_tensor(
         chi=chi,
         f0=data.f0,
-        s0=data.s0,
         g_il=g_il,
         g_it=g_it,
         g_el=g_el,
@@ -197,7 +118,7 @@ def run_model(
     solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
     fname = (resultsdir / "V.xdmf").as_posix()
-    delete_old_file(fname)
+    beat.postprocess.delete_old_file(fname)
 
     # Pick 12 uniformly distributed points on the mesh
     points = np.array(
@@ -263,7 +184,7 @@ def run_model(
 
 
 def get_microstructure(
-    dim: int, transverse: bool = False
+    transverse: bool = False,
 ) -> tuple[dolfin.Constant, dolfin.Constant]:
 
     if transverse:
@@ -278,7 +199,6 @@ def get_microstructure(
 
 results_folder = Path("results-multiple-stimulation-sites")
 save_every_ms = 1.0
-dimension = 2
 transverse = False
 end_time = 20.0
 dt = 0.05
@@ -289,8 +209,8 @@ mesh_unit = "cm"
 # Load mesh
 mesh_unit = mesh_unit
 
-dx = 0.05 * ureg("cm").to(mesh_unit).magnitude
-L = 1.0 * ureg("cm").to(mesh_unit).magnitude
+dx = 0.05 * beat.units.ureg("cm").to(mesh_unit).magnitude
+L = 1.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
 mesh = setup_geometry(Lx=L, Ly=L, dx=dx)
 
 
@@ -302,13 +222,12 @@ g_el = 0.625
 g_it = 0.04258
 g_et = 0.236
 
-f0, s0 = get_microstructure(dimension, transverse)
+f0, s0 = get_microstructure(transverse)
 
 
-data = Geometry(
+data = beat.Geometry(
     mesh=mesh,
     f0=f0,
-    s0=s0,
 )
 save_freq = round(save_every_ms / dt)
 run_model(

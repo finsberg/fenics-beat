@@ -14,6 +14,8 @@ except ImportError:
     from ufl.core.expr import Expr
 
 
+from .stimulation import Stimulus
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,11 +27,6 @@ class Status(str, Enum):
 class Results(NamedTuple):
     state: dolfin.Function
     status: Status
-
-
-class Stimulus(NamedTuple):
-    dz: dolfin.Measure
-    expr: dolfin.Expression
 
 
 class BaseModel(abc.ABC):
