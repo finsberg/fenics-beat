@@ -34,17 +34,19 @@ def post_process(mesh, dx, outdir):
                     traces[i, j] = V(cell * dx)
 
                 if V(p1) > 0.0 and tp1 == np.inf:
-                    tp1 = ti * beat.units.ureg("ms")
+                    tp1 = ti
                 if V(p2) > 0.0 and tp2 == np.inf:
-                    tp2 = ti * beat.units.ureg("ms")
+                    tp2 = ti
 
         np.save(outdir / "traces.npy", traces)
         np.save(outdir / "times.npy", t)
-        (outdir / "cv.text").write_text(f"{tp1.magnitude} {tp2.magnitude}")
+        (outdir / "cv.text").write_text(f"{tp1} {tp2}")
 
     traces = np.load(outdir / "traces.npy")
     t = np.load(outdir / "times.npy")
     tp1, tp2 = np.loadtxt(outdir / "cv.text")
+    tp1 *= beat.units.ureg("ms")
+    tp2 *= beat.units.ureg("ms")
 
     if not np.isclose(tp1, tp2):
         cv = dp / (tp2 - tp1)
