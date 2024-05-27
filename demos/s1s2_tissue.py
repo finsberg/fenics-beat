@@ -222,27 +222,30 @@ def save(t):
     )
 
 
-t = 0.0
 save_freq = int(1.0 / dt)
-i = 0
 num_beats = 5
 
 CIs = np.arange(CI1, CI0 - CIincr, -CIincr)
 
-for CI_value in CIs:
-    CI.assign(CI_value)
-    for _ in range(num_beats):
-        for ti in np.arange(0, CI_value, dt):
-            if i % save_freq == 0:
-                save(t)
 
-            solver.step((t, t + dt))
-            i += 1
-            t += dt
+def run():
+    t = 0.0
+    i = 0
+    for CI_value in CIs:
+        CI.assign(CI_value)
+        for _ in range(num_beats):
+            for ti in np.arange(0, CI_value, dt):
+                if i % save_freq == 0:
+                    save(t)
 
-            time.assign(ti)
-            if t > end_time:
-                print("Terminating")
-                import sys
+                solver.step((t, t + dt))
+                i += 1
+                t += dt
 
-                sys.exit(0)
+                time.assign(ti)
+                if t > end_time:
+                    print("Terminating")
+                    return
+
+
+run()

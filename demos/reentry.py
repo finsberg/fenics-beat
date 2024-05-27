@@ -1,5 +1,5 @@
-# # Conduction velocity and ECG for slabs
-# In this demo we will show how to compute conduction velocity and ECG for a Slab geometry.
+# # Reentry
+# In this demo we will show how to induce reentry
 #
 
 from pathlib import Path

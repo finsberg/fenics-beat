@@ -48,27 +48,29 @@ def solve_without_save_side_effect(*args, **kwargs):
 
 
 @pytest.mark.parametrize(
-    "demo",
+    "demo, mock_pyvista",
     [
-        "diffusion.py",
-        "endocardial_stimulation.py",
-        "niederer_benchmark.py",
-        "pvc.py",
-        "reentry.py",
-        "s1s2_tissue.py",
-        "apd_restitution.py",
-        "multiple_stimulation_sites.py",
-        "simple_ode.py",
+        ("diffusion.py", False),
+        ("endocardial_stimulation.py", False),
+        ("niederer_benchmark.py", False),
+        ("pvc.py", False),
+        ("reentry.py", False),
+        ("s1s2_tissue.py", False),
+        ("apd_restitution.py", False),
+        ("multiple_stimulation_sites.py", False),
+        ("simple_ode.py", False),
     ],
 )
-def test_monodomain_demos(demo, tmpdir_demo):
+def test_monodomain_demos(demo, mock_pyvista, tmpdir_demo):
     # Copy the demo to a temporary directory
 
     shutil.copy(DEMODIR / demo, tmpdir_demo)
 
+    pyvista = patch("pyvista") if mock_pyvista else contextlib.nullcontext()
+
     with chdir(tmpdir_demo):
         with (
-            patch("pyvista"),
+            pyvista,
             patch("beat.monodomain_solver.MonodomainSplittingSolver.step"),
             patch("ap_features.apd") as apd,
             patch("beat.single_cell.solve_with_save") as solve_with_save,

@@ -1,6 +1,6 @@
 # # Premature Ventricular Complexes (PVCs)
-#
-# -
+# TBW
+
 import matplotlib.pyplot as plt
 from pathlib import Path
 import numpy as np
@@ -16,7 +16,7 @@ def post_process(mesh, dx, outdir):
 
     cellnr = [0, 25, 50, 75, 100, 125, 150, 175, 200]
     cellnr = np.arange(0, 200, 10)
-    times = load_timesteps_from_xdmf(xdmffile)
+    times = beat.postprocess.load_timesteps_from_xdmf(xdmffile)
     t = np.array(list(times.values()))
 
     p1 = 25 * dx
@@ -95,7 +95,8 @@ import tentusscher_panfilov_2006_epi_cell
 model = tentusscher_panfilov_2006_epi_cell.__dict__
 
 traveling_wave = False
-end_time = 1000.0
+# Change this to run the simulations for longer
+end_time = 10.0
 
 D = 0.0005 * beat.units.ureg("cm**2 / ms")
 Cm = 1.0 * beat.units.ureg("uF/cm**2")

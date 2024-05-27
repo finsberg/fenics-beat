@@ -6,13 +6,13 @@
 # name: torso_electrodes
 # ---
 # Electrode positions
+# ```
 
 # +
 from collections import defaultdict
 from pathlib import Path
 import cardiac_geometries
 import numpy as np
-from typing import Any
 import matplotlib.pyplot as plt
 import dolfin
 import pyvista
@@ -170,8 +170,6 @@ markers = beat.utils.expand_layer_biv(
     epi_size=0.3,
 )
 
-with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
-    xdmf.write(markers)
 
 pyvista.start_xvfb()
 plotter_markers = pyvista.Plotter()
@@ -179,11 +177,14 @@ topology, cell_types, x = beat.viz.create_vtk_structures(V)
 grid = pyvista.UnstructuredGrid(topology, cell_types, x)
 grid["markers"] = markers.vector().get_local()
 plotter_markers.add_mesh(grid, show_edges=True)
+# -
 
+plotter_markers.view_zy()
+plotter_markers.camera.zoom(4)
 if not pyvista.OFF_SCREEN:
     plotter_markers.show()
 else:
-    figure_as_array = plotter_markers.screenshot("biv-geometry.png")
+    figure = plotter_markers.screenshot("fundamentals_mesh.png")
 
 # +
 init_states = {

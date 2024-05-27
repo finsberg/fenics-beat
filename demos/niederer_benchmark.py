@@ -1,12 +1,5 @@
 # # Niederer benchmark
-# In this example we will use the same setup as in the Niederer benchmark
-# > Niederer SA, Kerfoot E, Benson AP, Bernabeu MO, Bernus O, Bradley C,
-#   Cherry EM, Clayton R, Fenton FH, Garny A, Heidenreich E, Land S, Maleckar M,
-#   Pathmanathan P, Plank G, Rodríguez JF, Roy I, Sachse FB, Seemann G, Skavhaug O,
-#   Smith NP. Verification of cardiac tissue electrophysiology simulators using an
-#   N-version benchmark. Philos Trans A Math Phys Eng Sci. 2011 Nov 13;369(1954):4331-51.
-#   doi: 10.1098/rsta.2011.0139. PMID: 21969679; PMCID: PMC3263775.
-#
+# In this example we will use the same setup as in the Niederer benchmark {cite}`land2015verification`.
 
 from pathlib import Path
 import json
@@ -63,31 +56,6 @@ def setup_geometry(Lx, Ly, Lz, dx):
     return mesh
 
 
-# def define_conductivity_tensor(chi, C_m, mesh_unit):
-#     # Conductivities as defined by page 4339 of Niederer benchmark
-#     sigma_il = 0.17 * beat.units.ureg("S/m")
-#     sigma_it = 0.019 * beat.units.ureg("S/m")
-#     sigma_el = 0.62 * beat.units.ureg("S/m")
-#     sigma_et = 0.24 * beat.units.ureg("S/m")
-
-#     # Compute monodomain approximation by taking harmonic mean in each
-#     # direction of intracellular and extracellular part
-#     def harmonic_mean(a, b):
-#         return a * b / (a + b)
-
-#     sigma_l = harmonic_mean(sigma_il, sigma_el)
-#     sigma_t = harmonic_mean(sigma_it, sigma_et)
-
-#     # Scale conducitivites by 1/(C_m * chi)
-#     s_l = (sigma_l / (C_m * chi)).to(f"{mesh_unit}**2/ms").magnitude
-#     s_t = (sigma_t / (C_m * chi)).to(f"{mesh_unit}**2/ms").magnitude
-
-#     # Define conductivity tensor
-#     M = dolfin.as_tensor(((s_l, 0, 0), (0, s_t, 0), (0, 0, s_t)))
-
-#     return M
-
-
 # +
 dx = 0.5
 dt = 0.05
@@ -136,11 +104,15 @@ plotter = pyvista.Plotter()
 topology, cell_types, x = beat.viz.create_vtk_structures(ode_space)
 grid = pyvista.UnstructuredGrid(topology, cell_types, x)
 plotter.add_mesh(grid, show_edges=True)
+plotter.show_grid()
+plotter.add_axes(line_width=5)
+plotter.show_axes()
+plotter.view_xy()
 
 if not pyvista.OFF_SCREEN:
     plotter.show()
 else:
-    figure_as_array = plotter.screenshot("niederer-benchmark-geometry.png")
+    figure = plotter.screenshot("niederer_mesh.png")
 
 # +
 # Surface to volume ratio
@@ -228,31 +200,21 @@ activation_times = {p: -1.0 for p in points}
 save_freq = int(1.0 / dt)
 i = 0
 plotter_voltage = pyvista.Plotter()
-sargs = dict(
-    title_font_size=25,
-    label_font_size=20,
-    fmt="%.2e",
-    color="black",
-    position_x=0.1,
-    position_y=0.8,
-    width=0.8,
-    height=0.1,
-)
 viridis = plt.get_cmap("viridis")
-plotter_voltage.add_mesh(
+grid.point_data["V"] = solver.pde.state.vector().get_local()
+grid.set_active_scalars("V")
+renderer = plotter_voltage.add_mesh(
     grid,
     show_edges=True,
     lighting=False,
     cmap=viridis,
-    scalar_bar_args=sargs,
     clim=[-90.0, 40.0],
 )
-grid.point_data["V"] = solver.pde.state.vector().get_local()
 gif_file = Path("niederer_benchmark.gif")
 gif_file.unlink(missing_ok=True)
 plotter_voltage.open_gif(gif_file.as_posix())
 
-T = 15
+T = 20
 # T = 100  # Change to 100 to reproduce Niederer benchmark
 t = 0.0
 while t < T + 1e-12 and any(at < 0.0 for at in activation_times.values()):
@@ -278,23 +240,21 @@ while t < T + 1e-12 and any(at < 0.0 for at in activation_times.values()):
     i += 1
     t += dt
 
-mesh.mpi_comm().Barrier()
 plotter_voltage.close()
 # -
 
-# ![niederer](niederer_benchmark.gif "niederer")
+# ![_](niederer_benchmark.gif)
 
-if mesh.mpi_comm().rank == 0:
-    # Save activation times
-    activation_times["dx"] = dx
-    activation_times["dt"] = dt
-    at_file_name = output_dir / "activation_times.json"
-    if at_file_name.is_file():
-        all_at = json.loads(at_file_name.read_text())
-    else:
-        all_at = []
-    all_at.append(activation_times)
-    at_file_name.write_text(json.dumps(all_at, indent=2))
+# Save activation times
+activation_times["dx"] = dx
+activation_times["dt"] = dt
+at_file_name = output_dir / "activation_times.json"
+if at_file_name.is_file():
+    all_at = json.loads(at_file_name.read_text())
+else:
+    all_at = []
+all_at.append(activation_times)
+at_file_name.write_text(json.dumps(all_at, indent=2))
 
 # The activation times are saved in the file `output-niederer-benchmark/activation_times.json`.
 # The file contains a list of dictionaries, each dictionary contains the activation times for a specific dx and dt.

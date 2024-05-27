@@ -13,7 +13,6 @@ parts:
     - file: demos/niederer_benchmark.py
     - file: demos/slab.py
     - file: demos/diffusion.py
-    - file: demos/conduction_velocity.py
     - file: demos/endocardial_stimulation.py
     - file: demos/s1s2_tissue.py
     - file: demos/apd_restitution.py
