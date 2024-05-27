@@ -85,7 +85,7 @@ print("Running model")
 # Load the model
 model_path = Path("tentusscher_panfilov_2006_epi_cell.py")
 if not model_path.is_file():
-    here = Path(__file__).parent
+    here = Path.cwd()
     ode = gotranx.load_ode(
         here
         / ".."

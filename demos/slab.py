@@ -100,6 +100,7 @@ endo = dolfin.CompiledSubDomain("x[0] < L / 3", L=L)
 epi = dolfin.CompiledSubDomain("x[0] > 2 * L / 3", L=L)
 endo.mark(cfun, 1)
 epi.mark(cfun, 2)
+
 V = dolfin.FunctionSpace(mesh, "CG", 1)
 
 
@@ -167,8 +168,6 @@ chi = 1400.0 * beat.units.ureg("cm**-1")
 # Membrane capacitance
 C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
-with dolfin.XDMFFile((results_folder / "markers.xdmf").as_posix()) as xdmf:
-    xdmf.write(markers)
 
 print("Get steady states")
 nbeats = 2  # Should be set to at least 200
@@ -259,7 +258,7 @@ V_ode = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 ode = beat.odesolver.DolfinMultiODESolver(
     v_ode=dolfin.Function(V_ode),
     v_pde=pde.state,
-    markers=markers,
+    markers=cfun_func,
     num_states={i: len(s) for i, s in init_states.items()},
     fun=fun,
     init_states=init_states,
@@ -365,15 +364,14 @@ plotter_voltage.close()
 
 # ![volt](voltage_slab_time.gif "volt")
 
-cv = (x1 - x0) / (t2 - t1) * beat.units.ureg(f"{mesh_unit}/ms")
-msg = (
-    f"Conduction velocity = {cv.magnitude:.3f} mm/ms or "  #
-    f" {cv.to('m/s').magnitude:.3f} m/s or "  #
-    f" {cv.to('cm/s').magnitude:.3f} cm/s"  #
-)
-print(msg)
-plotter_voltage.close()
-
+if not np.isclose(t1, t2):
+    cv = (x1 - x0) / (t2 - t1) * beat.units.ureg(f"{mesh_unit}/ms")
+    msg = (
+        f"Conduction velocity = {cv.magnitude:.3f} mm/ms or "  #
+        f" {cv.to('m/s').magnitude:.3f} m/s or "  #
+        f" {cv.to('cm/s').magnitude:.3f} cm/s"  #
+    )
+    print(msg)
 
 x0 = L * 2.0
 if mesh.geometry().dim() == 2:

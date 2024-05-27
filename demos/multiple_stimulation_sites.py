@@ -65,7 +65,7 @@ def run_model(
     # Load the model
     model_path = Path("courtemanche_ramirez_nattel_1998.py")
     if not model_path.is_file():
-        here = Path(__file__).parent
+        here = Path.cwd()
         ode = gotranx.load_ode(
             here / ".." / "odes" / "courtemanche_ramirez_nattel_1998.ode"
         )

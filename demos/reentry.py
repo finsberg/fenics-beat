@@ -72,7 +72,9 @@ results_folder = Path("results-reentry")
 save_every_ms = 1.0
 dimension = 2
 transverse = False
-end_time = 200.0
+
+# Increase this to see more interesting dynamics
+end_time = 20.0
 dt = 0.05
 overwrite = False
 stim_amp = 5000.0
@@ -105,7 +107,7 @@ print("Running model")
 # # Load the model
 model_path = Path("courtemanche_ramirez_nattel_1998.py")
 if not model_path.is_file():
-    here = Path(__file__).parent
+    here = Path.cwd()
     ode = gotranx.load_ode(
         here / ".." / "odes" / "courtemanche_ramirez_nattel_1998.ode"
     )
