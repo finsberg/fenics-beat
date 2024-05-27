@@ -6,22 +6,17 @@
 # name: torso_electrodes
 # ---
 # Electrode positions
+# ```
 
 # +
 from collections import defaultdict
 from pathlib import Path
 import cardiac_geometries
 import numpy as np
-from typing import Any
 import matplotlib.pyplot as plt
-import pint
 import dolfin
 import pyvista
 
-try:
-    import ufl_legacy as ufl
-except ImportError:
-    import ufl
 
 try:
     from tqdm import tqdm
@@ -33,8 +28,6 @@ import beat.viz
 import gotranx
 
 # -
-
-ureg = pint.UnitRegistry()
 
 
 def get_data(datadir="data_endocardial_stimulation"):
@@ -66,82 +59,11 @@ def get_data(datadir="data_endocardial_stimulation"):
     return cardiac_geometries.geometry.Geometry.from_folder(datadir)
 
 
-def define_stimulus(mesh, chi, time, ffun, markers, mesh_unit="mm"):
-    duration = 2.0  # ms
-    A = 500.0 * ureg("uA/cm**2")
-    amplitude = amplitude = (A / chi).to(f"uA/{mesh_unit}").magnitude
-    I_s = dolfin.Expression(
-        "time >= start ? (time <= (duration + start) ? amplitude : 0.0) : 0.0",
-        time=time,
-        start=0.0,
-        duration=duration,
-        amplitude=amplitude,
-        degree=0,
-    )
-
-    subdomain_data = dolfin.MeshFunction("size_t", mesh, 2)
-    subdomain_data.set_all(0)
-    marker = 1
-    subdomain_data.array()[ffun.array() == markers["ENDO_LV"][0]] = 1
-    subdomain_data.array()[ffun.array() == markers["ENDO_RV"][0]] = 1
-
-    ds = dolfin.Measure("ds", domain=mesh, subdomain_data=subdomain_data)(marker)
-    return beat.base_model.Stimulus(dz=ds, expr=I_s)
-
-
-def define_conductivity_tensor(chi, f0, s0, n0):
-    # Conductivities as defined by page 4339 of Niederer benchmark
-    sigma_il = 0.17 * ureg("mS/mm")
-    sigma_it = 0.019 * ureg("mS/mm")
-    sigma_el = 0.62 * ureg("mS/mm")
-    sigma_et = 0.24 * ureg("mS/mm")
-
-    # Compute monodomain approximation by taking harmonic mean in each
-    # direction of intracellular and extracellular part
-    def harmonic_mean(a, b):
-        return a * b / (a + b)
-
-    sigma_l = harmonic_mean(sigma_il, sigma_el)
-    sigma_t = harmonic_mean(sigma_it, sigma_et)
-
-    # Scale conducitivites
-    s_l = (sigma_l / chi).to("uA/mV").magnitude
-    s_t = (sigma_t / chi).to("uA/mV").magnitude
-
-    # Define conductivity tensor
-    A = dolfin.as_matrix(
-        [
-            [f0[0], s0[0], n0[0]],
-            [f0[1], s0[1], n0[1]],
-            [f0[2], s0[2], n0[2]],
-        ],
-    )
-
-    M_star = ufl.diag(dolfin.as_vector([s_l, s_t, s_t]))
-    M = A * M_star * A.T
-
-    return M
-
-
-def load_timesteps_from_xdmf(xdmffile):
-    import xml.etree.ElementTree as ET
-
-    times = {}
-    i = 0
-    tree = ET.parse(xdmffile)
-    for elem in tree.iter():
-        if elem.tag == "Time":
-            times[i] = float(elem.get("Value"))
-            i += 1
-
-    return times
-
-
 def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
     V = dolfin.FunctionSpace(heart_mesh, "Lagrange", 1)
     v = dolfin.Function(V)
 
-    timesteps = load_timesteps_from_xdmf(xdmffile)
+    timesteps = beat.postprocess.load_timesteps_from_xdmf(xdmffile)
     with dolfin.XDMFFile(Path(xdmffile).as_posix()) as f:
         for i, t in tqdm(timesteps.items()):
             f.read_checkpoint(v, key, i)
@@ -219,12 +141,19 @@ def compute_ecg_recovery():
 
 here = Path.cwd()
 datadir = here / "data_endocardial_stimulation"
-ode = gotranx.load_ode(here / ".." / "odes" / "ORdmm_Land.ode")
-code = gotranx.cli.gotran2py.get_code(
-    ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
-)
-model: dict[str, Any] = {}
-exec(code, model)
+
+model_path = Path("ORdmm_Land.py")
+if not model_path.is_file():
+    ode = gotranx.load_ode(here / ".." / "odes" / "ORdmm_Land.ode")
+    code = gotranx.cli.gotran2py.get_code(
+        ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
+    )
+    model_path.write_text(code)
+
+import ORdmm_Land
+
+model = ORdmm_Land.__dict__
+
 data = get_data(datadir=datadir)
 
 # +
@@ -241,8 +170,6 @@ markers = beat.utils.expand_layer_biv(
     epi_size=0.3,
 )
 
-with dolfin.XDMFFile((datadir / "markers.xdmf").as_posix()) as xdmf:
-    xdmf.write(markers)
 
 pyvista.start_xvfb()
 plotter_markers = pyvista.Plotter()
@@ -250,11 +177,14 @@ topology, cell_types, x = beat.viz.create_vtk_structures(V)
 grid = pyvista.UnstructuredGrid(topology, cell_types, x)
 grid["markers"] = markers.vector().get_local()
 plotter_markers.add_mesh(grid, show_edges=True)
+# -
 
+plotter_markers.view_zy()
+plotter_markers.camera.zoom(4)
 if not pyvista.OFF_SCREEN:
     plotter_markers.show()
 else:
-    figure_as_array = plotter_markers.screenshot("biv-geometry.png")
+    figure = plotter_markers.screenshot("fundamentals_mesh.png")
 
 # +
 init_states = {
@@ -280,21 +210,30 @@ v_index = {
 }
 
 # Surface to volume ratio
-chi = 140.0 * ureg("mm**-1")
+chi = 140.0 * beat.units.ureg("mm**-1")
 # Membrane capacitance
-C_m = 0.01 * ureg("uF/mm**2")
+C_m = 0.01 * beat.units.ureg("uF/mm**2")
 
 time = dolfin.Constant(0.0)
-I_s = define_stimulus(
+
+subdomain_data = dolfin.MeshFunction("size_t", data.mesh, 2)
+subdomain_data.set_all(0)
+marker = 1
+subdomain_data.array()[data.ffun.array() == data.markers["ENDO_LV"][0]] = 1
+subdomain_data.array()[data.ffun.array() == data.markers["ENDO_RV"][0]] = 1
+I_s = beat.stimulation.define_stimulus(
     mesh=data.mesh,
     chi=chi,
     mesh_unit=mesh_unit,
     time=time,
-    ffun=data.ffun,
-    markers=data.markers,
+    subdomain_data=subdomain_data,
+    marker=marker,
+    amplitude=500.0,
 )
 
-M = define_conductivity_tensor(chi=chi, f0=data.f0, s0=data.s0, n0=data.n0)
+M = beat.conductivities.define_conductivity_tensor(
+    chi=chi, f0=data.f0, g_il=0.17, g_it=0.019, g_el=0.62, g_et=0.24
+)
 
 params = {"preconditioner": "sor", "use_custom_preconditioner": False}
 pde = beat.MonodomainModel(

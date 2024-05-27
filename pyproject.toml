@@ -26,7 +26,6 @@ test = [
     "pytest-cov",
     "gotranx",
     "numba",
-    "fenics-beat[demos]",
 ]
 dev = [
     "pdbpp",
@@ -46,12 +45,15 @@ demos = [
    "ap_features",
    "numba",
    "jupyter",
-   "pyvista[all]>=0.43.0"
+   "pyvista[all]>=0.43.0",
+   "trame-vuetify",
+   "ipywidgets",
 ]
 docs = [
    "jupyter-book",
    "jupytext",
    "jupyterlab_myst",
+   "sphinxcontrib-bibtex",
    "fenics-beat[demos]"
 ]
 all = [

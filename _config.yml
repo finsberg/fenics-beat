@@ -1,10 +1,10 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: beat
+title: fenics-beat
 author: Henrik Finsberg
 logo: "docs/_static/logo.png"
-copyright: "2023"
+copyright: "2024"
 only_build_toc_files: true
 
 
@@ -32,16 +32,18 @@ sphinx:
 
   config:
     html_last_updated_fmt: "%b %d, %Y"
-    suppress_warnings: ["mystnb.unknown_mime_type"]
+    bibtex_bibfiles: ["docs/refs.bib"]
+    nb_execution_show_tb: True
+    suppress_warnings: ["mystnb.unknown_mime_type", "bibtex.duplicate_citation"]
     nb_custom_formats:  # https://jupyterbook.org/en/stable/file-types/jupytext.html#file-types-custom
         .py:
             - jupytext.reads
             - fmt: py
 
-
   extra_extensions:
   - 'sphinx.ext.autodoc'
   - 'sphinx.ext.napoleon'
   - 'sphinx.ext.viewcode'
+  - 'sphinxcontrib.bibtex'
 
 exclude_patterns: [".pytest_cache/*" ,"tests/.pytest_cache/*"]

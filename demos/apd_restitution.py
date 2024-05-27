@@ -1,5 +1,7 @@
 # # Single-cell APD restitution
-#
+# TBW
+
+# +
 import matplotlib.pyplot as plt
 import ap_features as apf
 from pathlib import Path
@@ -7,14 +9,13 @@ import numpy as np
 import gotranx
 from beat.single_cell import get_steady_state, compute_hash
 
-# import ap_features
 
-here = Path(__file__).parent
+here = Path.cwd()
 
 
+# +
 model_path = Path("tentusscher_panfilov_2006_epi_cell.py")
 if not model_path.is_file():
-    here = Path(__file__).parent
     ode = gotranx.load_ode(
         here
         / ".."
@@ -30,6 +31,9 @@ if not model_path.is_file():
 import tentusscher_panfilov_2006_epi_cell
 
 model = tentusscher_panfilov_2006_epi_cell.__dict__
+
+
+# -
 
 
 def run(outdir, parameters):
