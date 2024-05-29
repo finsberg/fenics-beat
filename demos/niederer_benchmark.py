@@ -6,10 +6,8 @@ import json
 
 import beat.conductivities
 import dolfin
-import numpy as np
 import numpy.typing as npt
 import pyvista
-import ufl_legacy as ufl
 import gotranx
 import matplotlib.pyplot as plt
 
@@ -42,18 +40,6 @@ def setup_initial_conditions() -> npt.NDArray:
     }
     values = model.init_state_values(**ic)
     return values
-
-
-def setup_geometry(Lx, Ly, Lz, dx):
-    mesh = dolfin.BoxMesh(
-        dolfin.MPI.comm_world,
-        dolfin.Point(0.0, 0.0, 0.0),
-        dolfin.Point(Lx, Ly, Lz),
-        int(np.rint((Lx / dx))),
-        int(np.rint((Ly / dx))),
-        int(np.rint((Lz / dx))),
-    )
-    return mesh
 
 
 # +
@@ -91,13 +77,13 @@ Ly = 7 * beat.units.ureg("mm").to(mesh_unit).magnitude
 Lz = 3 * beat.units.ureg("mm").to(mesh_unit).magnitude
 dx_mm = dx * beat.units.ureg("mm").to(mesh_unit).magnitude
 
-mesh = setup_geometry(
+geo = beat.geometry.get_3D_slab_geometry(
     Lx=Lx,
     Ly=Ly,
     Lz=Lz,
     dx=dx_mm,
 )
-ode_space = dolfin.FunctionSpace(mesh, "Lagrange", 1)
+ode_space = dolfin.FunctionSpace(geo.mesh, "Lagrange", 1)
 
 pyvista.start_xvfb()
 plotter = pyvista.Plotter()
@@ -127,11 +113,11 @@ S1_subdomain = dolfin.CompiledSubDomain(
     "x[0] <= L + DOLFIN_EPS && x[1] <= L + DOLFIN_EPS && x[2] <= L + DOLFIN_EPS",
     L=L,
 )
-S1_markers = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim())
+S1_markers = dolfin.MeshFunction("size_t", geo.mesh, geo.mesh.topology().dim())
 S1_subdomain.mark(S1_markers, S1_marker)
 
 I_s = beat.stimulation.define_stimulus(
-    mesh=mesh,
+    mesh=geo.mesh,
     chi=chi,
     time=time,
     subdomain_data=S1_markers,
@@ -142,19 +128,15 @@ I_s = beat.stimulation.define_stimulus(
 
 
 M = beat.conductivities.define_conductivity_tensor(
-    chi,
-    f0=ufl.as_vector([1, 0, 0]),
-    g_il=0.17,
-    g_it=0.019,
-    g_el=0.62,
-    g_et=0.24,
+    f0=geo,
+    **beat.conductivities.default_conductivities("Niederer"),
 )
 
 params = {"preconditioner": "sor", "use_custom_preconditioner": False}
 
 pde = beat.MonodomainModel(
     time=time,
-    mesh=mesh,
+    mesh=geo.mesh,
     M=M,
     I_s=I_s,
     params=params,
@@ -178,10 +160,10 @@ filename = output_dir / f"results-{dt}-{dx}.xdmf"
 filename.unlink(missing_ok=True)
 filename.with_suffix(".h5").unlink(missing_ok=True)
 
-xdmf = dolfin.XDMFFile(mesh.mpi_comm(), filename.as_posix())
+xdmf = dolfin.XDMFFile(geo.mesh.mpi_comm(), filename.as_posix())
 xdmf.parameters["functions_share_mesh"] = True
 xdmf.parameters["rewrite_function_mesh"] = False
-xdmf.write(mesh)
+xdmf.write(geo.mesh)
 
 points = {
     "P1": (0, 0, 0),
