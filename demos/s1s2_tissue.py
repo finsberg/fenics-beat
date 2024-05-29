@@ -11,39 +11,6 @@ import gotranx
 import beat
 
 
-class Geometry(NamedTuple):
-    mesh: dolfin.Mesh
-    f0: dolfin.Constant
-    s0: dolfin.Constant
-
-
-def setup_geometry(dx, Lx, Ly):
-
-    mesh = dolfin.RectangleMesh(
-        dolfin.MPI.comm_world,
-        dolfin.Point(0.0, 0.0),
-        dolfin.Point(Lx, Ly),
-        int(np.rint((Lx / dx))),
-        int(np.rint((Ly / dx))),
-    )
-
-    return mesh
-
-
-def get_microstructure(
-    dim: int, transverse: bool = False
-) -> tuple[dolfin.Constant, dolfin.Constant]:
-
-    if transverse:
-        f0 = dolfin.Constant((0.0, 1.0))
-        s0 = dolfin.Constant((1.0, 0.0))
-    else:
-        f0 = dolfin.Constant((1.0, 0.0))
-        s0 = dolfin.Constant((0.0, 1.0))
-
-    return f0, s0
-
-
 results_folder = Path("results-s1s2-tissue")
 save_every_ms = 1.0
 dimension = 2
@@ -59,25 +26,11 @@ mesh_unit = mesh_unit
 
 dx = 0.02 * beat.units.ureg("cm").to(mesh_unit).magnitude
 L = 1.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
-mesh = setup_geometry(Lx=L, Ly=L, dx=dx)
+data = beat.geometry.get_2D_slab_geometry(Lx=L, Ly=L, dx=dx)
 
 
-V = dolfin.FunctionSpace(mesh, "CG", 1)
+V = dolfin.FunctionSpace(data.mesh, "CG", 1)
 
-
-g_il = 0.16069
-g_el = 0.625
-g_it = 0.04258
-g_et = 0.236
-
-f0, s0 = get_microstructure(dimension, transverse)
-
-
-data = Geometry(
-    mesh=mesh,
-    f0=f0,
-    s0=s0,
-)
 save_freq = round(save_every_ms / dt)
 
 print("Running model")
@@ -120,7 +73,9 @@ CIincr = 50.0
 parameters = model["init_parameter_values"](stim_amplitude=0.0)
 
 
-subdomain_data = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
+subdomain_data = dolfin.MeshFunction(
+    "size_t", data.mesh, data.mesh.topology().dim() - 1
+)
 subdomain_data.set_all(0)
 marker = 1
 dolfin.CompiledSubDomain("x[0] < 2 * dx", dx=dx).mark(subdomain_data, 1)
@@ -139,19 +94,15 @@ I_s = beat.stimulation.define_stimulus(
     duration=5.0,
 )
 
-V_ode = dolfin.FunctionSpace(mesh, "Lagrange", 1)
+V_ode = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 parameters_ode = np.zeros((len(parameters), V_ode.dim()))
 parameters_ode.T[:] = parameters
 
 M = beat.conductivities.define_conductivity_tensor(
-    chi=chi,
     f0=data.f0,
-    g_il=g_il,
-    g_it=g_it,
-    g_el=g_el,
-    g_et=g_et,
+    **beat.conductivities.default_conductivities("Niederer"),
 )
-pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, C_m=C_m.magnitude)
+pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, C_m=C_m.magnitude)
 ode = beat.odesolver.DolfinODESolver(
     v_ode=dolfin.Function(V_ode),
     v_pde=pde.state,

@@ -17,60 +17,6 @@ import beat.viz
 from beat.geometry import Geometry
 
 
-try:
-    import ufl_legacy as ufl
-except ImportError:
-    import ufl
-
-
-def setup_geometry(dx, Lx, Ly, Lz=0.0, dim=2):
-    if dim == 2:
-        mesh = dolfin.RectangleMesh(
-            dolfin.MPI.comm_world,
-            dolfin.Point(0.0, 0.0),
-            dolfin.Point(Lx, Ly),
-            int(np.rint((Lx / dx))),
-            int(np.rint((Ly / dx))),
-        )
-
-    else:
-        mesh = dolfin.BoxMesh(
-            dolfin.MPI.comm_world,
-            dolfin.Point(0.0, 0.0, 0.0),
-            dolfin.Point(Lx, Ly, Lz),
-            int(np.rint((Lx / dx))),
-            int(np.rint((Ly / dx))),
-            int(np.rint((Lz / dx))),
-        )
-    return mesh
-
-
-def get_microstructure(
-    dim: int, transverse: bool = False
-) -> tuple[dolfin.Constant, dolfin.Constant, dolfin.Constant]:
-    if dim == 2:
-        if transverse:
-            f0 = dolfin.Constant((0.0, 1.0))
-            s0 = dolfin.Constant((1.0, 0.0))
-        else:
-            f0 = dolfin.Constant((1.0, 0.0))
-            s0 = dolfin.Constant((0.0, 1.0))
-
-        n0 = dolfin.Constant((0.0, 0.0))
-
-    else:
-        if transverse:
-            f0 = dolfin.Constant((0.0, 0.0, 1.0))
-            s0 = dolfin.Constant((1.0, 0.0, 0.0))
-            n0 = dolfin.Constant((0.0, 1.0, 0.0))
-        else:
-            f0 = dolfin.Constant((1.0, 0.0, 0.0))
-            s0 = dolfin.Constant((0.0, 1.0, 0.0))
-            n0 = dolfin.Constant((0.0, 0.0, 1.0))
-
-    return f0, s0, n0
-
-
 results_folder = Path("results-slab")
 save_every_ms = 1.0
 dimension = 2
@@ -86,7 +32,7 @@ mesh_unit = mesh_unit
 
 dx = 0.05 * beat.units.ureg("cm").to(mesh_unit).magnitude
 L = 1.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
-mesh = setup_geometry(Lx=L, Ly=dx, Lz=dx, dx=dx / 5, dim=dimension)
+mesh = beat.geometry.get_3D_slab_mesh(Lx=L, Ly=dx, Lz=dx, dx=dx / 5, dim=dimension)
 
 ffun = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
 ffun.set_all(0)
@@ -131,7 +77,7 @@ g_el = 0.625
 g_it = 0.04258
 g_et = 0.236
 
-f0, s0, n0 = get_microstructure(dimension, transverse)
+f0, s0, n0 = beat.geometry.get_3D_slab_microstructure(transverse)
 
 markers = {"ENDO": (marker, 2)}
 

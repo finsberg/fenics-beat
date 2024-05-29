@@ -58,13 +58,14 @@ def post_process(mesh, dx, outdir):
     # Plot 3D plot for all traces
     fig, ax = plt.subplots()
     for i, cell_index in enumerate(cellnr):
-        ax.plot(t, -cell_index / 3 * np.ones_like(t) + traces[:, i])
+        color = "k" if cell_index < 100 else "m"
+        ax.plot(t, cell_index / 3 * np.ones_like(t) + traces[:, i], color=color)
     ax.set_xlabel("Time (ms)")
-    ax.set_yticks([-150, -120, -85])
+    ax.set_yticks([-22, -55, -85])
     ax.set_yticklabels([200, 100, 1])
     fig.text(x=0.03, y=0.17, s="Cell number", rotation=90)
 
-    ax.set_ylim(-150, 50)
+    ax.set_ylim(-90, 120)
     fig.savefig(outdir / "V_3d.png")
 
 
@@ -98,12 +99,12 @@ model = tentusscher_panfilov_2006_epi_cell.__dict__
 
 traveling_wave = False
 # Change this to run the simulations for longer
-end_time = 10.0
+end_time = 1500.0
 
 D = 0.0005 * beat.units.ureg("cm**2 / ms")
 Cm = 1.0 * beat.units.ureg("uF/cm**2")
 
-parameters = model["init_parameter_values"](stim_start=100.0, stim_period=1000.0)
+parameters = model["init_parameter_values"](stim_start=100.0, stim_period=1500.0)
 
 dt = 0.01
 nbeats = 50
@@ -131,7 +132,7 @@ if traveling_wave:
         start=100.0,
         duration=2.0,
         amplitude=1.0,
-        PCL=1000.0,
+        PCL=5000.0,
         degree=0,
     )
     subdomain_data = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
@@ -152,7 +153,7 @@ g_Kr_index = model["parameter_index"]("g_Kr")
 g_Kr_value = parameters[g_Kr_index]
 parameters_ode[g_Kr_index, :] = (
     dolfin.interpolate(
-        dolfin.Expression("g_Kr ? x[0] > L / 2 : 0.0", g_Kr=g_Kr_value, L=L, degree=0),
+        dolfin.Expression("x[0] > L / 2 ? 0.0 : g_Kr", g_Kr=g_Kr_value, L=L, degree=0),
         V_ode,
     )
     .vector()
@@ -163,7 +164,7 @@ g_Ks_index = model["parameter_index"]("g_Ks")
 g_Ks_value = parameters[g_Ks_index]
 parameters_ode[g_Ks_index, :] = (
     dolfin.interpolate(
-        dolfin.Expression("g_Ks ? x[0] > L / 2 : 0.0", g_Ks=g_Ks_value, L=L, degree=0),
+        dolfin.Expression("x[0] > L / 2 ? 0.0 : g_Ks", g_Ks=g_Ks_value, L=L, degree=0),
         V_ode,
     )
     .vector()
