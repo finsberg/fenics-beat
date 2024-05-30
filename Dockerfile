@@ -1,6 +1,10 @@
-FROM ghcr.io/scientificcomputing/fenics-gmsh:2024-02-19
+FROM ghcr.io/scientificcomputing/fenics-gmsh:2024-05-30
 
 COPY . /app
 WORKDIR /app
+
+ARG TARGETPLATFORM
+RUN echo "Building for $TARGETPLATFORM"
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then python3 -m pip install "https://github.com/finsberg/vtk-aarch64/releases/download/vtk-9.2.6-cp310/vtk-9.2.6.dev0-cp310-cp310-linux_aarch64.whl"; fi
 
 RUN python3 -m pip install ".[demos]"
