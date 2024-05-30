@@ -104,7 +104,7 @@ end_time = 1500.0
 D = 0.0005 * beat.units.ureg("cm**2 / ms")
 Cm = 1.0 * beat.units.ureg("uF/cm**2")
 
-parameters = model["init_parameter_values"](stim_start=100.0, stim_period=1500.0)
+parameters = model["init_parameter_values"](stim_start=100.0, stim_period=500.0)
 
 dt = 0.01
 nbeats = 50
@@ -207,11 +207,16 @@ def save(t):
 t = 0.0
 save_freq = int(1.0 / dt)
 i = 0
+done_stimulating = False
 while t < end_time + 1e-12:
     # Make sure to save at the same time steps that is used by Ambit
 
     if i % save_freq == 0:
         save(t)
+    if t > 1000 and not done_stimulating:
+        ode.parameters[model["parameter_index"]("stim_amplitude"), :] = 0.0
+        I_s.assign(0.0)
+        done_stimulating = True
 
     solver.step((t, t + dt))
     i += 1

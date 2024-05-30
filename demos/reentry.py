@@ -17,7 +17,7 @@ import beat.viz
 results_folder = Path("results-multiple-stimulation-sites")
 save_every_ms = 1.0
 transverse = False
-end_time = 1000.0
+end_time = 3000.0
 dt = 0.05
 overwrite = False
 stim_amp = 5000.0
@@ -72,7 +72,7 @@ fun = model["forward_generalized_rush_larsen"]
 y = model["init_state_values"]()
 
 time = dolfin.Constant(0.0)
-parameters = model["init_parameter_values"](stim_amplitude=0.0, g_Na=2.6)
+parameters = model["init_parameter_values"](stim_amplitude=0.0, g_Na=2.5)
 
 delay = 400.0
 duration = 5.0
@@ -140,7 +140,7 @@ times = []
 def save(t):
     v = solver.pde.state.vector().get_local()
     print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
-    with dolfin.XDMFFile(mesh.mpi_comm(), fname) as xdmf:
+    with dolfin.XDMFFile(data.mesh.mpi_comm(), fname) as xdmf:
         xdmf.parameters["functions_share_mesh"] = True
         xdmf.parameters["rewrite_function_mesh"] = False
         xdmf.write_checkpoint(
