@@ -9,6 +9,9 @@ class Stimulus(NamedTuple):
     dz: dolfin.Measure
     expr: dolfin.Expression
 
+    def assign(self, amp: float):
+        self.expr.amplitude = amp
+
 
 def define_stimulus(
     mesh: dolfin.Mesh,
