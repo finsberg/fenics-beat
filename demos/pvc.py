@@ -47,7 +47,7 @@ model = tentusscher_panfilov_2006_epi_cell.__dict__
 
 traveling_wave = False
 # Change this to run the simulations for longer
-end_time = 1500.0
+end_time = 15.0
 
 # We specify a diffusion coefficient and a membrane capacitance
 

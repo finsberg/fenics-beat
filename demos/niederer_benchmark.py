@@ -45,7 +45,8 @@ def setup_initial_conditions() -> npt.NDArray:
 # +
 dx = 0.5
 dt = 0.05
-T = 200.0
+# Increase T to 100 to reproduce Niederer benchmark
+T = 20.0
 
 here = Path.cwd()
 
