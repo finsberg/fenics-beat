@@ -94,7 +94,7 @@ parameters_ode.T[:] = parameters
 
 M = beat.conductivities.define_conductivity_tensor(
     f0=data.f0,
-    **beat.conductivites("Niederer"),
+    **beat.conductivities("Niederer"),
 )
 pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, C_m=C_m.magnitude)
 ode = beat.odesolver.DolfinODESolver(
