@@ -2,6 +2,8 @@
 # In this demo we try to replicate the experimental setup conducted in {cite}`zhang2021mechanisms`
 #
 # First we do the necceary imports
+#
+
 import matplotlib.pyplot as plt
 from pathlib import Path
 import numpy as np
@@ -54,7 +56,8 @@ Cm = 1.0 * beat.units.ureg("uF/cm**2")
 
 # Next we run a single cell model with the to get the correct steady state solutions.
 # We run this for 50 beats with a stimulation every 500.0 ms
-# +
+#
+
 parameters = model["init_parameter_values"](stim_period=500.0)
 
 dt = 0.01
@@ -75,6 +78,7 @@ y = get_steady_state(
 # Now we create the stimulus current which is 0.0 is we stimulate all the cells at once (in which case the stimulation is applied directly to all cells), or in the case of a traveling wave we stimulate the two first cells.
 #
 # In both cases we stimulate after 100 ms with period of 500 ms
+#
 
 time = dolfin.Constant(0.0)
 if traveling_wave:
@@ -101,11 +105,13 @@ else:
     parameters = model["init_parameter_values"](stim_start=100.0, stim_period=500.0)
 
 # Now we would like to change the conductances for the cells in the right most part of the cable. We choose a first order Lagrange space for this, so that we have one set of parameters for each cells, and then we copy over the default parameters
+
 V_ode = dolfin.FunctionSpace(mesh, "Lagrange", 1)
 parameters_ode = np.zeros((len(parameters), V_ode.dim()))
 parameters_ode.T[:] = parameters
 
 # Next we set the values og $g_Kr$ to zero in the right part of the cable
+
 g_Kr_index = model["parameter_index"]("g_Kr")
 g_Kr_value = parameters[g_Kr_index]
 parameters_ode[g_Kr_index, :] = (

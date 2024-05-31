@@ -139,7 +139,7 @@ stim_values = []
 def save(t):
     v = solver.pde.state.vector().get_local()
     print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
-    with dolfin.XDMFFile(mesh.mpi_comm(), fname) as xdmf:
+    with dolfin.XDMFFile(data.mesh.mpi_comm(), fname) as xdmf:
         xdmf.parameters["functions_share_mesh"] = True
         xdmf.parameters["rewrite_function_mesh"] = False
         xdmf.write_checkpoint(

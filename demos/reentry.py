@@ -36,9 +36,11 @@ V = dolfin.FunctionSpace(data.mesh, "CG", 1)
 # For this simulation we will use a model from {courtemanche1998ionic}`courtemanche1998ionic`. The model is taken form https://models.physiomeproject.org/workspace/courtemanche_ramirez_nattel_1998
 #
 
-# +
+
 print("Running model")
+
 # Load the model
+
 model_path = Path("courtemanche_ramirez_nattel_1998.py")
 if not model_path.is_file():
     here = Path.cwd()
@@ -53,19 +55,21 @@ if not model_path.is_file():
 import courtemanche_ramirez_nattel_1998
 
 model = courtemanche_ramirez_nattel_1998.__dict__
-# -
 
 
 # Membrane capacitance
+
 C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
 # Here we also reduce the conductance for the sodium channel to make sure that the speed of the traveling wave is reduced
+
 fun = model["forward_generalized_rush_larsen"]
 y = model["init_state_values"]()
 time = dolfin.Constant(0.0)
 parameters = model["init_parameter_values"](stim_amplitude=0.0, g_Na=2.5)
 
 # The duration of the stimulation is set to 5 ms and the second stimulation is done 400 ms after the initial stimulation. This timing is important to get spiral wave appearing
+
 duration = 5.0
 delay = 400.0
 # We specify this stimulation protocol as an expressions
@@ -181,7 +185,7 @@ while t < end_time + 1e-12:
 
 # ```{figure} ../docs/_static/reentry.mp4
 # ---
-# name: pvc
+# name: reentry
 # ---
 # ```
 

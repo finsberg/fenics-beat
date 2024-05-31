@@ -26,10 +26,6 @@ dt = 0.05
 overwrite = False
 stim_amp = 5000.0
 mesh_unit = "cm"
-
-# Load mesh
-mesh_unit = mesh_unit
-
 dx = 0.05 * beat.units.ureg("cm").to(mesh_unit).magnitude
 L = 1.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
 mesh = beat.geometry.get_3D_slab_mesh(Lx=L, Ly=dx, Lz=dx, dx=dx / 5, dim=dimension)
@@ -67,6 +63,7 @@ else:
 #
 # Interpolate meshfunction to a CG 1 function
 #
+
 cfun_DG = dolfin.Function(dolfin.FunctionSpace(mesh, "DG", 0))
 cfun_DG.vector()[:] = cfun.array()
 cfun_func = dolfin.Function(V)
@@ -109,9 +106,11 @@ import ORdmm_Land
 model = ORdmm_Land.__dict__
 
 # Surface to volume ratio
+
 chi = 1400.0 * beat.units.ureg("cm**-1")
 
 # Membrane capacitance
+
 C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
 
