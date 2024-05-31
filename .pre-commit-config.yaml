@@ -21,6 +21,7 @@ repos:
         args: [ --fix ]
       # Run the formatter.
       - id: ruff-format
+        exclude: 'demos/.*.py$'
 
 
   - repo: https://github.com/pre-commit/mirrors-mypy
