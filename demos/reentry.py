@@ -1,31 +1,27 @@
 # # Inducing reentry in a 2D sheet of cardiac tissue
 #
-# In this demo we show how to induce reentry in a 2D sheet of cardiac tissue.
-
+# In this demo we show how to induce reentry in a 2D sheet of cardiac tissue using two stimulations, i.e one wave where we stimulate the left side of the square and then one second stimulation where we stimulate the third quadrant of the square.
+#
+# First we make the necessary imports
 
 from pathlib import Path
-
 import dolfin
 import matplotlib.pyplot as plt
 import numpy as np
-
 import gotranx
 import beat
-import beat.viz
 
+# And set up some basic parameters
 
-results_folder = Path("results-multiple-stimulation-sites")
+results_folder = Path("results-reentry")
 save_every_ms = 1.0
 transverse = False
 end_time = 3000.0
 dt = 0.05
+save_freq = round(save_every_ms / dt)
 overwrite = False
 stim_amp = 5000.0
 mesh_unit = "cm"
-
-# Load mesh
-mesh_unit = mesh_unit
-
 dx = 0.4 * beat.units.ureg("mm").to(mesh_unit).magnitude
 L = 5.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
 data = beat.geometry.get_2D_slab_geometry(
@@ -37,13 +33,10 @@ data = beat.geometry.get_2D_slab_geometry(
 
 V = dolfin.FunctionSpace(data.mesh, "CG", 1)
 
-g_il = 0.16069
-g_el = 0.625
-g_it = 0.04258
-g_et = 0.236
+# For this simulation we will use a model from {courtemanche1998ionic}`courtemanche1998ionic`. The model is taken form https://models.physiomeproject.org/workspace/courtemanche_ramirez_nattel_1998
+#
 
-save_freq = round(save_every_ms / dt)
-
+# +
 print("Running model")
 # Load the model
 model_path = Path("courtemanche_ramirez_nattel_1998.py")
@@ -60,24 +53,24 @@ if not model_path.is_file():
 import courtemanche_ramirez_nattel_1998
 
 model = courtemanche_ramirez_nattel_1998.__dict__
+# -
 
-# Surface to volume ratio
-chi = 1400.0 * beat.units.ureg("cm**-1")
 
 # Membrane capacitance
 C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
+# Here we also reduce the conductance for the sodium channel to make sure that the speed of the traveling wave is reduced
 fun = model["forward_generalized_rush_larsen"]
-
 y = model["init_state_values"]()
-
 time = dolfin.Constant(0.0)
 parameters = model["init_parameter_values"](stim_amplitude=0.0, g_Na=2.5)
 
-delay = 400.0
+# The duration of the stimulation is set to 5 ms and the second stimulation is done 400 ms after the initial stimulation. This timing is important to get spiral wave appearing
 duration = 5.0
+delay = 400.0
+# We specify this stimulation protocol as an expressions
 
-
+# +
 expr = dolfin.Expression(
     "(t < duration && x[0] < 0.05) ? 20.0 : "
     "((t > delay && t < delay+duration) && (x[0] < L / 2 && x[1] < L / 2)) ? 20.0 : 0.0",
@@ -91,18 +84,17 @@ expr = dolfin.Expression(
 I_s = beat.base_model.Stimulus(
     dz=dolfin.dx, expr=expr  # StimulationProtocol(time, L=L),
 )
+# -
+
+# Next we set up the models
 
 V_ode = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 parameters_ode = np.zeros((len(parameters), V_ode.dim()))
 parameters_ode.T[:] = parameters
 
 M = beat.conductivities.define_conductivity_tensor(
-    chi=chi,
     f0=data.f0,
-    g_il=g_il,
-    g_it=g_it,
-    g_el=g_el,
-    g_et=g_et,
+    **beat.conductivites("Niederer"),
 )
 pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, C_m=C_m.magnitude)
 ode = beat.odesolver.DolfinODESolver(
@@ -119,7 +111,8 @@ solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 fname = (results_folder / "V.xdmf").as_posix()
 beat.postprocess.delete_old_file(fname)
 
-# Pick 12 uniformly distributed points on the mesh
+# and we also pick 12 uniformly distributed points on the mesh and keep track of the voltage in these points
+
 points = np.array(
     [
         [0.1, 0.1],
@@ -170,6 +163,8 @@ def save(t):
     )
 
 
+# Finally we solve it
+
 t = 0.0
 save_freq = int(1.0 / dt)
 i = 0
@@ -182,3 +177,14 @@ while t < end_time + 1e-12:
     solver.step((t, t + dt))
     i += 1
     t += dt
+
+
+# ```{figure} ../docs/_static/reentry.gif
+# ---
+# name: pvc
+# ---
+# ```
+
+# ```{bibliography}
+# ```
+#
