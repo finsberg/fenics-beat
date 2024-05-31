@@ -1,4 +1,6 @@
-![_](docs/_static/fenics-beat-logo.png)
+<p align="center">
+  <img width="300" height="300" src="docs/_static/fenics-beat-logo.png">
+</p>
 
 [![pre-commit](https://github.com/finsberg/fenics-beat/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/finsberg/fenics-beat/actions/workflows/pre-commit.yml)
 [![Create and publish a Docker image](https://github.com/finsberg/fenics-beat/actions/workflows/docker-image.yml/badge.svg)](https://github.com/finsberg/fenics-beat/pkgs/container/fenics-beat)
