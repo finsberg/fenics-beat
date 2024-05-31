@@ -16,7 +16,7 @@ RUN python3 -m pip install ".[demos]" jupytext
 
 
 # Convert all python files to notebooks
-RUN jupyext demos/*.py --to ipynb
+RUN jupytext demos/*.py --to ipynb
 
 # Jupyter-lab images for examples
 FROM beat_base as beat_lab
