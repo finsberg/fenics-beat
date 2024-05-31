@@ -51,10 +51,10 @@ def define_stimulus(
         PCL=PCL,
     )
 
-    if dim == 1:
+    if dim == mesh.topology().dim() - 2:
         dz = dolfin.Measure("dP", domain=mesh, subdomain_data=subdomain_data)(marker)
-    elif dim == 2:
+    elif dim == mesh.topology().dim() - 1:
         dz = dolfin.Measure("ds", domain=mesh, subdomain_data=subdomain_data)(marker)
-    elif dim == 3:
+    elif dim == mesh.topology().dim():
         dz = dolfin.Measure("dx", domain=mesh, subdomain_data=subdomain_data)(marker)
     return Stimulus(dz=dz, expr=I_s)

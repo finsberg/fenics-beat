@@ -1,7 +1,9 @@
 # # Fibrotic region
-# In this demo we will show how to model a fibrotic region in a 2D sheet of cardiac tissue.
-#
+# In this demo we will show how to model a fibrotic region in a 2D sheet of cardiac tissue. This demo is inspired by the demo in https://opencarp.org/documentation/examples/02_ep_tissue/21_reentry_induction
 
+# First we do the necessary imports
+
+# +
 from pathlib import Path
 import beat.single_cell
 import dolfin
@@ -14,11 +16,14 @@ except ImportError:
 
 import gotranx
 import beat
-import beat.viz
+
+
+# -
 
 
 # We will define a function to define the conductivity tensor which will
-# modify the conductivity tensor in the fibrotic region of the tissue.
+# modify the conductivity tensor in the fibrotic region of the tissue and basically the the conductivities to $10^{-7}$ in these elements.
+#
 
 
 def define_conductivity_tensor(
@@ -26,10 +31,10 @@ def define_conductivity_tensor(
     f0,
     V_dg,
     indices,
-    g_il=0.17,
-    g_it=0.019,
-    g_el=0.62,
-    g_et=0.24,
+    g_il,
+    g_it,
+    g_el,
+    g_et,
 ):
     s_l, s_t = beat.conductivities.get_harmonic_mean_conductivity(
         chi=chi, g_il=g_il, g_it=g_it, g_el=g_el, g_et=g_et
@@ -45,24 +50,21 @@ def define_conductivity_tensor(
     return s_l * ufl.outer(f0, f0) + s_t * (ufl.Identity(2) - ufl.outer(f0, f0))
 
 
-results_folder = Path("results-reentry")
+# Now just define some general parameters for the simulation
+
+results_folder = Path("results-fibrotic-region")
 save_every_ms = 1.0
 dimension = 2
 transverse = False
-
 # Increase this to see more interesting dynamics
-end_time = 20.0
+end_time = 500.0
 dt = 0.05
+save_freq = round(save_every_ms / dt)
 overwrite = False
-stim_amp = 5000.0
+stim_amp = 50_000.0
 mesh_unit = "cm"
-
-# Load mesh
-mesh_unit = mesh_unit
-
 dx = 0.4 * beat.units.ureg("mm").to(mesh_unit).magnitude
 L = 5.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
-
 data = beat.geometry.get_2D_slab_geometry(
     Lx=L,
     Ly=L,
@@ -70,9 +72,8 @@ data = beat.geometry.get_2D_slab_geometry(
     transverse=transverse,
 )
 
-save_freq = round(save_every_ms / dt)
 
-
+# +
 print("Running model")
 # # Load the model
 model_path = Path("courtemanche_ramirez_nattel_1998.py")
@@ -90,53 +91,65 @@ if not model_path.is_file():
 import courtemanche_ramirez_nattel_1998
 
 model = courtemanche_ramirez_nattel_1998.__dict__
+# -
 
-# Surface to volume ratio
-chi = 1400.0 * beat.units.ureg("cm**-1")
-
-# Membrane capacitance
+# Define model parameters for conductivities
+conductivities = beat.conductivities.default_conductivities("Niederer")
+# and the membrane capacitance
 C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
+# Gather the defails initial states and parameters and set the stimulus amplitude to zero as this will be provided at the PDE level
 fun = model["forward_generalized_rush_larsen"]
-
 y = model["init_state_values"]()
-
 time = dolfin.Constant(0.0)
 parameters = model["init_parameter_values"](stim_amplitude=0.0)
+# Next we define the point where we want to stimulate and choose a small region close to the left boundary, i.e the region
+#
+# ```{math}
+# (x - L/10)^2 + (y - L/2)^2 < 0.5^2
+# ```
 
-subdomain_data = dolfin.MeshFunction(
-    "size_t", data.mesh, data.mesh.topology().dim() - 1
-)
+subdomain_data = dolfin.MeshFunction("size_t", data.mesh, data.mesh.topology().dim())
 subdomain_data.set_all(0)
 marker = 1
 dolfin.CompiledSubDomain(
-    "std::pow((x[0] - 0.2), 2) + std::pow((x[1] - 0.5), 2) < 0.05", dx=dx
+    "std::pow((x[0] - L / 10), 2) + std::pow((x[1] - L / 2), 2) < std::pow(0.5, 2)",
+    L=L,
 ).mark(subdomain_data, 1)
+dolfin.File("subdomain_data.pvd") << subdomain_data
+
+# and define the stimulus to stimulate every 150 ms with a duration of 5 ms
 
 I_s = beat.stimulation.define_stimulus(
-    chi=chi,
+    chi=conductivities["chi"],
     mesh=data.mesh,
     mesh_unit=mesh_unit,
     time=time,
     start=5.0,
     duration=5.0,
-    amplitude=1.0,
+    amplitude=stim_amp,
     PCL=150.0,
     subdomain_data=subdomain_data,
     marker=marker,
 )
 
-V_ode = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
-parameters_ode = np.zeros((len(parameters), V_ode.dim()))
-parameters_ode.T[:] = parameters
+# Next we will define the fibrotic region is defined as a region in the center of radius 2, i.e
+#
+# ```{math}
+# (x - L/2)^2 + (y - L/2)^2 < 1^2
+# ```
+#
 
 fibrosis = dolfin.MeshFunction("size_t", data.mesh, data.mesh.topology().dim())
 fibrosis.set_all(0)
 marker = 1
 dolfin.CompiledSubDomain(
-    "std::pow((x[0] - 0.5),2) + std::pow((x[1] - 0.5), 2) < std::pow((x[1] - 1.42), 2)",
-    dx=dx,
+    "std::pow((x[0] - L/2),2) + std::pow((x[1] - L/2), 2) < 1", L=L
 ).mark(fibrosis, marker)
+
+# Inside this region we will have 70% of the tissue with reduced conductance for the `g_K1`, `g_Na` and `g_Ca_L` and the remaining 30% will have a conductivity of $10^{-7}$.
+#
+# We first find the indices and make 70/30 split
 
 indices = np.where(fibrosis.array() == 1)[0]
 np.random.shuffle(indices)
@@ -144,7 +157,14 @@ N = len(indices)
 indices1 = indices[: int(N * 0.7)]
 indices2 = indices[int(N * 0.7) :]
 
+# We define a function space for the parameters (at the elements and nodes)
+
 V_dg = dolfin.FunctionSpace(data.mesh, "DG", 0)
+V_ode = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
+parameters_ode = np.zeros((len(parameters), V_ode.dim()))
+parameters_ode.T[:] = parameters
+
+# And specify a 50% reduction in the `g_K1` conductance
 
 g_K1_index = model["parameter_index"]("g_K1")
 # g_K1_index = model["parameter_index"]("scale_drug_IK1")
@@ -156,6 +176,8 @@ parameters_ode[g_K1_index, :] = (
     dolfin.interpolate(g_K1_func, V_ode).vector().get_local()
 )
 
+# and 40% reduction in `g_Na`
+
 g_Na_index = model["parameter_index"]("g_Na")
 # g_Na_index = model["parameter_index"]("scale_drug_INa")
 g_Na_value = parameters[g_Na_index]
@@ -165,6 +187,8 @@ g_Na_func.vector()[indices1] = g_Na_value * 0.6
 parameters_ode[g_Na_index, :] = (
     dolfin.interpolate(g_Na_func, V_ode).vector().get_local()
 )
+
+# and a 50% reduction in `g_Ca_L`
 
 g_CaL_index = model["parameter_index"]("g_Ca_L")
 # g_CaL_index = model["parameter_index"]("scale_drug_ICaL")
@@ -176,13 +200,17 @@ parameters_ode[g_CaL_index, :] = (
     dolfin.interpolate(g_CaL_func, V_ode).vector().get_local()
 )
 
+# Finally we compute the conductivity tensor with the remaining non conductive tissue
+
 M = define_conductivity_tensor(
-    V_dg=V_dg,
-    indices=indices2,
-    f0=data.f0,
-    **beat.conductivities.default_conductivities("Niederer"),
+    V_dg=V_dg, indices=indices2, f0=data.f0, **conductivities
 )
+
+# Now we are ready to set up the models
+
+# +
 pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, C_m=C_m.magnitude)
+
 ode = beat.odesolver.DolfinODESolver(
     v_ode=dolfin.Function(V_ode),
     v_pde=pde.state,
@@ -193,7 +221,10 @@ ode = beat.odesolver.DolfinODESolver(
     v_index=model["state_index"]("V"),
 )
 solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
+# -
 
+# And solve
+# +
 fname = (results_folder / "V.xdmf").as_posix()
 beat.postprocess.delete_old_file(fname)
 

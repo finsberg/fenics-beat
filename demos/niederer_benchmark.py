@@ -102,7 +102,7 @@ else:
 
 # +
 # Surface to volume ratio
-chi = 1400 * beat.units.ureg("cm**-1")
+conductivities = beat.conductivities.default_conductivities("Niederer")
 # # Membrane capacitance
 C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
@@ -118,7 +118,7 @@ S1_subdomain.mark(S1_markers, S1_marker)
 
 I_s = beat.stimulation.define_stimulus(
     mesh=geo.mesh,
-    chi=chi,
+    chi=conductivities["chi"],
     time=time,
     subdomain_data=S1_markers,
     marker=S1_marker,
@@ -128,8 +128,8 @@ I_s = beat.stimulation.define_stimulus(
 
 
 M = beat.conductivities.define_conductivity_tensor(
-    f0=geo,
-    **beat.conductivities.default_conductivities("Niederer"),
+    f0=geo.f0,
+    **conductivities,
 )
 
 params = {"preconditioner": "sor", "use_custom_preconditioner": False}
