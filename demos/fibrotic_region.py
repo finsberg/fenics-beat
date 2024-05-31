@@ -47,7 +47,9 @@ def define_conductivity_tensor(
     s_t_func.vector()[:] = s_t
     s_t_func.vector()[indices] = 1e-7
 
-    return s_l * ufl.outer(f0, f0) + s_t * (ufl.Identity(2) - ufl.outer(f0, f0))
+    return s_l_func * ufl.outer(f0, f0) + s_t_func * (
+        ufl.Identity(2) - ufl.outer(f0, f0)
+    )
 
 
 # Now just define some general parameters for the simulation
@@ -57,7 +59,7 @@ save_every_ms = 1.0
 dimension = 2
 transverse = False
 # Increase this to see more interesting dynamics
-end_time = 500.0
+end_time = 2.0
 dt = 0.05
 save_freq = round(save_every_ms / dt)
 overwrite = False
@@ -103,22 +105,15 @@ fun = model["forward_generalized_rush_larsen"]
 y = model["init_state_values"]()
 time = dolfin.Constant(0.0)
 parameters = model["init_parameter_values"](stim_amplitude=0.0)
-# Next we define the point where we want to stimulate and choose a small region close to the left boundary, i.e the region
-#
-# ```{math}
-# (x - L/10)^2 + (y - L/2)^2 < 0.5^2
-# ```
+# Next we define the point where we want to stimulate and choose a small region close to the left boundary
 
 subdomain_data = dolfin.MeshFunction("size_t", data.mesh, data.mesh.topology().dim())
 subdomain_data.set_all(0)
 marker = 1
-dolfin.CompiledSubDomain(
-    "std::pow((x[0] - L / 10), 2) + std::pow((x[1] - L / 2), 2) < std::pow(0.5, 2)",
-    L=L,
-).mark(subdomain_data, 1)
+dolfin.CompiledSubDomain("x[0] < 2*dx", dx=dx).mark(subdomain_data, 1)
 dolfin.File("subdomain_data.pvd") << subdomain_data
 
-# and define the stimulus to stimulate every 150 ms with a duration of 5 ms
+# and define the stimulus to stimulate every 350 ms with a duration of 5 ms
 
 I_s = beat.stimulation.define_stimulus(
     chi=conductivities["chi"],
@@ -128,12 +123,12 @@ I_s = beat.stimulation.define_stimulus(
     start=5.0,
     duration=5.0,
     amplitude=stim_amp,
-    PCL=150.0,
+    PCL=350.0,
     subdomain_data=subdomain_data,
     marker=marker,
 )
 
-# Next we will define the fibrotic region is defined as a region in the center of radius 2, i.e
+# Next we will define the fibrotic region is defined as a region in the center of radius 1.42 cm, i.e
 #
 # ```{math}
 # (x - L/2)^2 + (y - L/2)^2 < 1^2
@@ -144,7 +139,7 @@ fibrosis = dolfin.MeshFunction("size_t", data.mesh, data.mesh.topology().dim())
 fibrosis.set_all(0)
 marker = 1
 dolfin.CompiledSubDomain(
-    "std::pow((x[0] - L/2),2) + std::pow((x[1] - L/2), 2) < 1", L=L
+    "std::pow((x[0] - L/2),2) + std::pow((x[1] - L/2), 2) < std::pow(1.42, 2)", L=L
 ).mark(fibrosis, marker)
 
 # Inside this region we will have 70% of the tissue with reduced conductance for the `g_K1`, `g_Na` and `g_Ca_L` and the remaining 30% will have a conductivity of $10^{-7}$.

@@ -9,7 +9,7 @@ Library for running cardiac electrophysiology simulations.
 
 ## Getting started
 
-Check out the example in https://finsberg.github.io/fenics-beat/
+Check out the examples at https://finsberg.github.io/fenics-beat/
 
 ## Install
 
