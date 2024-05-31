@@ -1,4 +1,4 @@
-![_](fenics-beat-logo.png)
+![_](docs/_static/fenics-beat-logo.png)
 # fenics-beat
 
 Library for running cardiac electrophysiology simulations.
