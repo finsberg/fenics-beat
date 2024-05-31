@@ -50,11 +50,23 @@ However this requires FEniCS to already be installed. Currently, FEniCS can be i
 ## Automated tests
 Upon pushing new code to the repository, a number of tests run:
 * pre-commit tests.
-    - Install `pre-commit`: `python3 -m pip install pre-commit`
-    - Run pre-commit hooks: `pre-commit run --all`
-* unit tests (can be found in `tests` folder): test initialization of compartment, species, and parameter objects.
-    - Install test dependencies: `python3 -m pip install fenics-beat[test]`. Alternatively, if you have already installed SMART, you can install `pytest` and `pytest-cov` using `python3 -m pip install pytest pytest-cov`.
-    - Run tests from the root of the repository: `python3 -m pytest`
+    - Install `pre-commit`:
+    ```
+    python3 -m pip install pre-commit
+    ```
+    - Run pre-commit hooks:
+    ```
+    pre-commit run --all
+    ```
+* unit and integration tests can be found in `tests` folder
+    - Install tests dependencies:
+    ```
+    python3 -m pip install -e .[test]
+    ```
+    - Run tests
+    ```
+    python3 -m pytest
+    ```
 * Examples: All examples are run as part of building the documentation
 
 ## Contributing guidelines
