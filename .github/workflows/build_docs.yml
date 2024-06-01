@@ -44,6 +44,9 @@ jobs:
       - name: Build docs
         run: jupyter book build -W --keep-going .
 
+      - name: Copy html images
+        run: cp -r docs/_static ${{ env.PUBLISH_DIR }}/docs/.
+
       - name: Upload documentation as artifact
         uses: actions/upload-artifact@v4
         with:

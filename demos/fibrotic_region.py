@@ -24,7 +24,7 @@ import beat
 # We will define a function to define the conductivity tensor which will
 # modify the conductivity tensor in the fibrotic region of the tissue and basically the the conductivities to $10^{-7}$ in these elements.
 #
-
+#
 
 def define_conductivity_tensor(
     chi,
@@ -219,6 +219,7 @@ solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 # -
 
 # And solve
+
 # +
 fname = (results_folder / "V.xdmf").as_posix()
 beat.postprocess.delete_old_file(fname)
@@ -252,10 +253,11 @@ while t < end_time + 1e-12:
     solver.step((t, t + dt))
     i += 1
     t += dt
-
+# -
 
 # ```{figure} ../docs/_static/fibrotic.gif
 # ---
 # name: reentry
 # ---
 # ```
+#
