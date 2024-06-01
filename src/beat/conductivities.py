@@ -39,6 +39,7 @@ def default_conductivities(name="Niederer") -> dict[str, pint.Quantity]:
             "g_it": 0.019 * ureg("S/m"),
             "g_el": 0.62 * ureg("S/m"),
             "g_et": 0.24 * ureg("S/m"),
+            "chi": 1400.0 * ureg("cm**-1"),
         }
     elif name == "Bishop":
         return {
@@ -46,13 +47,15 @@ def default_conductivities(name="Niederer") -> dict[str, pint.Quantity]:
             "g_it": 0.060 * ureg("S/m"),
             "g_el": 0.12 * ureg("S/m"),
             "g_et": 0.08 * ureg("S/m"),
+            "chi": 1400.0 * ureg("cm**-1"),
         }
     elif name == "Potse":
         return {
-            "g_il": 3.0 * ureg("S/m"),
-            "g_it": 0.3 * ureg("S/m"),
-            "g_el": 3.0 * ureg("S/m"),
-            "g_et": 1.2 * ureg("S/m"),
+            "g_il": 3.0 * ureg("mS/cm"),
+            "g_it": 0.3 * ureg("mS/cm"),
+            "g_el": 3.0 * ureg("mS/cm"),
+            "g_et": 1.2 * ureg("mS/cm"),
+            "chi": 800.0 * ureg("cm**-1"),
         }
     else:
         raise ValueError(f"Unknown conductivity tensor {name}")

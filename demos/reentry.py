@@ -1,117 +1,53 @@
-# # Reentry
-# In this demo we will show how to induce reentry
+# # Inducing reentry in a 2D sheet of cardiac tissue
 #
+# In this demo we show how to induce reentry in a 2D sheet of cardiac tissue using two stimulations, i.e one wave where we stimulate the left side of the square and then one second stimulation where we stimulate the third quadrant of the square.
+#
+# First we make the necessary imports
 
 from pathlib import Path
-import beat.single_cell
 import dolfin
+import matplotlib.pyplot as plt
 import numpy as np
-
-try:
-    import ufl_legacy as ufl
-except ImportError:
-    import ufl
-
 import gotranx
 import beat
-import beat.viz
 
-
-def define_conductivity_tensor(
-    chi,
-    f0,
-    V_dg,
-    indices,
-    g_il=0.17,
-    g_it=0.019,
-    g_el=0.62,
-    g_et=0.24,
-):
-    s_l, s_t = beat.conductivities.get_harmonic_mean_conductivity(
-        chi=chi, g_il=g_il, g_it=g_it, g_el=g_el, g_et=g_et
-    )
-
-    s_l_func = dolfin.Function(V_dg)
-    s_l_func.vector()[:] = s_l
-    s_l_func.vector()[indices] = 1e-7
-    s_t_func = dolfin.Function(V_dg)
-    s_t_func.vector()[:] = s_t
-    s_t_func.vector()[indices] = 1e-7
-
-    return s_l * ufl.outer(f0, f0) + s_t * (ufl.Identity(2) - ufl.outer(f0, f0))
-
-
-def setup_geometry(dx, Lx, Ly):
-
-    mesh = dolfin.RectangleMesh(
-        dolfin.MPI.comm_world,
-        dolfin.Point(0.0, 0.0),
-        dolfin.Point(Lx, Ly),
-        int(np.rint((Lx / dx))),
-        int(np.rint((Ly / dx))),
-    )
-
-    return mesh
-
-
-def get_microstructure(
-    dim: int, transverse: bool = False
-) -> tuple[dolfin.Constant, dolfin.Constant]:
-
-    if transverse:
-        f0 = dolfin.Constant((0.0, 1.0))
-        s0 = dolfin.Constant((1.0, 0.0))
-    else:
-        f0 = dolfin.Constant((1.0, 0.0))
-        s0 = dolfin.Constant((0.0, 1.0))
-
-    return f0, s0
-
+# And set up some basic parameters
 
 results_folder = Path("results-reentry")
 save_every_ms = 1.0
-dimension = 2
 transverse = False
-
-# Increase this to see more interesting dynamics
-end_time = 20.0
+# Increase this to make the simulation longer
+end_time = 10.0
 dt = 0.05
+save_freq = round(save_every_ms / dt)
 overwrite = False
 stim_amp = 5000.0
 mesh_unit = "cm"
-
-# Load mesh
-mesh_unit = mesh_unit
-
-dx = 0.01 * beat.units.ureg("cm").to(mesh_unit).magnitude
-L = 1.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
-mesh = setup_geometry(Lx=L, Ly=L, dx=dx)
-
-
-g_il = 0.16069
-g_el = 0.625
-g_it = 0.04258
-g_et = 0.236
-
-f0, s0 = get_microstructure(dimension, transverse)
-
-
-data = beat.Geometry(
-    mesh=mesh,
-    f0=f0,
+dx = 0.4 * beat.units.ureg("mm").to(mesh_unit).magnitude
+L = 5.0 * beat.units.ureg("cm").to(mesh_unit).magnitude
+data = beat.geometry.get_2D_slab_geometry(
+    Lx=L,
+    Ly=L,
+    dx=dx,
+    transverse=transverse,
 )
-save_freq = round(save_every_ms / dt)
+
+V = dolfin.FunctionSpace(data.mesh, "CG", 1)
+
+# For this simulation we will use a model from {cite}`courtemanche1998ionic`. The model is taken form https://models.physiomeproject.org/workspace/courtemanche_ramirez_nattel_1998
+#
 
 
 print("Running model")
-# # Load the model
+
+# Load the model
+
 model_path = Path("courtemanche_ramirez_nattel_1998.py")
 if not model_path.is_file():
     here = Path.cwd()
     ode = gotranx.load_ode(
         here / ".." / "odes" / "courtemanche_ramirez_nattel_1998.ode"
     )
-
     code = gotranx.cli.gotran2py.get_code(
         ode, scheme=[gotranx.schemes.Scheme.forward_generalized_rush_larsen]
     )
@@ -121,99 +57,51 @@ import courtemanche_ramirez_nattel_1998
 
 model = courtemanche_ramirez_nattel_1998.__dict__
 
-# Surface to volume ratio
-chi = 1400.0 * beat.units.ureg("cm**-1")
 
 # Membrane capacitance
+
 C_m = 1.0 * beat.units.ureg("uF/cm**2")
 
+# Here we also reduce the conductance for the sodium channel to make sure that the speed of the traveling wave is reduced
+
 fun = model["forward_generalized_rush_larsen"]
-
 y = model["init_state_values"]()
-
 time = dolfin.Constant(0.0)
-parameters = model["init_parameter_values"](stim_amplitude=0.0)
+parameters = model["init_parameter_values"](stim_amplitude=0.0, g_Na=2.5)
 
-subdomain_data = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
-subdomain_data.set_all(0)
-marker = 1
-dolfin.CompiledSubDomain(
-    "std::pow((x[0] - 0.2), 2) + std::pow((x[1] - 0.5), 2) < 0.05", dx=dx
-).mark(subdomain_data, 1)
+# The duration of the stimulation is set to 5 ms and the second stimulation is done 400 ms after the initial stimulation. This timing is important to get spiral wave appearing
 
-I_s = beat.stimulation.define_stimulus(
-    chi=chi,
-    mesh=mesh,
-    mesh_unit=mesh_unit,
-    time=time,
-    start=5.0,
-    duration=5.0,
-    amplitude=1.0,
-    PCL=150.0,
-    subdomain_data=subdomain_data,
-    marker=marker,
+duration = 5.0
+delay = 400.0
+# We specify this stimulation protocol as an expressions
+
+# +
+expr = dolfin.Expression(
+    "(t < duration && x[0] < 0.05) ? 20.0 : "
+    "((t > delay && t < delay+duration) && (x[0] < L / 2 && x[1] < L / 2)) ? 20.0 : 0.0",
+    t=time,
+    L=L,
+    delay=delay,
+    duration=duration,
+    degree=0,
 )
 
-V_ode = dolfin.FunctionSpace(mesh, "Lagrange", 1)
+I_s = beat.base_model.Stimulus(
+    dz=dolfin.dx, expr=expr  # StimulationProtocol(time, L=L),
+)
+# -
+
+# Next we set up the models
+
+V_ode = dolfin.FunctionSpace(data.mesh, "Lagrange", 1)
 parameters_ode = np.zeros((len(parameters), V_ode.dim()))
 parameters_ode.T[:] = parameters
 
-fibrosis = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim())
-fibrosis.set_all(0)
-marker = 1
-dolfin.CompiledSubDomain(
-    "std::pow((x[0] - 0.5),2) + std::pow((x[1] - 0.5), 2) < 0.05", dx=dx
-).mark(fibrosis, marker)
-
-indices = np.where(fibrosis.array() == 1)[0]
-np.random.shuffle(indices)
-N = len(indices)
-indices1 = indices[: int(N * 0.7)]
-indices2 = indices[int(N * 0.7) :]
-
-V_dg = dolfin.FunctionSpace(mesh, "DG", 0)
-
-g_K1_index = model["parameter_index"]("g_K1")
-# g_K1_index = model["parameter_index"]("scale_drug_IK1")
-g_K1_value = parameters[g_K1_index]
-g_K1_func = dolfin.Function(V_dg)
-g_K1_func.vector()[:] = g_K1_value
-g_K1_func.vector()[indices1] = g_K1_value * 0.5
-parameters_ode[g_K1_index, :] = (
-    dolfin.interpolate(g_K1_func, V_ode).vector().get_local()
-)
-
-g_Na_index = model["parameter_index"]("g_Na")
-# g_Na_index = model["parameter_index"]("scale_drug_INa")
-g_Na_value = parameters[g_Na_index]
-g_Na_func = dolfin.Function(V_dg)
-g_Na_func.vector()[:] = g_Na_value
-g_Na_func.vector()[indices1] = g_Na_value * 0.6
-parameters_ode[g_Na_index, :] = (
-    dolfin.interpolate(g_Na_func, V_ode).vector().get_local()
-)
-
-g_CaL_index = model["parameter_index"]("g_Ca_L")
-# g_CaL_index = model["parameter_index"]("scale_drug_ICaL")
-g_CaL_value = parameters[g_CaL_index]
-g_CaL_func = dolfin.Function(V_dg)
-g_CaL_func.vector()[:] = g_CaL_value
-g_CaL_func.vector()[indices1] = g_CaL_value * 0.5
-parameters_ode[g_CaL_index, :] = (
-    dolfin.interpolate(g_CaL_func, V_ode).vector().get_local()
-)
-
-M = define_conductivity_tensor(
-    chi=chi,
-    V_dg=V_dg,
-    indices=indices2,
+M = beat.conductivities.define_conductivity_tensor(
     f0=data.f0,
-    g_il=g_il,
-    g_it=g_it,
-    g_el=g_el,
-    g_et=g_et,
+    **beat.conductivities.default_conductivities("Niederer"),
 )
-pde = beat.MonodomainModel(time=time, mesh=mesh, M=M, I_s=I_s, C_m=C_m.magnitude)
+pde = beat.MonodomainModel(time=time, mesh=data.mesh, M=M, I_s=I_s, C_m=C_m.magnitude)
 ode = beat.odesolver.DolfinODESolver(
     v_ode=dolfin.Function(V_ode),
     v_pde=pde.state,
@@ -228,11 +116,29 @@ solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 fname = (results_folder / "V.xdmf").as_posix()
 beat.postprocess.delete_old_file(fname)
 
+# and we also pick 12 uniformly distributed points on the mesh and keep track of the voltage in these points
+
+points = np.array(
+    [
+        [0.1, 0.1],
+        [0.1, 0.5],
+        [0.1, 0.9],
+        [0.5, 0.1],
+        [0.5, 0.5],
+        [0.5, 0.9],
+        [0.9, 0.1],
+        [0.9, 0.5],
+        [0.9, 0.9],
+    ]
+)
+V_values: list[list[float]] = [[] for _ in points]
+times = []
+
 
 def save(t):
     v = solver.pde.state.vector().get_local()
     print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
-    with dolfin.XDMFFile(mesh.mpi_comm(), fname) as xdmf:
+    with dolfin.XDMFFile(data.mesh.mpi_comm(), fname) as xdmf:
         xdmf.parameters["functions_share_mesh"] = True
         xdmf.parameters["rewrite_function_mesh"] = False
         xdmf.write_checkpoint(
@@ -243,10 +149,29 @@ def save(t):
             True,
         )
 
+    times.append(t)
+    for i, p in enumerate(points):
+        V_values[i].append(solver.pde.state(p))
+    fig, ax = plt.subplots()
+    for p in points:
+        ax.plot(times, V_values[i], label=f"{p}")
+    ax.set_xlabel("Time [ms]")
+    ax.set_ylabel("V [mV]")
+    ax.legend(title="Point")
+    fig.savefig(results_folder / "V.png")
+    plt.close()
+    print("Saved to ", results_folder / "V.png")
+    np.save(
+        results_folder / "V.npy",
+        {"V": V_values, "time": times},
+        allow_pickle=True,
+    )
+
+
+# Finally we solve it
 
 t = 0.0
 save_freq = int(1.0 / dt)
-
 i = 0
 while t < end_time + 1e-12:
     # Make sure to save at the same time steps that is used by Ambit
@@ -257,3 +182,14 @@ while t < end_time + 1e-12:
     solver.step((t, t + dt))
     i += 1
     t += dt
+
+
+# ```{figure} ../docs/_static/reentry.mp4
+# ---
+# name: reentry
+# ---
+# ```
+
+# ```{bibliography}
+# ```
+#

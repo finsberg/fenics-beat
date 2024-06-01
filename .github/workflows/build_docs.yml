@@ -42,7 +42,7 @@ jobs:
           key: cache_key_1 # Bump number manually when you want to clear the cache
 
       - name: Build docs
-        run: jupyter book build .
+        run: jupyter book build -W --keep-going .
 
       - name: Upload documentation as artifact
         uses: actions/upload-artifact@v4

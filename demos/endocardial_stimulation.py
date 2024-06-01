@@ -271,6 +271,8 @@ while t < T + 1e-12:
         v = solver.pde.state.vector().get_local()
         print(f"Solve for {t=:.2f}, {v.max() =}, {v.min() = }")
         with dolfin.XDMFFile(dolfin.MPI.comm_world, fname) as xdmf:
+            xdmf.parameters["functions_share_mesh"] = True
+            xdmf.parameters["rewrite_function_mesh"] = False
             xdmf.write_checkpoint(
                 solver.pde.state,
                 "V",

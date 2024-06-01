@@ -95,12 +95,14 @@ def run(outdir, parameters):
     return APDs, CIs, Vs
 
 
-prebeats = 20
+prebeats = 1  # Use 50 or more
 BCL = 1000
-nbeats = 5
-CI0 = 50
+nbeats = 1  # Use maybe 7 - 8 beats here
+CI0 = 200  # Final interval - typically 200 ms
+# How much to decrease the interval by each step
+# Typical value here is 25
+CIinc = 100
 CI1 = BCL
-CIinc = 25
 
 
 outdir = here / "apd_restitution"
