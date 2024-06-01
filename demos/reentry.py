@@ -34,7 +34,7 @@ data = beat.geometry.get_2D_slab_geometry(
 
 V = dolfin.FunctionSpace(data.mesh, "CG", 1)
 
-# For this simulation we will use a model from {courtemanche1998ionic}`courtemanche1998ionic`. The model is taken form https://models.physiomeproject.org/workspace/courtemanche_ramirez_nattel_1998
+# For this simulation we will use a model from {cite}`courtemanche1998ionic`. The model is taken form https://models.physiomeproject.org/workspace/courtemanche_ramirez_nattel_1998
 #
 
 
