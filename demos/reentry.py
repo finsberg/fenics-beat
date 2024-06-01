@@ -184,7 +184,7 @@ while t < end_time + 1e-12:
     t += dt
 
 
-# ```{figure} ../docs/_static/reentry.mp4
+# ```{figure} ../docs/_static/reentry.gif
 # ---
 # name: reentry
 # ---

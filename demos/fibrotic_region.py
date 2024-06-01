@@ -252,3 +252,10 @@ while t < end_time + 1e-12:
     solver.step((t, t + dt))
     i += 1
     t += dt
+
+
+# ```{figure} ../docs/_static/fibrotic.gif
+# ---
+# name: reentry
+# ---
+# ```
