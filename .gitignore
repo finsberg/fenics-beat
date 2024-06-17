@@ -9,6 +9,8 @@ jitfailure*
 __pycache__/
 *.py[cod]
 *$py.class
+*/results-*
+*.npy
 
 # C extensions
 *.so
