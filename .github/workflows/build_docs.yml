@@ -41,10 +41,14 @@ jobs:
           path: _build
           key: cache_key_1 # Bump number manually when you want to clear the cache
 
+      - name: Copy build images
+        run: cp _build/html/_images/*  demos/.
+
       - name: Build docs
         run: jupyter book build -W --keep-going .
 
       - name: Copy html images
+        continue-on-error: true
         run: cp -r docs/_static ${{ env.PUBLISH_DIR }}/docs/.
 
       - name: Upload documentation as artifact
