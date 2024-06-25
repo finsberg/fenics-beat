@@ -43,6 +43,7 @@ jobs:
 
       - name: Copy build images
         run: cp _build/html/_images/*  demos/.
+        continue-on-error: true
 
       - name: Build docs
         run: jupyter book build -W --keep-going .
