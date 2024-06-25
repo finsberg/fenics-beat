@@ -30,15 +30,19 @@ def define_stimulus(
     if isinstance(amplitude, ureg.Quantity):
         A = amplitude
     else:
-        if dim == 1:
+        if dim <= 1:
             A = amplitude * ureg("uA / cm")
         elif dim == 2:
             A = amplitude * ureg("uA / cm**2")
         elif dim == 3:
             A = amplitude * ureg("uA / cm**3")
 
-    amp = (A / chi).to(f"uA/{mesh_unit}**{dim - 1}").magnitude
+    if dim == 0:
+        unit = "uA"
+    else:
+        unit = f"uA/{mesh_unit}**{dim - 1}"
 
+    amp = (A / chi).to(unit).magnitude
     I_s = dolfin.Expression(
         "std::fmod(time,PCL) >= start "
         "? (std::fmod(time,PCL) <= (duration + start) ? amplitude : 0.0)"

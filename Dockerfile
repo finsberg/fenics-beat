@@ -1,6 +1,6 @@
 FROM ghcr.io/scientificcomputing/fenics-gmsh:2024-05-30 as beat_base
 
-ENV PYVISTA_JUPYTER_BACKEND="trame"
+ENV PYVISTA_JUPYTER_BACKEND="html"
 
 # Requirements for pyvista
 RUN apt-get update && apt-get install -y libgl1-mesa-glx libxrender1 xvfb nodejs
