@@ -17,7 +17,7 @@ results_folder = Path("results-reentry")
 save_every_ms = 1.0
 transverse = False
 # Increase this to make the simulation longer
-end_time = 800.0
+end_time = 10.0
 dt = 0.05
 save_freq = round(save_every_ms / dt)
 overwrite = True
