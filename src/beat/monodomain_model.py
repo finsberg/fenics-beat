@@ -1,6 +1,6 @@
 from __future__ import annotations
 import logging
-
+from typing import Sequence
 import dolfin
 
 try:
@@ -30,7 +30,7 @@ class MonodomainModel(BaseModel):
         time: dolfin.Constant,
         mesh: dolfin.Mesh,
         M: ufl.Coefficient | float,
-        I_s: Stimulus | ufl.Coefficient | None = None,
+        I_s: Stimulus | Sequence[Stimulus] | ufl.Coefficient | None = None,
         params=None,
         C_m: float = 1.0,
     ) -> None:
@@ -92,12 +92,10 @@ class MonodomainModel(BaseModel):
         v_mid = theta * v + (1.0 - theta) * self.v_
 
         theta_parabolic = ufl.inner(self._M * ufl.grad(v_mid), ufl.grad(w))
-        # breakpoint()
-        G_stim = self._I_s.expr * w * self._I_s.dz
 
         G = (self.C_m * Dt_v_k_n * w + k_n * theta_parabolic) * dolfin.dx(
             domain=self._mesh
-        ) - k_n * G_stim
+        ) - k_n * self.G_stim(w)
 
         # Define preconditioner based on educated(?) guess by Marie
         if self.parameters["use_custom_preconditioner"]:

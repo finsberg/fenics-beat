@@ -79,6 +79,10 @@ def get_harmonic_mean_conductivity(
     sigma_el = to_quantity(g_el, "S/m")
     sigma_et = to_quantity(g_et, "S/m")
 
+    logger.info(
+        f"Get harmonic mean conductivity: {g_il=} {g_it=} {g_el=} {g_et=} {chi=}",
+    )
+
     # Compute monodomain approximation by taking harmonic mean in each
     # direction of intracellular and extracellular part
     def harmonic_mean(a, b):
@@ -86,11 +90,24 @@ def get_harmonic_mean_conductivity(
 
     sigma_l = harmonic_mean(sigma_il, sigma_el)
     sigma_t = harmonic_mean(sigma_it, sigma_et)
+    logger.info(
+        f"Harmonic mean conductivities {sigma_l=} {sigma_t=}",
+    )
 
     # Scale conducitivites by 1/(chi)
     s_l = (sigma_l / chi).to("uA/mV").magnitude
     s_t = (sigma_t / chi).to("uA/mV").magnitude
+
+    logger.info(
+        f"Scaled harmonic mean conductivities {s_l=} {s_t=}",
+    )
     return Conductivities(s_l, s_t)
+
+
+def conductivity_tensor(s_l: float, s_t: float, f0: dolfin.Constant | dolfin.Function):
+    dim = get_dimesion(f0)
+    logger.info(f"Define conductivity tensor {s_l=} {s_t=} {dim=}")
+    return s_l * ufl.outer(f0, f0) + s_t * (ufl.Identity(dim) - ufl.outer(f0, f0))
 
 
 def define_conductivity_tensor(
@@ -102,7 +119,4 @@ def define_conductivity_tensor(
     g_et: float = 0.24,
 ):
     s_l, s_t = get_harmonic_mean_conductivity(chi, g_il, g_it, g_el, g_et)
-    dim = get_dimesion(f0)
-
-    # Define conductivity tensor
-    return s_l * ufl.outer(f0, f0) + s_t * (ufl.Identity(dim) - ufl.outer(f0, f0))
+    return conductivity_tensor(s_l, s_t, f0)

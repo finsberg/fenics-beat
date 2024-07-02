@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Sequence
 import abc
 import logging
 from enum import Enum, auto
@@ -29,13 +29,24 @@ class Results(NamedTuple):
     status: Status
 
 
+def transform_I_s(I_s: Stimulus | Sequence[Stimulus] | ufl.Coefficient | None) -> list[Stimulus]:
+    if I_s is None:
+        return [Stimulus(expr=dolfin.Constant(0.0), dz=dolfin.dx)]
+    if isinstance(I_s, Stimulus):
+        return [I_s]
+    if isinstance(I_s, ufl.Coefficient):
+        return [Stimulus(expr=I_s, dz=dolfin.dx)]
+
+    return list(I_s)
+
+
 class BaseModel(abc.ABC):
     def __init__(
         self,
         time: dolfin.Constant,
         mesh: dolfin.Mesh,
         params: dict[str, Any] | None = None,
-        I_s: Stimulus | ufl.Coefficient | None = None,
+        I_s: Stimulus | Sequence[Stimulus] | ufl.Coefficient | None = None,
     ) -> None:
         self._mesh = mesh
         self.time = time
@@ -44,12 +55,7 @@ class BaseModel(abc.ABC):
         if params is not None:
             self.parameters.update(params)
 
-        if I_s is None:
-            I_s = dolfin.Constant(0.0)
-        if not isinstance(I_s, Stimulus):
-            I_s = Stimulus(expr=I_s, dz=dolfin.dx)
-        self._I_s = I_s
-
+        self._I_s = transform_I_s(I_s)
         self._setup_state_space()
 
         self._timestep = dolfin.Constant(self.parameters["default_timestep"])
@@ -66,6 +72,9 @@ class BaseModel(abc.ABC):
 
     @abc.abstractmethod
     def _setup_state_space(self) -> None: ...
+
+    def G_stim(self, w):
+        return sum([i.expr * w * i.dz for i in self._I_s])
 
     def _create_linear_solver(self):
         "Helper function for creating linear solver based on parameters."
