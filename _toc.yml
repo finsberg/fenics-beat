@@ -19,6 +19,7 @@ parts:
     - file: demos/pvc.py
     - file: demos/reentry.py
     - file: demos/fibrotic_region.py
+    - file: demos/purkinje_stimulation.py
   - caption: Verification
     chapters:
     - file: tests/README
