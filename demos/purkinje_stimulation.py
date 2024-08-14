@@ -430,7 +430,6 @@ solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
 plotter_voltage = pyvista.Plotter()
 plotter_voltage.view_zy()
-plotter_voltage.camera.zoom(0.5)
 viridis = plt.get_cmap("viridis")
 grid.point_data["V"] = solver.pde.state.vector().get_local()
 grid.set_active_scalars("V")
@@ -444,6 +443,7 @@ renderer = plotter_voltage.add_mesh(
 gif_file = Path("purkinje.gif")
 gif_file.unlink(missing_ok=True)
 plotter_voltage.open_gif(gif_file.as_posix())
+plotter_voltage.camera.zoom("tight")
 
 fname = (datadir / "state.xdmf").as_posix()
 i = 0
