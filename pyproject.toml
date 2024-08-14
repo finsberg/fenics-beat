@@ -48,6 +48,7 @@ demos = [
    "pyvista[all]>=0.43.0",
    "trame-vuetify",
    "ipywidgets",
+   "fractal-tree",
 ]
 docs = [
    "jupyter-book",
