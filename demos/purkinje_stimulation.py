@@ -236,17 +236,6 @@ param = FractalTreeParameters(
 # +
 lv_tree = generate_fractal_tree(lv_mesh, param)
 
-# pyvista.start_xvfb()
-# lv_tree_vtu = pyvista.read((datadir / "lv_tree").with_suffix(".vtu"))
-# plotter = pyvista.Plotter()
-# plotter.add_mesh(lv_tree_vtu, show_edges=True)
-
-# if not pyvista.OFF_SCREEN:
-#     plotter.show()
-# else:
-#     figure = plotter.screenshot("lv_tree.png")
-# # -
-
 
 # We can now compute the distance from the root node to each node in the tree
 
@@ -300,6 +289,25 @@ param = FractalTreeParameters(
 )
 
 rv_tree = generate_fractal_tree(rv_mesh, param)
+# -
+
+pyvista.start_xvfb()
+lv_tree_vtu = pyvista.read((datadir / "lv_tree").with_suffix(".vtu"))
+rv_tree_vtu = pyvista.read((datadir / "rv_tree").with_suffix(".vtu"))
+plotter = pyvista.Plotter()
+topology, cell_types, x = beat.viz.create_vtk_structures(V)
+grid = pyvista.UnstructuredGrid(topology, cell_types, x)
+plotter.add_mesh(grid, show_edges=True)
+plotter.view_zy()
+# plotter_markers.camera.zoom(4)
+plotter.add_mesh(lv_tree_vtu)
+plotter.add_mesh(rv_tree_vtu)
+
+
+if not pyvista.OFF_SCREEN:
+    plotter.show()
+else:
+    figure = plotter.screenshot("purkinje.png")
 # -
 
 # We can now compute the distance from the root node to each node in the tree
