@@ -430,6 +430,7 @@ solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
 plotter_voltage = pyvista.Plotter()
 plotter_voltage.view_zy()
+plotter_voltage.camera.zoom(0.5)
 viridis = plt.get_cmap("viridis")
 grid.point_data["V"] = solver.pde.state.vector().get_local()
 grid.set_active_scalars("V")
