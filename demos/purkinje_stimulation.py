@@ -425,6 +425,21 @@ t = 0.0
 dt = 0.05
 solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
+plotter_voltage = pyvista.Plotter()
+viridis = plt.get_cmap("viridis")
+grid.point_data["V"] = solver.pde.state.vector().get_local()
+grid.set_active_scalars("V")
+renderer = plotter_voltage.add_mesh(
+    grid,
+    show_edges=True,
+    lighting=False,
+    cmap=viridis,
+    clim=[-90.0, 40.0],
+)
+gif_file = Path("purkinje.gif")
+gif_file.unlink(missing_ok=True)
+plotter_voltage.open_gif(gif_file.as_posix())
+
 fname = (datadir / "state.xdmf").as_posix()
 i = 0
 while t < T + 1e-12:
@@ -441,9 +456,15 @@ while t < T + 1e-12:
                 dolfin.XDMFFile.Encoding.HDF5,
                 True,
             )
+        grid.point_data["V"] = solver.pde.state.vector().get_local()
+        plotter_voltage.write_frame()
     solver.step((t, t + dt))
     i += 1
     t += dt
+plotter_voltage.close()
 # # -
+
+
+# ![_](purkinje.gif)
 
 compute_ecg_recovery()
