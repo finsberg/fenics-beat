@@ -19,6 +19,7 @@ from fractal_tree import generate_fractal_tree, FractalTreeParameters, Mesh
 
 
 # We create a function that generates the BiV geometry that we want to use for this demo.
+#
 
 
 def get_data(datadir="data_endocardial_stimulation"):
@@ -51,6 +52,7 @@ def get_data(datadir="data_endocardial_stimulation"):
 
 
 # We have a function that can load the solution from a file.
+#
 
 
 def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
@@ -65,6 +67,7 @@ def load_from_file(heart_mesh, xdmffile, key="v", stop_index=None):
 
 
 # and we have a function to compute the pseudo ECG
+#
 
 
 def compute_ecg_recovery():
@@ -230,8 +233,8 @@ param = FractalTreeParameters(
     length=0.5,
     initial_direction=np.array([1, 0, 0]),
 )
-# -
 
+# +
 # Next we create the Purkinje networks for the LV
 # +
 lv_tree = generate_fractal_tree(lv_mesh, param)
@@ -426,6 +429,7 @@ dt = 0.05
 solver = beat.MonodomainSplittingSolver(pde=pde, ode=ode)
 
 plotter_voltage = pyvista.Plotter()
+plotter_voltage.view_zy()
 viridis = plt.get_cmap("viridis")
 grid.point_data["V"] = solver.pde.state.vector().get_local()
 grid.set_active_scalars("V")
@@ -464,7 +468,8 @@ while t < T + 1e-12:
 plotter_voltage.close()
 # # -
 
+compute_ecg_recovery()
+# -
 
 # ![_](purkinje.gif)
-
-compute_ecg_recovery()
+#
