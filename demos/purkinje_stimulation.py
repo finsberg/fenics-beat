@@ -7,6 +7,7 @@ from collections import defaultdict
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+import gmsh  # noqa: F401
 import dolfin
 import pyvista
 import meshio
