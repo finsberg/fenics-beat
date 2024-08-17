@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="300" height="300" src="./docs/_static/fenics-beat-logo.png">
+  <img width="300" height="300" src="https://raw.githubusercontent.com/finsberg/fenics-beat/main/docs/_static/fenics-beat-logo.png">
 </p>
 
 [![pre-commit](https://github.com/finsberg/fenics-beat/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/finsberg/fenics-beat/actions/workflows/pre-commit.yml)
@@ -7,6 +7,7 @@
 [![Build docs](https://github.com/finsberg/fenics-beat/actions/workflows/build_docs.yml/badge.svg)](https://github.com/finsberg/fenics-beat/actions/workflows/build_docs.yml)
 [![Test package](https://github.com/finsberg/fenics-beat/actions/workflows/main.yml/badge.svg)](https://github.com/finsberg/fenics-beat/actions/workflows/main.yml)
 [![PyPI version](https://badge.fury.io/py/fenics-beat.svg)](https://badge.fury.io/py/fenics-beat)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13323643.svg)](https://doi.org/10.5281/zenodo.13323643)
 
 ---
 

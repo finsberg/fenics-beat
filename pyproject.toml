@@ -12,6 +12,7 @@ requires-python = ">=3.8"
 keywords = ["cardiac", "electrophysiology"]
 dependencies = [
     "numpy<=1.21.5",
+    "pint",
 ]
 
 [project.urls]
@@ -40,7 +41,6 @@ pypi = [
 demos = [
    "cardiac-geometries",
    "ldrb",
-   "pint",
    "gotranx",
    "ap_features",
    "numba",
@@ -128,3 +128,29 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [tool.ruff.lint.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 10
+
+[tool.bumpversion]
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+current_version = "0.1.0"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search  = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search   = 'version: "{current_version}"'
+replace  = 'version: "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search   = 'date-released: "\d{{4}}-\d{{2}}-\d{{2}}"'
+replace  = 'date-released: "{now:%Y-%m-%d}"'
+regex    = true

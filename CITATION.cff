@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Finsberg"
+  given-names: "Henrik"
+  orcid: "https://orcid.org/0000-0003-3766-2393"
+title: "fenics-beat"
+version: "0.1.0"
+doi: 10.5281/zenodo.13323643
+date-released: "2024-08-16"
+url: "https://github.com/finsberg/fenics-beat"
