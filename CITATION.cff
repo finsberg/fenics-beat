@@ -5,7 +5,7 @@ authors:
   given-names: "Henrik"
   orcid: "https://orcid.org/0000-0003-3766-2393"
 title: "fenics-beat"
-version: "0.1.0"
+version: "0.1.1"
 doi: 10.5281/zenodo.13323643
-date-released: "2024-08-16"
+date-released: "2024-08-17"
 url: "https://github.com/finsberg/fenics-beat"
