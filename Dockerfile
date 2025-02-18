@@ -1,9 +1,9 @@
-FROM ghcr.io/scientificcomputing/fenics-gmsh:2024-05-30 as beat_base
+FROM ghcr.io/scientificcomputing/fenics-gmsh:2024-05-30 AS beat_base
 
 ENV PYVISTA_JUPYTER_BACKEND="html"
 
 # Requirements for pyvista
-RUN apt-get update && apt-get install -y libgl1-mesa-glx libxrender1 xvfb nodejs
+RUN apt-get update && apt-get install -y libgl1-mesa-dev xvfb nodejs
 
 COPY . /repo
 WORKDIR /repo
@@ -19,6 +19,6 @@ RUN python3 -m pip install ".[demos]" jupytext
 RUN jupytext demos/*.py --to ipynb
 
 # Jupyter-lab images for examples
-FROM beat_base as beat_lab
+FROM beat_base AS beat_lab
 EXPOSE 8888/tcp
 ENTRYPOINT [ "jupyter", "lab", "--ip", "0.0.0.0", "--port", "8888", "--no-browser", "--allow-root"]
