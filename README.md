@@ -18,6 +18,9 @@ Library for running cardiac electrophysiology simulations.
 - Source code: https://github.com/finsberg/fenics-beat
 - Documentation: https://finsberg.github.io/fenics-beat
 
+> [!NOTE]
+> This library are using the legacy version of FEnICS. New users are encourage to use [`fenicsx-beat`](https://github.com/finsberg/fenicsx-beat) which is based on FEniCSx
+
 
 ## Getting started
 
