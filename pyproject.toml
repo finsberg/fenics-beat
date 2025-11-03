@@ -51,7 +51,7 @@ demos = [
    "fractal-tree",
 ]
 docs = [
-   "jupyter-book",
+   "jupyter-book<2.0",
    "jupytext",
    "jupyterlab_myst",
    "sphinxcontrib-bibtex",
