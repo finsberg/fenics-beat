@@ -36,7 +36,7 @@ jobs:
 
       - name: Cache notebooks
         id: cache-notebooks
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: _build
           key: cache_key_1 # Bump number manually when you want to clear the cache
