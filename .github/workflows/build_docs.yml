@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: _build
-          key: cache_key_1 # Bump number manually when you want to clear the cache
+          key: cache_key_2 # Bump number manually when you want to clear the cache
 
       - name: Copy build images
         run: cp _build/html/_images/*  demos/.
