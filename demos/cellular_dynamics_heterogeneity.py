@@ -219,7 +219,7 @@ imp_region_3.mark(cfun, 4)
 V = dolfin.FunctionSpace(mesh, "CG", 1)
 
 
-pyvista.start_xvfb()
+# pyvista.start_xvfb()
 plotter_markers = pyvista.Plotter()
 topology, cell_types, x = beat.viz.create_vtk_structures(V)
 grid = pyvista.UnstructuredGrid(topology, cell_types, x)

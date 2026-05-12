@@ -16,7 +16,6 @@ import pyvista
 import beat.viz
 from beat.geometry import Geometry
 
-
 results_folder = Path("results-slab")
 save_every_ms = 1.0
 dimension = 2
@@ -46,7 +45,7 @@ epi.mark(cfun, 2)
 V = dolfin.FunctionSpace(mesh, "CG", 1)
 
 
-pyvista.start_xvfb()
+# pyvista.start_xvfb()
 plotter_markers = pyvista.Plotter()
 topology, cell_types, x = beat.viz.create_vtk_structures(V)
 grid = pyvista.UnstructuredGrid(topology, cell_types, x)

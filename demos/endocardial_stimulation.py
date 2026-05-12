@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import dolfin
 import pyvista
 
-
 try:
     from tqdm import tqdm
 except ImportError:
@@ -171,7 +170,7 @@ markers = beat.utils.expand_layer_biv(
 )
 
 
-pyvista.start_xvfb()
+# pyvista.start_xvfb()
 plotter_markers = pyvista.Plotter()
 topology, cell_types, x = beat.viz.create_vtk_structures(V)
 grid = pyvista.UnstructuredGrid(topology, cell_types, x)

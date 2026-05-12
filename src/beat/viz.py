@@ -135,7 +135,7 @@ def plot(
         grid.set_active_scalars(None)
 
     pyvista.OFF_SCREEN = off_screen
-    pyvista.start_xvfb()
+    # pyvista.start_xvfb()
 
     plotter = pyvista.Plotter()
 

@@ -86,7 +86,7 @@ geo = beat.geometry.get_3D_slab_geometry(
 )
 ode_space = dolfin.FunctionSpace(geo.mesh, "Lagrange", 1)
 
-pyvista.start_xvfb()
+# pyvista.start_xvfb()
 plotter = pyvista.Plotter()
 topology, cell_types, x = beat.viz.create_vtk_structures(ode_space)
 grid = pyvista.UnstructuredGrid(topology, cell_types, x)
