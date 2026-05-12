@@ -10,7 +10,6 @@ import numpy as np
 import gotranx
 import beat
 
-
 results_folder = Path("results-s1s2-tissue")
 save_every_ms = 1.0
 dimension = 2
@@ -132,8 +131,8 @@ points = np.array(
     ]
 )
 V_values: list[list[float]] = [[] for _ in points]
-times = []
-stim_values = []
+times: list[float] = []
+stim_values: list[float] = []
 
 
 def save(t):
