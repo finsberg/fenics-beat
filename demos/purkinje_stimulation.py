@@ -17,7 +17,6 @@ import beat.viz
 import gotranx
 from fractal_tree import generate_fractal_tree, FractalTreeParameters, Mesh
 
-
 # We create a function that generates the BiV geometry that we want to use for this demo.
 #
 
@@ -294,7 +293,7 @@ param = FractalTreeParameters(
 rv_tree = generate_fractal_tree(rv_mesh, param)
 # -
 
-pyvista.start_xvfb()
+# pyvista.start_xvfb()
 lv_tree_vtu = pyvista.read((datadir / "lv_tree").with_suffix(".vtu"))
 rv_tree_vtu = pyvista.read((datadir / "rv_tree").with_suffix(".vtu"))
 plotter = pyvista.Plotter()
